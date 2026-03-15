@@ -1,0 +1,57 @@
+name: goal_fixtures_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 2.0.0+22
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.2.0
+  intl: any
+  url_launcher: ^6.2.2
+  shared_preferences: ^2.5.3
+  flutter_localizations:
+    sdk: flutter
+  package_info_plus: ^8.1.0
+  flutter_riverpod: ^3.2.1
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.0.0
+  font_awesome_flutter: ^10.7.0
+  flutter_facebook_auth: ^7.1.5
+  firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.2
+  flutter_local_notifications: ^21.0.0
+  firebase_auth: 6.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/generated_app_icon_no_text.png"
+  image_path_ios_dark_transparent: "assets/generated_app_icon_no_text_dark.png"
+  adaptive_icon_background: "#F8FAFC"
+  adaptive_icon_foreground: "assets/generated_app_icon_no_text.png"
+  adaptive_icon_monochrome: "assets/generated_app_icon_no_text_dark.png"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/goalio_logo.png
+    - assets/goalio_logo_light.png
+    - assets/generated_app_icon_no_text.png
+    - assets/generated_app_icon_no_text_dark.png

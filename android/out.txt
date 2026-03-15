@@ -1,0 +1,112 @@
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+Variant: release
+Config: release
+Store: C:\laragon\www\scrapping\goal_fixtures_app\android\app\app\upload-keystore.jks
+Alias: upload
+MD5: 43:CB:20:DE:E3:EC:CB:55:26:0B:46:AA:6F:CE:43:B2
+SHA1: 00:6A:69:82:6A:6D:10:DB:6A:F0:92:09:87:12:8E:10:B0:12:59:8B
+SHA-256: D8:1A:4E:02:DD:3A:E9:B6:27:D2:69:70:20:AD:59:31:B9:04:41:96:A6:F2:19:59:59:0D:08:CC:D6:B7:11:7E
+Valid until: Wednesday, June 18, 2053
+----------
+Variant: profile
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+> Task :google_sign_in_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+> Task :package_info_plus:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+> Task :shared_preferences_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+> Task :sign_in_with_apple:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+> Task :url_launcher_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\moham\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: A6:6A:55:05:63:D8:10:F4:11:69:1F:E6:6C:10:83:D7
+SHA1: DC:2A:F2:87:B9:CC:78:75:E9:D7:00:79:39:42:2C:8B:20:2A:F5:F1
+SHA-256: 46:18:5F:37:E5:B0:5C:87:7D:F0:23:D8:02:BD:06:AE:34:B0:8F:D0:56:02:B2:2F:13:69:9E:CD:7B:A6:6D:C0
+Valid until: Monday, May 10, 2055
+----------
+
+[Incubating] Problems report is available at: file:///C:/laragon/www/scrapping/goal_fixtures_app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4s
+10 actionable tasks: 6 executed, 4 up-to-date

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1039306559815",
+    "project_id": "goalio-49c90",
+    "storage_bucket": "goalio-49c90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039306559815:android:79928887ce9110cb60fc62",
+        "android_client_info": {
+          "package_name": "com.goalioApp.fixtures"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1039306559815-0kv0su08leo6asptr54siaog944tk5lb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.goalioApp.fixtures",
+            "certificate_hash": "dc2af287b9cc7875e9d7007939422c8b202af5f1"
+          }
+        },
+        {
+          "client_id": "1039306559815-t8egv3tivv56apg7k61479v2h1kd5h1a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwqFVMttxQ_zdU6KOJMEh4va6B5Q2ETQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1039306559815-t8egv3tivv56apg7k61479v2h1kd5h1a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

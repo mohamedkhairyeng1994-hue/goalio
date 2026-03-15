@@ -1,0 +1,509 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
+
+import '../../core/constants/constants.dart'; // Import for GoalioColors
+import '../../core/services/api_service.dart';
+import '../../core/utils/size_config.dart';
+import '../../screens/news/news_detail_page.dart';
+import '../../l10n/app_localizations.dart';
+
+class NewsPage extends StatefulWidget {
+  const NewsPage({super.key});
+
+  @override
+  State<NewsPage> createState() => NewsPageState();
+}
+
+class NewsPageState extends State<NewsPage> {
+  List<dynamic> _news = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+  final ScrollController _scrollController = ScrollController();
+
+  // Pagination
+  int _offset = 0;
+  static const int _limit = 50;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadNews(silent: true);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        !_isLoadingMore &&
+        _hasMore) {
+      _loadMoreNews();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void resetState() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  Future<void> loadNews({bool silent = false, bool forceScrape = false}) async {
+    if (mounted) {
+      setState(() {
+        // Show loader if not silent OR if we have no data yet
+        _isLoading = !silent || _news.isEmpty;
+        _errorMessage = null;
+        if (!silent) _news = []; // Only clear if not silent
+      });
+    }
+
+    _offset = 0;
+    _hasMore = true;
+
+    try {
+      final fetchedNews = await ApiService.getNews(
+        limit: _limit,
+        offset: _offset,
+        scrape: forceScrape,
+      );
+
+      if (kDebugMode) debugPrint('📰 Loaded ${fetchedNews.length} news items');
+
+      if (mounted) {
+        setState(() {
+          _news = fetchedNews;
+          _offset += fetchedNews.length;
+          _hasMore = fetchedNews.length == _limit;
+          _isLoading = false;
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('📰 Error loading news: $e');
+      if (mounted && (_news.isEmpty || !silent)) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = AppLocalizations.of(context)!.noNewsAvailable;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreNews() async {
+    if (!mounted || _isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final fetchedNews = await ApiService.getNews(
+        limit: _limit,
+        offset: _offset,
+      );
+
+      if (mounted) {
+        setState(() {
+          _news.addAll(fetchedNews);
+          _offset += fetchedNews.length;
+          _hasMore = fetchedNews.length == _limit;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('📰 Error loading more news: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    }
+  }
+
+  Future<void> refreshNews() async {
+    // Calling loadNews with forceScrape: true will trigger the backend scraper
+    // and then update the UI with the fresh data in a single step.
+    await loadNews(silent: true, forceScrape: true);
+  }
+
+  /// Groups articles into a mix of hero and grid items
+  List<dynamic> get _layoutItems {
+    final List<dynamic> items = [];
+    int i = 0;
+    while (i < _news.length) {
+      // Add a Hero card (Full width)
+      items.add(_news[i]);
+      i++;
+
+      // Add a pair of small cards (Grid) if possible
+      if (i + 1 < _news.length) {
+        items.add([_news[i], _news[i + 1]]);
+        i += 2;
+      } else if (i < _news.length) {
+        items.add(_news[i]);
+        i++;
+      }
+    }
+    return items;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: GoalioColors.greenAccent),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Text(
+          _errorMessage!,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+      );
+    }
+
+    if (_news.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.newspaper,
+              size: 64.w,
+              color: GoalioColors.greenAccent.withOpacity(0.5),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context)!.noNewsAvailable,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontSize: 16.sp,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton.icon(
+              onPressed: refreshNews,
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context)!.refresh),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final layoutItems = _layoutItems;
+
+    return Stack(
+      children: [
+        // Content with pull-to-refresh that triggers scraper
+        RefreshIndicator(
+          color: GoalioColors.greenAccent,
+          edgeOffset: 110.h, // Spinner starts below the floating header
+          onRefresh: refreshNews,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              16.w,
+              100.h,
+              16.w,
+              120.h,
+            ), // Padding for header/nav
+            itemCount: layoutItems.length + (_isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == layoutItems.length) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: GoalioColors.greenAccent,
+                    ),
+                  ),
+                );
+              }
+
+              final item = layoutItems[index];
+
+              if (item is List) {
+                // Return a row of two small cards
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GoalioNewsCard(
+                          article: item[0],
+                          isSmall: true,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => NewsDetailPage(
+                                      article: item[0],
+                                      heroTag:
+                                          'news_tab_image_${item[0]['id']}',
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: GoalioNewsCard(
+                          article: item[1],
+                          isSmall: true,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => NewsDetailPage(
+                                      article: item[1],
+                                      heroTag:
+                                          'news_tab_image_${item[1]['id']}',
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Return a full-width hero card
+              return GoalioNewsCard(
+                article: item,
+                isSmall: false,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => NewsDetailPage(
+                            article: item,
+                            heroTag: 'news_tab_image_${item['id']}',
+                          ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+
+        // Floating Header with refresh icon
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+            child: SafeArea(
+              bottom: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.latestNews,
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      fontFamily: 'RobotoCondensed',
+                      color: GoalioColors.greenAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class GoalioNewsCard extends StatelessWidget {
+  final Map<String, dynamic> article;
+  final VoidCallback onTap;
+  final bool isSmall;
+
+  const GoalioNewsCard({
+    super.key,
+    required this.article,
+    required this.onTap,
+    this.isSmall = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: isSmall ? 0 : 20.h),
+      height: isSmall ? 180.h : 220.h,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor, // Placeholder color behind image
+        borderRadius: BorderRadius.circular(16.w),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8.w,
+            offset: Offset(0.w, 4.h),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.w),
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background Image
+              if (article['image_url'] != null)
+                Hero(
+                  tag: 'news_tab_image_${article['id']}',
+                  child: Image.network(
+                    article['image_url'],
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (c, e, s) =>
+                            Container(color: Theme.of(context).cardColor),
+                  ),
+                )
+              else
+                Container(color: Theme.of(context).cardColor),
+
+              // Gradient Overlay - Always dark to support white text
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.9),
+                      Colors.black.withOpacity(0.3),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+              ),
+
+              // Content
+              Padding(
+                padding: EdgeInsets.all(isSmall ? 10.0.w : 16.0.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Tag - Only show on Hero or if it fits
+                    if (!isSmall)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: GoalioColors.greenAccent,
+                          borderRadius: BorderRadius.circular(20.w),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.newsTag,
+                          style: TextStyle(
+                            color: const Color(0xFF0F172A),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10.sp,
+                          ),
+                        ),
+                      ),
+                    if (!isSmall) SizedBox(height: 10.h),
+
+                    Text(
+                      article['title'] ?? AppLocalizations.of(context)!.noTitle,
+                      style: TextStyle(
+                        color: Colors.white, // Always white on dark gradient
+                        fontSize: isSmall ? 13.sp : 17.sp,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                        fontFamily: 'RobotoCondensed',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          color: Colors.white70,
+                          size: isSmall ? 10.w : 14.w,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          _formatDate(context, article['published_at']),
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: isSmall ? 10.sp : 12.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(BuildContext context, String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      final now = DateTime.now();
+      final diff = now.difference(date);
+
+      if (diff.inHours < 24) {
+        if (diff.inHours > 0) {
+          return AppLocalizations.of(context)!.hoursShort(diff.inHours);
+        }
+        return AppLocalizations.of(context)!.minutesShort(diff.inMinutes);
+      }
+      return DateFormat(
+        'MMM d',
+        AppLocalizations.of(context)!.localeName,
+      ).format(date);
+    } catch (e) {
+      return '';
+    }
+  }
+}

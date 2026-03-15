@@ -1,0 +1,74 @@
+# Set platform to 15.0 for firebase_core compatibility
+platform :ios, '15.0'
+
+# CocoaPods analytics sends network stats synchronously during install.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+# Determine the Flutter SDK root
+def flutter_root
+  # 1. Environment variable (preferred on CI like Codemagic/GitHub Actions)
+  return ENV['FLUTTER_ROOT'] if ENV['FLUTTER_ROOT'] && !ENV['FLUTTER_ROOT'].empty?
+  
+  # 2. Read from Generated.xcconfig (but guard against Windows paths)
+  generated_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  if File.exist?(generated_settings_path)
+    File.foreach(generated_settings_path) do |line|
+      if line.include?('FLUTTER_ROOT=')
+        path = line.split('=').last.strip
+        # Skip if it's a Windows drive path (e.g., C:\...)
+        return path unless path.include?('\\') || path.start_with?(/[A-Za-z]:/)
+      end
+    end
+  end
+  
+  # 3. Fallback to common Mac/Linux locations
+  ['/opt/flutter', '/usr/local/share/flutter'].each do |fallback|
+    return fallback if File.exist?(File.join(fallback, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'))
+  end
+  
+  # Final fallback - will fail require if didn't find anything
+  '/opt/flutter' 
+end
+
+f_root = flutter_root
+puts "Using Flutter SDK at: #{f_root}"
+
+# Require the Flutter podhelper script
+podhelper_path = File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), f_root)
+require podhelper_path
+
+# Modern Flutter setup
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  # Firebase plugins require frameworks
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    
+    target.build_configurations.each do |config|
+      # Force deployment target to 15.0 for every pod to satisfy firebase_core
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      # Newer Firebase plugins often require bitcode disabled
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
+  
+  # Ensure the Pods project itself has the same deployment target
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+  end
+end
+
+# Adding an explicit project map for builders that require it
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
