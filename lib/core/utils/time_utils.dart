@@ -24,11 +24,14 @@ String formatMatchTime(String? timeStr) {
   return timeStr;
 }
 
-String formatHumanDetailedDate(String? dateStr) {
+String formatHumanDetailedDate(String? dateStr, [String? locale]) {
   if (dateStr == null || dateStr.isEmpty) return 'N/A';
   try {
     final date = DateTime.parse(dateStr).toLocal();
-    return DateFormat('EEEE, MMMM d, yyyy', Intl.defaultLocale).format(date);
+    return DateFormat(
+      'EEEE, MMMM d, yyyy',
+      locale ?? Intl.defaultLocale,
+    ).format(date);
   } catch (e) {
     return dateStr;
   }
@@ -97,5 +100,25 @@ String localizeMatchStatus(dynamic contextOrAppLocalizations, String? status) {
     default:
       if (s.contains("'")) return status;
       return formatMatchTime(status);
+  }
+}
+
+String formatRelativeTime(String dateStr, AppLocalizations l10n) {
+  try {
+    final date = DateTime.parse(dateStr).toLocal();
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}${l10n.minutesAbbr}';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}${l10n.hoursAbbr}';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}${l10n.daysAbbr}';
+    } else {
+      return DateFormat('d MMM', Intl.defaultLocale).format(date);
+    }
+  } catch (_) {
+    return '';
   }
 }

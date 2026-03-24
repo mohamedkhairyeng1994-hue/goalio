@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'No news available.'**
   String get noNewsAvailable;
 
+  /// No description provided for @noNewsAvailableFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No news available for {league}'**
+  String noNewsAvailableFor(Object league);
+
   /// No description provided for @leagueStandings.
   ///
   /// In en, this message translates to:
@@ -373,6 +379,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// No description provided for @checkAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Again'**
+  String get checkAgain;
 
   /// No description provided for @goals.
   ///
@@ -1205,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchInfoNotAvailable.
   ///
   /// In en, this message translates to:
-  /// **'Match information is not available yet.\\nCheck back closer to kick-off.'**
+  /// **'Match information is not available yet.\nCheck back closer to kick-off.'**
   String get matchInfoNotAvailable;
 
   /// No description provided for @matchOverviewLabel.
@@ -1699,6 +1711,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to send feedback. Please try again later.'**
   String get feedbackSentError;
+
+  /// No description provided for @addedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// No description provided for @removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// No description provided for @matchNotificationsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Match notifications enabled'**
+  String get matchNotificationsEnabled;
+
+  /// No description provided for @matchNotificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Match notifications disabled'**
+  String get matchNotificationsDisabled;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'NOTIFICATIONS'**
+  String get notificationsTitle;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'NOTIFICATIONS'**
+  String get notifications;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllRead;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsYet;
+
+  /// No description provided for @userPredictions.
+  ///
+  /// In en, this message translates to:
+  /// **'User Predictions'**
+  String get userPredictions;
+
+  /// No description provided for @noPredictionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No predictions found by this user.'**
+  String get noPredictionsFound;
+
+  /// No description provided for @question.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get question;
+
+  /// No description provided for @answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get answer;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'STATISTICS'**
+  String get statistics;
+
+  /// No description provided for @lastUpdatedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated: January 29, 2026'**
+  String get lastUpdatedLabel;
+
+  /// No description provided for @privacyPolicyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your privacy is important to us. This Privacy Policy explains how Goalio collects, uses, and protects your information when you use our mobile application.'**
+  String get privacyPolicyIntro;
+
+  /// No description provided for @privacySection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Information We Collect'**
+  String get privacySection1Title;
+
+  /// No description provided for @privacySection1Content.
+  ///
+  /// In en, this message translates to:
+  /// **'We collect information you provide directly to us when you create an account, such as your fullname and email address. We also store your \'Favorite Teams\' preferences as part of your user profile to personalize your experience.'**
+  String get privacySection1Content;
+
+  /// No description provided for @privacySection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. How We Use Your Information'**
+  String get privacySection2Title;
+
+  /// No description provided for @privacySection2Content.
+  ///
+  /// In en, this message translates to:
+  /// **'We use the information we collect to:\n• Provide, maintain, and improve our services.\n• Personalize your experience by showing your favorite teams first.\n• Communicate with you about updates or security alerts.\n• Protect the safety and integrity of our services.'**
+  String get privacySection2Content;
+
+  /// No description provided for @privacySection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Data Persistence'**
+  String get privacySection3Title;
+
+  /// No description provided for @privacySection3Content.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account data and favorite teams are stored securely in our backend database. We do not sell or share your personal data with third-party advertisers.'**
+  String get privacySection3Content;
+
+  /// No description provided for @privacySection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Security'**
+  String get privacySection4Title;
+
+  /// No description provided for @privacySection4Content.
+  ///
+  /// In en, this message translates to:
+  /// **'We implement industry-standard security measures to protect your data, including hashed passwords and encrypted communication (HTTPS). However, no method of transmission over the internet is 100% secure.'**
+  String get privacySection4Content;
+
+  /// No description provided for @privacySection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Your Choices'**
+  String get privacySection5Title;
+
+  /// No description provided for @privacySection5Content.
+  ///
+  /// In en, this message translates to:
+  /// **'You can update your favorite teams at any time within the app. You may also contact us to request the deletion of your account and personal data.'**
+  String get privacySection5Content;
+
+  /// No description provided for @privacySection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Contact Us'**
+  String get privacySection6Title;
+
+  /// No description provided for @privacySection6Content.
+  ///
+  /// In en, this message translates to:
+  /// **'If you have any questions about this Privacy Policy, please reach out via our support channels.'**
+  String get privacySection6Content;
+
+  /// No description provided for @allRightsReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'© 2026 Goalio. All rights reserved.'**
+  String get allRightsReserved;
+
+  /// No description provided for @termsSection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Acceptance of Terms'**
+  String get termsSection1Title;
+
+  /// No description provided for @termsSection1Content.
+  ///
+  /// In en, this message translates to:
+  /// **'By accessing and using the Goalio application, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.'**
+  String get termsSection1Content;
+
+  /// No description provided for @termsSection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Use of Services'**
+  String get termsSection2Title;
+
+  /// No description provided for @termsSection2Content.
+  ///
+  /// In en, this message translates to:
+  /// **'Goalio provides football fixtures, news, and personalized features. You agree to use the services only for lawful purposes and in a manner that does not infringe the rights of others.'**
+  String get termsSection2Content;
+
+  /// No description provided for @termsSection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. User Accounts'**
+  String get termsSection3Title;
+
+  /// No description provided for @termsSection3Content.
+  ///
+  /// In en, this message translates to:
+  /// **'When you create an account, you are responsible for maintaining the confidentiality of your credentials and for all activities that occur under your account.'**
+  String get termsSection3Content;
+
+  /// No description provided for @termsSection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Intellectual Property'**
+  String get termsSection4Title;
+
+  /// No description provided for @termsSection4Content.
+  ///
+  /// In en, this message translates to:
+  /// **'The content, features, and functionality of Goalio are owned by Goalio and are protected by international copyright, trademark, and other intellectual property laws.'**
+  String get termsSection4Content;
+
+  /// No description provided for @termsSection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Disclaimer of Warranties'**
+  String get termsSection5Title;
+
+  /// No description provided for @termsSection5Content.
+  ///
+  /// In en, this message translates to:
+  /// **'Goalio is provided \'as is\' without warranties of any kind. While we strive for accuracy, we do not guarantee that match data, scores, or news will always be error-free or up-to-the-minute.'**
+  String get termsSection5Content;
+
+  /// No description provided for @termsSection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Limitation of Liability'**
+  String get termsSection6Title;
+
+  /// No description provided for @termsSection6Content.
+  ///
+  /// In en, this message translates to:
+  /// **'In no event shall Goalio be liable for any indirect, incidental, or consequential damages arising out of your use or inability to use the application.'**
+  String get termsSection6Content;
+
+  /// No description provided for @termsSection7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'7. Changes to Terms'**
+  String get termsSection7Title;
+
+  /// No description provided for @termsSection7Content.
+  ///
+  /// In en, this message translates to:
+  /// **'We reserve the right to modify these Terms of Service at any time. Your continued use of the app after such changes constitutes acceptance of the new terms.'**
+  String get termsSection7Content;
+
+  /// No description provided for @selectLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Select League'**
+  String get selectLeague;
+
+  /// No description provided for @tapToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to search & select...'**
+  String get tapToSearch;
+
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get searchPlaceholder;
+
+  /// No description provided for @minutesAbbr.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get minutesAbbr;
+
+  /// No description provided for @hoursAbbr.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get hoursAbbr;
+
+  /// No description provided for @daysAbbr.
+  ///
+  /// In en, this message translates to:
+  /// **'d'**
+  String get daysAbbr;
+
+  /// No description provided for @pushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get pushNotifications;
+
+  /// No description provided for @notificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable or disable receiving notifications from the app'**
+  String get notificationsSubtitle;
 }
 
 class _AppLocalizationsDelegate

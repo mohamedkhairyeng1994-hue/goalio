@@ -13,8 +13,12 @@ import '../../core/utils/size_config.dart';
 import '../../screens/fixtures/match_detail_page.dart';
 import '../../screens/news/news_detail_page.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/messages.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../notifications/notifications_providers.dart';
+import '../notifications/notifications_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   final VoidCallback onNavigateToFixtures;
   final VoidCallback onNavigateToNews;
   final VoidCallback onNavigateToLeagues;
@@ -31,10 +35,10 @@ class HomePage extends StatefulWidget {
   });
 
   @override
-  State<HomePage> createState() => HomePageState();
+  ConsumerState<HomePage> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends ConsumerState<HomePage> {
   List<dynamic> _news = [];
   List<dynamic> _upcomingMatches = [];
   List<dynamic> _activatedLeagues = [];
@@ -102,6 +106,10 @@ class HomePageState extends State<HomePage> {
 
     // For news: Always do only a fast DB fetch.
     tasks.add(_loadNews());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(unreadNotificationsCountProvider);
+    });
 
     await Future.wait(tasks);
 
@@ -410,6 +418,91 @@ class HomePageState extends State<HomePage> {
                   ),
                 ),
                 actions: [
+                  // Notification Bell with Badge
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final unreadCountAsync = ref.watch(
+                        unreadNotificationsCountProvider,
+                      );
+                      final count = unreadCountAsync.maybeWhen(
+                        data: (d) => d,
+                        orElse: () => 0,
+                      );
+
+                      return Container(
+                        margin: EdgeInsetsDirectional.only(end: 8.w),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.notifications_none_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 28.w,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => const NotificationsPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            if (count > 0)
+                              PositionedDirectional(
+                                top: 4.h,
+                                end: 4.w,
+                                child: Container(
+                                  padding: EdgeInsets.all(2.w),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.redAccent,
+                                        Color(0xFFE11D48),
+                                      ],
+                                    ),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color:
+                                          isDark
+                                              ? const Color(0xFF0F172A)
+                                              : Colors.white,
+                                      width: 1.5.w,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 16.w,
+                                    minHeight: 16.w,
+                                  ),
+                                  child: Text(
+                                    count > 9 ? '9+' : '$count',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'RobotoCondensed',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
                   Container(
                     margin: EdgeInsetsDirectional.only(end: 16.w),
                     decoration: BoxDecoration(
@@ -825,170 +918,272 @@ class HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        child: Column(
+        child: Stack(
           children: [
-            // Competition Tag
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(20.w),
-              ),
-              child: Text(
-                match['competition'] ??
-                    AppLocalizations.of(context)!.featuredMatch,
-                style: TextStyle(
-                  color: GoalioColors.greenAccent,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Column(
               children: [
-                Column(
-                  children: [
-                    buildTeamLogo(match['home_team_image'], size: 56.w),
-                    SizedBox(height: 12.h),
-                    SizedBox(
-                      width: 80.w,
-                      child: Text(
-                        match['home_team'] ??
-                            AppLocalizations.of(context)!.homeTeam,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                // Competition Tag
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(20.w),
+                  ),
+                  child: Text(
+                    match['competition'] ??
+                        AppLocalizations.of(context)!.featuredMatch,
+                    style: TextStyle(
+                      color: GoalioColors.greenAccent,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
-                  ],
+                  ),
                 ),
-                Column(
+                SizedBox(height: 20.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    if (isLive(match) ||
-                        isFinishedStatus(match['status']?.toString()))
-                      Column(
-                        children: [
+                    Column(
+                      children: [
+                        buildTeamLogo(match['home_team_image'], size: 56.w),
+                        SizedBox(height: 12.h),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                match['home_team'] ??
+                                    AppLocalizations.of(context)!.homeTeam,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if ((match['home_red_cards'] ?? 0) > 0) ...[
+                                SizedBox(height: 4.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w,
+                                    vertical: 1.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(2.w),
+                                  ),
+                                  child: Text(
+                                    match['home_red_cards'].toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        if (isLive(match) ||
+                            isFinishedStatus(match['status']?.toString()))
+                          Column(
+                            children: [
+                              Text(
+                                "${match['home_score'] == 'N/A' ? '0' : match['home_score']} - ${match['away_score'] == 'N/A' ? '0' : match['away_score']}",
+                                style: TextStyle(
+                                  fontSize: 32.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                              if (match['home_score_pen'] != null &&
+                                  match['home_score_pen'] != 'N/A' &&
+                                  match['away_score_pen'] != null &&
+                                  match['away_score_pen'] != 'N/A')
+                                Text(
+                                  "(${match['home_score_pen']} - ${match['away_score_pen']})",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.amber[300]
+                                            : Colors.orange[700],
+                                  ),
+                                ),
+                            ],
+                          )
+                        else if (match['home_score'] != 'N/A')
                           Text(
-                            "${match['home_score'] == 'N/A' ? '0' : match['home_score']} - ${match['away_score'] == 'N/A' ? '0' : match['away_score']}",
+                            "${match['home_score']} - ${match['away_score']}",
                             style: TextStyle(
+                              color: Colors.redAccent,
                               fontSize: 32.sp,
                               fontWeight: FontWeight.w900,
-                              color: Colors.redAccent,
+                            ),
+                          )
+                        else
+                          Text(
+                            AppLocalizations.of(context)!.vs,
+                            style: TextStyle(
+                              color: Colors.white24,
+                              fontSize: 32.sp,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
-                          if (match['home_score_pen'] != null &&
-                              match['home_score_pen'] != 'N/A' &&
-                              match['away_score_pen'] != null &&
-                              match['away_score_pen'] != 'N/A')
-                            Text(
-                              "(${match['home_score_pen']} - ${match['away_score_pen']})",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.amber[300]
-                                        : Colors.orange[700],
-                              ),
+                        SizedBox(height: 8.h),
+                        if (isLive(match))
+                          Text(
+                            ((match['status'].toString().toUpperCase() ==
+                                            'LIVE' ||
+                                        match['status']
+                                                .toString()
+                                                .toUpperCase() ==
+                                            'HT') &&
+                                    match['time'] != null &&
+                                    match['time'].toString().isNotEmpty &&
+                                    (match['time'].toString().contains("'") ||
+                                        RegExp(
+                                          r'^\d+$',
+                                        ).hasMatch(match['time'].toString())))
+                                ? (match['time'].toString().contains("'")
+                                    ? match['time'].toString()
+                                    : "${match['time']}'")
+                                : localizeMatchStatus(context, match['status']),
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
                             ),
-                        ],
-                      )
-                    else if (match['home_score'] != 'N/A')
-                      Text(
-                        "${match['home_score']} - ${match['away_score']}",
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 32.sp,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      )
-                    else
-                      Text(
-                        AppLocalizations.of(context)!.vs,
-                        style: TextStyle(
-                          color: Colors.white24,
-                          fontSize: 32.sp,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    SizedBox(height: 8.h),
-                    if (isLive(match))
-                      Text(
-                        ((match['status'].toString().toUpperCase() == 'LIVE' ||
-                                    match['status'].toString().toUpperCase() ==
-                                        'HT') &&
-                                match['time'] != null &&
-                                match['time'].toString().isNotEmpty &&
-                                (match['time'].toString().contains("'") ||
-                                    RegExp(
-                                      r'^\d+$',
-                                    ).hasMatch(match['time'].toString())))
-                            ? (match['time'].toString().contains("'")
-                                ? match['time'].toString()
-                                : "${match['time']}'")
-                            : localizeMatchStatus(context, match['status']),
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.sp,
-                        ),
-                      )
-                    else if (match['status'] == 'HT' || match['status'] == 'FT')
-                      Text(
-                        localizeMatchStatus(context, match['status']),
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.sp,
-                        ),
-                      )
-                    else
-                      Text(
-                        formatMatchTime(match['time']),
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.sp,
-                        ),
-                      ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    buildTeamLogo(match['away_team_image'], size: 56.w),
-                    SizedBox(height: 12.h),
-                    SizedBox(
-                      width: 80.w,
-                      child: Text(
-                        match['away_team'] ??
-                            AppLocalizations.of(context)!.awayTeam,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                          )
+                        else if (match['status'] == 'HT' ||
+                            match['status'] == 'FT')
+                          Text(
+                            localizeMatchStatus(context, match['status']),
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                            ),
+                          )
+                        else
+                          Text(
+                            formatMatchTime(match['time']),
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        buildTeamLogo(match['away_team_image'], size: 56.w),
+                        SizedBox(height: 12.h),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                match['away_team'] ??
+                                    AppLocalizations.of(context)!.awayTeam,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if ((match['away_red_cards'] ?? 0) > 0) ...[
+                                SizedBox(height: 4.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w,
+                                    vertical: 1.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(2.w),
+                                  ),
+                                  child: Text(
+                                    match['away_red_cards'].toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
+            // Notification Bell
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () => _toggleMatchNotification(match),
+                child: Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    match['match_notifications'] == true
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_none_rounded,
+                    color:
+                        match['match_notifications'] == true
+                            ? GoalioColors.greenAccent
+                            : Colors.white30,
+                    size: 20.w,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _toggleMatchNotification(dynamic match) {
+    setState(() {
+      match['match_notifications'] = !(match['match_notifications'] == true);
+    });
+
+    ApiService.toggleMatchNotification(
+      match['id'],
+      match['match_notifications'] == true,
+    );
+
+    if (mounted) {
+      GoalioMessages.showSuccess(
+        context,
+        match['match_notifications'] == true
+            ? AppLocalizations.of(context)!.matchNotificationsEnabled
+            : AppLocalizations.of(context)!.matchNotificationsDisabled,
+      );
+    }
   }
 
   Widget _buildCompactMatchCard(dynamic match) {
@@ -1018,28 +1213,24 @@ class HomePageState extends State<HomePage> {
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16.w),
+          borderRadius: BorderRadius.circular(20.w),
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.05)
+                    ? Colors.white.withOpacity(0.08)
                     : Colors.black.withOpacity(0.05),
+            width: 1,
           ),
-          boxShadow:
-              isDark
-                  ? []
-                  : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4.w,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Top row: League Name and Dynamic Badge (Live or Date)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1056,137 +1247,207 @@ class HomePageState extends State<HomePage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: BoxDecoration(
+                GestureDetector(
+                  onTap: () => _toggleMatchNotification(match),
+                  child: Icon(
+                    match['match_notifications'] == true
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_none_rounded,
                     color:
-                        isLive
-                            ? Colors.redAccent
-                            : isDark
-                            ? Colors.white.withOpacity(0.05)
-                            : Colors.black.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(6.w),
-                  ),
-                  child: Text(
-                    isLive
-                        ? AppLocalizations.of(context)!.live
-                        : (match['date_label'] ?? ''),
-                    style: TextStyle(
-                      color:
-                          isLive
-                              ? Colors.white
-                              : isDark
-                              ? Colors.white54
-                              : Colors.black54,
-                      fontSize: 8.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        match['match_notifications'] == true
+                            ? GoalioColors.greenAccent
+                            : (isDark ? Colors.white30 : Colors.black26),
+                    size: 18.w,
                   ),
                 ),
               ],
             ),
             SizedBox(height: 12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      buildTeamLogo(match['home_team_image'], size: 28.w),
-                      SizedBox(width: 8.w),
                       Expanded(
-                        child: Text(
-                          match['home_team'] ??
-                              AppLocalizations.of(context)!.homeTeam,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodyMedium?.color,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            buildTeamLogo(match['home_team_image'], size: 28.w),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          match['home_team'] ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.homeTeam,
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyMedium?.color,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if ((match['home_red_cards'] ?? 0) >
+                                            0) ...[
+                                          SizedBox(height: 2.h),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 3.w,
+                                              vertical: 1.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.redAccent,
+                                              borderRadius:
+                                                  BorderRadius.circular(2.w),
+                                            ),
+                                            child: Text(
+                                              match['home_red_cards']
+                                                  .toString(),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8.sp,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        (isLive || isFinished)
+                            ? (match['home_score'] != 'N/A'
+                                ? "${match['home_score']}"
+                                : '0')
+                            : "-",
+                        style: TextStyle(
+                          color: isLive ? Colors.redAccent : Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  (isLive || isFinished)
-                      ? (match['home_score'] != 'N/A'
-                          ? "${match['home_score']}"
-                          : '0')
-                      : "-",
-                  style: TextStyle(
-                    color: isLive ? Colors.redAccent : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.sp,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      buildTeamLogo(match['away_team_image'], size: 28.w),
-                      SizedBox(width: 8.w),
                       Expanded(
-                        child: Text(
-                          match['away_team'] ??
-                              AppLocalizations.of(context)!.awayTeam,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodyMedium?.color,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            buildTeamLogo(match['away_team_image'], size: 28.w),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      match['away_team'] ??
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.awayTeam,
+                                      style: TextStyle(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium?.color,
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        (isLive || isFinished)
+                            ? (match['away_score'] != 'N/A'
+                                ? "${match['away_score']}"
+                                : '0')
+                            : "-",
+                        style: TextStyle(
+                          color: isLive ? Colors.redAccent : Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  (isLive || isFinished)
-                      ? (match['away_score'] != 'N/A'
-                          ? "${match['away_score']}"
-                          : '0')
-                      : "-",
-                  style: TextStyle(
-                    color: isLive ? Colors.redAccent : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.sp,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             Divider(
               color: Theme.of(context).dividerColor.withOpacity(0.1),
               height: 16.h,
             ),
-            Text(
-              localizeMatchStatus(
-                context,
-                match['status'] == 'HT' ? 'HT' : match['time'],
-              ),
-              style: TextStyle(
-                color:
-                    isLive
-                        ? Colors.redAccent
-                        : Theme.of(context).textTheme.bodySmall?.color,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  localizeMatchStatus(
+                    context,
+                    match['status'] == 'HT' ? 'HT' : match['time'],
+                  ),
+                  style: TextStyle(
+                    color:
+                        isLive
+                            ? Colors.redAccent
+                            : Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (!isLive &&
+                    !isFinished &&
+                    match['date_label'] != null &&
+                    match['date_label'].toString().isNotEmpty) ...[
+                  SizedBox(width: 6.w),
+                  Text(
+                    "•",
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    match['date_label'].toString(),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
-        ), // close Column
-      ), // close Container
-    ); // close GestureDetector
+        ),
+      ),
+    );
   }
 
   Widget _buildImmersiveNewsCard(dynamic article) {

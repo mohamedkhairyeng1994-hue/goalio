@@ -8,8 +8,11 @@ import '../../core/constants/constants.dart';
 import '../../core/utils/logo_utils.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/size_config.dart';
+import '../../core/utils/number_utils.dart';
+import '../../core/utils/name_translator.dart';
 import '../../screens/fixtures/match_detail_page.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/messages.dart';
 
 enum FixtureSortMode { favorites, alphabetical }
 
@@ -24,7 +27,8 @@ class FixturesPageState extends State<FixturesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showLiveOnly = false;
-  bool _showFavoritesOnly = false; // Note: kept as variable for backwards compat if needed, but UI toggle removed.
+  bool _showFavoritesOnly =
+      false; // Note: kept as variable for backwards compat if needed, but UI toggle removed.
   FixtureSortMode _sortMode = FixtureSortMode.favorites;
   final ValueNotifier<int> _refreshNotifier = ValueNotifier<int>(0);
   final ValueNotifier<bool> _todayHasLive = ValueNotifier<bool>(false);
@@ -151,10 +155,9 @@ class FixturesPageState extends State<FixturesPage>
     final yesterday = _formatDate(now.subtract(const Duration(days: 1)));
     final tomorrow = _formatDate(now.add(const Duration(days: 1)));
 
-    // IndexedStack builds ALL children at once so every tab loads its data
-    // immediately (unlike TabBarView which lazily builds only the visible tab).
-    return IndexedStack(
-      index: _tabController.index,
+    // TabBarView enables smooth swiping between tabs and keeps them in sync with the top bar.
+    return TabBarView(
+      controller: _tabController,
       children: [
         FixtureList(
           key: _yesterdayKey,
@@ -486,7 +489,7 @@ class FixturesPageState extends State<FixturesPage>
     );
   }
 
-        // Removed _buildModalFavoritesFilterButton
+  // Removed _buildModalFavoritesFilterButton
 
   Widget _buildModalCalendarButton(BuildContext modalContext) {
     return IconButton(
@@ -905,6 +908,8 @@ class _FixtureListState extends State<FixtureList>
           () => {
             'name': compName,
             'image': match['competition_image'],
+            'league_id': match['league_id'],
+            'is_favorite_league': match['is_favorite_league'] ?? false,
             'matches': [],
           },
         );
@@ -974,6 +979,8 @@ class _FixtureListState extends State<FixtureList>
           () => {
             'name': compName,
             'image': match['competition_image'],
+            'league_id': match['league_id'],
+            'is_favorite_league': match['is_favorite_league'] ?? false,
             'matches': [],
           },
         );
@@ -1041,13 +1048,14 @@ class _FixtureListState extends State<FixtureList>
 
     for (var comp in rawFilteredCompetitions) {
       final matches = List<Map<String, dynamic>>.from(comp['matches'] as List);
-      final nonFavoriteMatches = matches.where((m) {
-        if (m['is_favorite_team'] == true) {
-          favoriteMatches.add(m);
-          return false; // Remove from original league group
-        }
-        return true;
-      }).toList();
+      final nonFavoriteMatches =
+          matches.where((m) {
+            if (m['is_favorite_team'] == true) {
+              favoriteMatches.add(m);
+              return false; // Remove from original league group
+            }
+            return true;
+          }).toList();
 
       if (nonFavoriteMatches.isNotEmpty) {
         filteredCompetitions.add({...comp, 'matches': nonFavoriteMatches});
@@ -1073,9 +1081,10 @@ class _FixtureListState extends State<FixtureList>
         12.w,
         MediaQuery.of(context).padding.bottom + 84.h,
       ),
-      itemCount: hasFavorites
-          ? filteredCompetitions.length + 1
-          : filteredCompetitions.length,
+      itemCount:
+          hasFavorites
+              ? filteredCompetitions.length + 1
+              : filteredCompetitions.length,
       itemBuilder: (context, index) {
         if (hasFavorites) {
           if (index == 0) {
@@ -1088,7 +1097,9 @@ class _FixtureListState extends State<FixtureList>
     );
   }
 
-  Widget _buildFavoriteMatchesPinnedSection(List<Map<String, dynamic>> matches) {
+  Widget _buildFavoriteMatchesPinnedSection(
+    List<Map<String, dynamic>> matches,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1112,16 +1123,15 @@ class _FixtureListState extends State<FixtureList>
               ),
               borderRadius: BorderRadius.circular(12.w),
               border: Border.all(
-                color: isDark ? Colors.amber.withOpacity(0.2) : Colors.amber.withOpacity(0.1),
+                color:
+                    isDark
+                        ? Colors.amber.withOpacity(0.2)
+                        : Colors.amber.withOpacity(0.1),
               ),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.star_rounded,
-                  color: Colors.amber,
-                  size: 18.w,
-                ),
+                Icon(Icons.star_rounded, color: Colors.amber, size: 18.w),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
@@ -1136,7 +1146,9 @@ class _FixtureListState extends State<FixtureList>
                   ),
                 ),
                 Icon(
-                  _isFavoritesExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  _isFavoritesExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   color: isDark ? Colors.amber[300] : Colors.orange[800],
                   size: 20.w,
                 ),
@@ -1145,7 +1157,12 @@ class _FixtureListState extends State<FixtureList>
           ),
         ),
         if (_isFavoritesExpanded) ...[
-          ...matches.map((m) => MatchCard(match: m)).toList(),
+          ...matches
+              .map(
+                (m) =>
+                    MatchCard(match: m, onToggleFavorite: _toggleFavoriteTeam),
+              )
+              .toList(),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Divider(
@@ -1173,11 +1190,15 @@ class _FixtureListState extends State<FixtureList>
                     matches.where((m) => isLiveMatch(m['status'])).toList();
               }
 
-              // Client-side favorites filter — uses is_favorite_team flag stamped by backend
+              // Client-side favorites filter — uses is_favorite_team and is_favorite_league flags stamped by backend
               if (widget.showFavoritesOnly) {
                 matches =
                     matches
-                        .where((m) => m['is_favorite_team'] == true)
+                        .where(
+                          (m) =>
+                              m['is_favorite_team'] == true ||
+                              m['is_favorite_league'] == true,
+                        )
                         .toList();
               }
 
@@ -1313,10 +1334,28 @@ class _FixtureListState extends State<FixtureList>
           });
         }),
         if (isExpanded)
-          ...comp['matches'].map<Widget>((m) => MatchCard(match: m)).toList(),
+          ...comp['matches']
+              .map<Widget>(
+                (m) =>
+                    MatchCard(match: m, onToggleFavorite: _toggleFavoriteTeam),
+              )
+              .toList(),
         SizedBox(height: 16.h),
       ],
     );
+  }
+
+  void _updateLeagueInState(dynamic leagueId, String name, bool newValue) {
+    for (var c in _competitions) {
+      if (c['league_id'] == leagueId || c['name'] == name) {
+        c['is_favorite_league'] = newValue;
+        if (c['matches'] != null) {
+          for (var m in (c['matches'] as List)) {
+            m['is_favorite_league'] = newValue;
+          }
+        }
+      }
+    }
   }
 
   Widget _buildCompetitionHeader(
@@ -1325,6 +1364,8 @@ class _FixtureListState extends State<FixtureList>
     VoidCallback onTap,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isFav = comp['is_favorite_league'] == true;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1365,6 +1406,20 @@ class _FixtureListState extends State<FixtureList>
                 ),
               ),
             ),
+            GestureDetector(
+              onTap: () => _toggleFavoriteLeague(comp),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Icon(
+                  isFav ? Icons.star_rounded : Icons.star_outline_rounded,
+                  color:
+                      isFav
+                          ? Colors.amber
+                          : (isDark ? Colors.white38 : Colors.black26),
+                  size: 22.w,
+                ),
+              ),
+            ),
             Icon(
               isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
               color: isDark ? Colors.white70 : Colors.black54,
@@ -1375,15 +1430,123 @@ class _FixtureListState extends State<FixtureList>
       ),
     );
   }
+
+  Future<void> _toggleFavoriteLeague(Map<String, dynamic> comp) async {
+    final leagueId = comp['league_id'];
+    final name = comp['name'];
+    final image = comp['image'];
+
+    // Optimistic UI update
+    setState(() {
+      final newValue = !(comp['is_favorite_league'] ?? false);
+      _updateLeagueInState(leagueId, name, newValue);
+      // Also update the local reference used in the current build context
+      comp['is_favorite_league'] = newValue;
+      if (comp['matches'] != null) {
+        for (var match in comp['matches']) {
+          match['is_favorite_league'] = newValue;
+        }
+      }
+    });
+
+    final result = await ApiService.toggleFavoriteLeague(
+      leagueId: leagueId,
+      name: name,
+      image: image,
+    );
+
+    if (result.containsKey('error')) {
+      // Revert on error
+      setState(() {
+        final newValue = !(comp['is_favorite_league'] ?? false);
+        _updateLeagueInState(leagueId, name, newValue);
+        comp['is_favorite_league'] = newValue;
+        if (comp['matches'] != null) {
+          for (var match in comp['matches']) {
+            match['is_favorite_league'] = newValue;
+          }
+        }
+      });
+      if (mounted) {
+        GoalioMessages.showError(
+          context,
+          result['error'] ?? 'Error updating favorite',
+        );
+      }
+    } else {
+      if (mounted) {
+        final isFavorite = comp['is_favorite_league'] == true;
+        GoalioMessages.showSuccess(
+          context,
+          isFavorite
+              ? AppLocalizations.of(context)!.addedToFavorites
+              : AppLocalizations.of(context)!.removedFromFavorites,
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleFavoriteTeam(
+    Map<String, dynamic> match,
+    bool isHome,
+  ) async {
+    final teamId = isHome ? match['home_team_id'] : match['away_team_id'];
+    final teamName = isHome ? match['home_team'] : match['away_team'];
+    final teamLogo =
+        isHome ? match['home_team_image'] : match['away_team_image'];
+    final fieldName = isHome ? 'home_is_favorite' : 'away_is_favorite';
+
+    if (teamId == null) {
+      if (mounted)
+        GoalioMessages.showError(context, "Cannot favorite team: missing ID");
+      return;
+    }
+
+    // Optimistic UI update
+    setState(() {
+      match[fieldName] = !(match[fieldName] == true);
+    });
+
+    final result = await ApiService.toggleFavoriteTeam(
+      teamId: teamId,
+      name: teamName,
+      logo: teamLogo,
+      leagueName: match['competition'],
+    );
+
+    if (result.containsKey('error')) {
+      // Revert on error
+      setState(() {
+        match[fieldName] = !(match[fieldName] == true);
+      });
+      if (mounted) {
+        GoalioMessages.showError(
+          context,
+          result['error'] ?? 'Error updating favorite',
+        );
+      }
+    } else {
+      if (mounted) {
+        final isFavorite = match[fieldName] == true;
+        GoalioMessages.showSuccess(
+          context,
+          isFavorite
+              ? AppLocalizations.of(context)!.addedToFavorites
+              : AppLocalizations.of(context)!.removedFromFavorites,
+        );
+      }
+    }
+  }
 }
 
-// isLiveMatch is now moved to time_utils.dart as isLiveStatus, 
+// isLiveMatch is now moved to time_utils.dart as isLiveStatus,
 // keeping this shim to avoid breaking other files if any, but will use isLiveStatus locally.
 bool isLiveMatch(String? status) => isLiveStatus(status);
 
 class MatchCard extends StatelessWidget {
   final Map<String, dynamic> match;
-  const MatchCard({super.key, required this.match});
+  final Function(Map<String, dynamic>, bool)? onToggleFavorite;
+  const MatchCard({super.key, required this.match, this.onToggleFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -1420,17 +1583,23 @@ class MatchCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildTeamInfo(
+              context,
               match['home_team'],
               match['home_team_image'],
               true,
               isDark,
+              match['home_is_favorite'] == true,
+              (match['home_red_cards'] ?? 0) as int,
             ),
             _buildMatchStatus(context, status, isLive, isDark),
             _buildTeamInfo(
+              context,
               match['away_team'],
               match['away_team_image'],
               false,
               isDark,
+              match['away_is_favorite'] == true,
+              (match['away_red_cards'] ?? 0) as int,
             ),
           ],
         ),
@@ -1438,29 +1607,102 @@ class MatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamInfo(String? name, String? logo, bool isHome, bool isDark) {
+  Widget _buildTeamInfo(
+    BuildContext context,
+    String? name,
+    String? logo,
+    bool isHome,
+    bool isDark,
+    bool isFavorite,
+    int redCards,
+  ) {
     return Expanded(
       flex: 4,
       child: Row(
         mainAxisAlignment:
             isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isHome) ...[buildTeamLogo(logo), SizedBox(width: 8.w)],
-          Expanded(
-            child: Text(
-              name ?? '-',
-              textAlign: isHome ? TextAlign.end : TextAlign.start,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.sp,
-                height: 1.2,
+          // Home Favorite Star (Pinned Left)
+          if (isHome) ...[
+            GestureDetector(
+              onTap: () => onToggleFavorite?.call(match, true),
+              child: Icon(
+                isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+                color:
+                    isFavorite
+                        ? Colors.amber
+                        : (isDark ? Colors.white24 : Colors.black12),
+                size: 14.w,
               ),
-              maxLines: 3,
-              overflow: TextOverflow.visible,
+            ),
+            SizedBox(width: 8.w),
+          ],
+
+          // Away Logo
+          if (!isHome) ...[buildTeamLogo(logo), SizedBox(width: 8.w)],
+
+          // Team Name & Red Cards
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  ArabicNameExtension(name ?? '-').toArabicName(context),
+                  textAlign: isHome ? TextAlign.end : TextAlign.start,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.sp,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (redCards > 0) ...[
+                  SizedBox(height: 4.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 4.w,
+                      vertical: 1.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(2.w),
+                    ),
+                    child: Text(
+                      redCards.toString().toArabicNumbers(context),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
+
+          // Home Logo
           if (isHome) ...[SizedBox(width: 8.w), buildTeamLogo(logo)],
+
+          // Away Favorite Star (Pinned Right)
+          if (!isHome) ...[
+            SizedBox(width: 8.w),
+            GestureDetector(
+              onTap: () => onToggleFavorite?.call(match, false),
+              child: Icon(
+                isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+                color:
+                    isFavorite
+                        ? Colors.amber
+                        : (isDark ? Colors.white24 : Colors.black12),
+                size: 14.w,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1477,7 +1719,7 @@ class MatchCard extends StatelessWidget {
       child: Column(
         children: [
           if (isLive || isFinishedStatus(status.toString()))
-            _buildScoreBoard(isDark, isFinishedStatus(status.toString()))
+            _buildScoreBoard(context, isDark, isFinishedStatus(status.toString()))
           else
             _buildTimeOrSpecialStatus(context, status, isDark),
           if (isLive)
@@ -1503,30 +1745,91 @@ class MatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreBoard(bool isDark, bool isFinished) {
+  Widget _buildScoreBoard(BuildContext context, bool isDark, bool isFinished) {
     final homeScore = match['home_score'] == 'N/A' ? '0' : match['home_score'];
     final awayScore = match['away_score'] == 'N/A' ? '0' : match['away_score'];
     return Column(
       children: [
-        Text(
-          "$homeScore - $awayScore",
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color:
-                isFinished
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              homeScore.toString().toArabicNumbers(context),
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: isFinished
                     ? (isDark ? Colors.white54 : Colors.black45)
                     : Colors.redAccent,
-          ),
+              ),
+            ),
+            Text(
+              " - ",
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: isFinished
+                    ? (isDark ? Colors.white54 : Colors.black45)
+                    : Colors.redAccent,
+              ),
+            ),
+            Text(
+              awayScore.toString().toArabicNumbers(context),
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: isFinished
+                    ? (isDark ? Colors.white54 : Colors.black45)
+                    : Colors.redAccent,
+              ),
+            ),
+          ],
         ),
         if (match['home_score_pen'] != null && match['home_score_pen'] != 'N/A')
-          Text(
-            "(${match['home_score_pen']} - ${match['away_score_pen']})",
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.amber[300] : Colors.orange[700],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "(",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.amber[300] : Colors.orange[700],
+                ),
+              ),
+              Text(
+                "${match['home_score_pen']}".toArabicNumbers(context),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.amber[300] : Colors.orange[700],
+                ),
+              ),
+              Text(
+                " - ",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.amber[300] : Colors.orange[700],
+                ),
+              ),
+              Text(
+                "${match['away_score_pen']}".toArabicNumbers(context),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.amber[300] : Colors.orange[700],
+                ),
+              ),
+              Text(
+                ")",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.amber[300] : Colors.orange[700],
+                ),
+              ),
+            ],
           ),
       ],
     );

@@ -6,6 +6,7 @@ import '../../../core/utils/size_config.dart';
 import '../../../l10n/app_localizations.dart';
 import '../challenge_providers.dart';
 import 'match_item_widget.dart';
+import '../../../core/utils/number_utils.dart';
 
 class UnifiedChallengeCard extends ConsumerWidget {
   final bool isDark;
@@ -13,6 +14,8 @@ class UnifiedChallengeCard extends ConsumerWidget {
   final int datePoints;
   final int totalPoints;
   final AsyncValue<List<dynamic>> eplMatchesState;
+  final Map<String, dynamic> summary;
+  final bool isLoading;
 
   const UnifiedChallengeCard({
     super.key,
@@ -21,6 +24,8 @@ class UnifiedChallengeCard extends ConsumerWidget {
     required this.datePoints,
     required this.totalPoints,
     required this.eplMatchesState,
+    required this.summary,
+    this.isLoading = false,
   });
 
   @override
@@ -28,7 +33,6 @@ class UnifiedChallengeCard extends ConsumerWidget {
     final datesAsync = ref.watch(allChallengeMatchesProvider);
     final isDatesLoading = datesAsync.isLoading;
     final availableDates = ref.watch(challengeMatchDatesProvider);
-    final summary = ref.watch(challengeSummaryProvider);
 
     final currentDateNormalized = DateTime(
       selectedDate.year,
@@ -211,11 +215,11 @@ class UnifiedChallengeCard extends ConsumerWidget {
                   flex: 3,
                   child: _buildStatCard(
                     label: AppLocalizations.of(context)!.points.toUpperCase(),
-                    value: "$datePoints",
+                    value: "$datePoints".toArabicNumbers(context),
                     icon: Icons.bolt_rounded,
                     isDark: isDark,
                     accentColor: accentColor,
-                    isLoading: false,
+                    isLoading: isLoading,
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -223,11 +227,11 @@ class UnifiedChallengeCard extends ConsumerWidget {
                   flex: 4,
                   child: _buildStatCard(
                     label: AppLocalizations.of(context)!.predictions.toUpperCase(),
-                    value: "${summary['correct_predictions'] ?? 0}/${summary['total_predictions'] ?? 0}",
+                    value: "${summary['correct_predictions'] ?? 0}/${summary['total_predictions'] ?? 0}".toArabicNumbers(context),
                     icon: Icons.check_circle_outline_rounded,
                     isDark: isDark,
                     accentColor: Colors.blueAccent,
-                    isLoading: false,
+                    isLoading: isLoading,
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -235,11 +239,11 @@ class UnifiedChallengeCard extends ConsumerWidget {
                   flex: 3,
                   child: _buildStatCard(
                     label: AppLocalizations.of(context)!.overall.toUpperCase(),
-                    value: _formatNumber(totalPoints),
+                    value: _formatNumber(totalPoints, context),
                     icon: Icons.emoji_events_rounded,
                     isDark: isDark,
                     accentColor: const Color(0xFFFFB800),
-                    isLoading: false,
+                    isLoading: isLoading,
                   ),
                 ),
               ],
@@ -273,7 +277,9 @@ class UnifiedChallengeCard extends ConsumerWidget {
                   ],
                 ),
                 SizedBox(height: 16.h),
-                if (!isEplMatchday)
+                if (isLoading)
+                  _buildMatchesLoader(isDark)
+                else if (!isEplMatchday)
                   _buildEmptyState(context, isDark)
                 else
                   ...matches.map(
@@ -283,6 +289,15 @@ class UnifiedChallengeCard extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMatchesLoader(bool isDark) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 40.h),
+        child: const CircularProgressIndicator(color: GoalioColors.greenAccent),
       ),
     );
   }
@@ -487,9 +502,15 @@ class UnifiedChallengeCard extends ConsumerWidget {
     );
   }
 
-  String _formatNumber(int number) {
-    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
-    return number.toString();
+  String _formatNumber(int number, BuildContext context) {
+    String formatted;
+    if (number >= 1000000) {
+      formatted = '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      formatted = '${(number / 1000).toStringAsFixed(1)}K';
+    } else {
+      formatted = number.toString();
+    }
+    return formatted.toArabicNumbers(context);
   }
 }

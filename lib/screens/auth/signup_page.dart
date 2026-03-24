@@ -6,6 +6,7 @@ import '../../screens/favorites/favorite_teams_page.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/utils/messages.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SignupPage extends StatefulWidget {
   final VoidCallback onSignupSuccess;
@@ -32,8 +33,15 @@ class _SignupPageState extends State<SignupPage> {
     final password = _passwordController.text.trim();
 
     setState(() => _isLoading = true);
-
-    final result = await ApiService.signup(name, email, password);
+    
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
+    
+    final result = await ApiService.signup(name, email, password, fcmToken: fcmToken);
 
     if (mounted) {
       setState(() => _isLoading = false);

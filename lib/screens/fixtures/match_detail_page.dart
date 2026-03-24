@@ -7,6 +7,9 @@ import '../../core/constants/constants.dart';
 import '../../core/utils/logo_utils.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/utils/time_utils.dart';
+import '../../core/utils/number_utils.dart';
+import '../../core/utils/name_translator.dart';
+import '../../core/utils/messages.dart';
 import '../../l10n/app_localizations.dart';
 
 class MatchDetailPage extends StatefulWidget {
@@ -25,11 +28,15 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   String? _error;
   Map<String, dynamic> _overview = {};
   Map<String, dynamic> _lineup = {};
+  bool _homeIsFavorite = false;
+  bool _awayIsFavorite = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
+    _homeIsFavorite = widget.match['home_is_favorite'] ?? false;
+    _awayIsFavorite = widget.match['away_is_favorite'] ?? false;
     _loadDetails(forceRefresh: true);
   }
 
@@ -93,6 +100,64 @@ class _MatchDetailPageState extends State<MatchDetailPage>
     }
   }
 
+  Future<void> _toggleFavoriteTeam(bool isHome) async {
+    final teamId =
+        isHome ? widget.match['home_team_id'] : widget.match['away_team_id'];
+    final name = isHome ? widget.match['home_team'] : widget.match['away_team'];
+    final logo =
+        isHome
+            ? widget.match['home_team_image'] ?? widget.match['home_logo']
+            : widget.match['away_team_image'] ?? widget.match['away_logo'];
+    final leagueName = widget.match['competition'];
+
+    final oldVal = isHome ? _homeIsFavorite : _awayIsFavorite;
+
+    setState(() {
+      if (isHome) {
+        _homeIsFavorite = !oldVal;
+      } else {
+        _awayIsFavorite = !oldVal;
+      }
+    });
+
+    final result = await ApiService.toggleFavoriteTeam(
+      teamId: teamId,
+      name: name,
+      logo: logo,
+      leagueName: leagueName,
+    );
+
+    if (result.containsKey('error')) {
+      if (mounted) {
+        setState(() {
+          if (isHome) {
+            _homeIsFavorite = oldVal;
+          } else {
+            _awayIsFavorite = oldVal;
+          }
+        });
+        GoalioMessages.showError(context, result['error']);
+      }
+    } else {
+      if (mounted) {
+        final isFav = result['is_favorite'] ?? !oldVal;
+        setState(() {
+          if (isHome) {
+            _homeIsFavorite = isFav;
+          } else {
+            _awayIsFavorite = isFav;
+          }
+        });
+        GoalioMessages.showSuccess(
+          context,
+          isFav
+              ? AppLocalizations.of(context)!.addedToFavorites
+              : AppLocalizations.of(context)!.removedFromFavorites,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -118,6 +183,29 @@ class _MatchDetailPageState extends State<MatchDetailPage>
     final competition = match['competition'] ?? '';
     final scoreInfo = (_overview['score_info'] as Map<String, dynamic>?) ?? {};
 
+    int homeEventsCount = 0;
+    int awayEventsCount = 0;
+    final eventsList = (_overview['events'] as List<dynamic>?) ?? [];
+    for (var e in eventsList) {
+      if (e is Map<String, dynamic>) {
+        final type = e['type']?.toString();
+        if (type == 'goal' ||
+            type == 'penalty_goal' ||
+            type == 'own_goal' ||
+            type == 'red_card' ||
+            type == 'yellow_red') {
+          if (e['team'] == 'home') {
+            homeEventsCount++;
+          } else if (e['team'] == 'away') {
+            awayEventsCount++;
+          }
+        }
+      }
+    }
+    final int maxEvents =
+        homeEventsCount > awayEventsCount ? homeEventsCount : awayEventsCount;
+    final double dynamicAppbarHeight = 180.h + (maxEvents * 16.h) + 16.h;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
@@ -134,7 +222,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                     context,
                   ),
                   sliver: SliverAppBar(
-                    expandedHeight: 180.h,
+                    expandedHeight: dynamicAppbarHeight,
                     pinned: true,
                     backgroundColor: const Color(0xFF1E293B),
                     foregroundColor: Colors.white,
@@ -173,6 +261,8 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                             ),
                             child: TabBar(
                               controller: _tabController,
+                              isScrollable: true,
+                              tabAlignment: TabAlignment.start,
                               dividerColor: Colors.transparent,
                               indicatorSize: TabBarIndicatorSize.tab,
                               indicatorPadding: EdgeInsets.all(4.w),
@@ -209,6 +299,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               tabs: [
                                 Tab(
                                   text: AppLocalizations.of(context)!.overview,
+                                ),
+                                Tab(
+                                  text:
+                                      AppLocalizations.of(context)!.statistics,
                                 ),
                                 Tab(
                                   text: AppLocalizations.of(context)!.timeline,
@@ -262,6 +356,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 controller: _tabController,
                 children: [
                   _buildOverviewTab(innerContext),
+                  _buildStatisticsTab(innerContext),
                   _buildEventsTab(innerContext),
                   _buildLineupTab(innerContext),
                 ],
@@ -308,7 +403,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Text(
-                competition.toUpperCase(),
+                competition.toString().toArabicName(context).toUpperCase(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: GoalioColors.greenAccent,
@@ -322,6 +417,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           // Teams & Score
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Home Team
               Expanded(
@@ -332,18 +428,42 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       size: 48.w,
                     ),
                     SizedBox(height: 6.h),
-                    Text(
-                      home,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'RobotoCondensed',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _toggleFavoriteTeam(true),
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.only(end: 4.w),
+                            child: Icon(
+                              _homeIsFavorite
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              color:
+                                  _homeIsFavorite
+                                      ? Colors.amber
+                                      : Colors.white24,
+                              size: 22.w,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            ArabicNameExtension(home).toArabicName(context),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'RobotoCondensed',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    _buildScorersAndCards(true),
                   ],
                 ),
               ),
@@ -352,7 +472,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     if (isLive || homeScore != null && homeScore != 'N/A')
                       Row(
@@ -360,7 +480,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         children: [
                           Text(
                             homeScore != null && homeScore != 'N/A'
-                                ? homeScore.toString()
+                                ? homeScore.toString().toArabicNumbers(context)
                                 : '-',
                             style: TextStyle(
                               color: isLive ? Colors.redAccent : Colors.white,
@@ -382,7 +502,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                           Text(
                             awayScore != null && awayScore != 'N/A'
-                                ? awayScore.toString()
+                                ? awayScore.toString().toArabicNumbers(context)
                                 : '-',
                             style: TextStyle(
                               color: isLive ? Colors.redAccent : Colors.white,
@@ -409,14 +529,14 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       child: Text(
                         isLive
                             ? (minute != null && minute.isNotEmpty
-                                ? "$minute'"
+                                ? "$minute'".toArabicNumbers(context)
                                 : localizeMatchStatus(context, status))
                             : isFinished
                             ? localizeMatchStatus(context, status)
                             : localizeMatchStatus(
                               context,
                               match['time'] ?? match['match_time'],
-                            ),
+                            ).toArabicNumbers(context),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11.sp,
@@ -437,26 +557,119 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       size: 48.w,
                     ),
                     SizedBox(height: 6.h),
-                    Text(
-                      away,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'RobotoCondensed',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _toggleFavoriteTeam(false),
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.only(end: 4.w),
+                            child: Icon(
+                              _awayIsFavorite
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              color:
+                                  _awayIsFavorite
+                                      ? Colors.amber
+                                      : Colors.white24,
+                              size: 22.w,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            ArabicNameExtension(away).toArabicName(context),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'RobotoCondensed',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    _buildScorersAndCards(false),
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 4.h), // buffer for tabs
+          SizedBox(height: 8.h),
         ],
       ),
+    );
+  }
+
+  Widget _buildScorersAndCards(bool isHome) {
+    if (_overview.isEmpty) return const SizedBox.shrink();
+    final events = (_overview['events'] as List?) ?? [];
+    final sideKey = isHome ? 'home' : 'away';
+
+    final teamEvents =
+        events
+            .where((e) => e['team'] == sideKey)
+            .where(
+              (e) =>
+                  e['type'] == 'goal' ||
+                  e['type'] == 'penalty_goal' ||
+                  e['type'] == 'own_goal' ||
+                  e['type'] == 'red_card' ||
+                  e['type'] == 'yellow_red',
+            )
+            .toList();
+
+    if (teamEvents.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        SizedBox(height: 4.h),
+        ...teamEvents.map((e) {
+          final isRedCard =
+              e['type'] == 'red_card' || e['type'] == 'yellow_red';
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 1.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isRedCard)
+                  Container(
+                    width: 7.w,
+                    height: 10.h,
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.sports_soccer_rounded,
+                    size: 10.w,
+                    color: Colors.white54,
+                  ),
+                SizedBox(width: 4.w),
+                Flexible(
+                  child: Text(
+                    "${ArabicNameExtension(e['player']?.toString() ?? '').toArabicName(context)} ${(e['minute']?.toString() ?? '').toArabicNumbers(context)}",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 10.sp,
+                      fontFamily: 'RobotoCondensed',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+        SizedBox(height: 8.h),
+      ],
     );
   }
 
@@ -523,7 +736,6 @@ class _MatchDetailPageState extends State<MatchDetailPage>
 
   Widget _buildOverviewTab(BuildContext context) {
     final scoreInfo = (_overview['score_info'] as Map<String, dynamic>?) ?? {};
-    final rawStats = _overview['stats'];
     final rawForm = (_overview['form'] as Map<String, dynamic>?) ?? {};
 
     final homeForm = (rawForm['home'] as List<dynamic>?) ?? [];
@@ -532,46 +744,11 @@ class _MatchDetailPageState extends State<MatchDetailPage>
 
     final bool hasInfo =
         scoreInfo['venue'] != null || scoreInfo['date'] != null;
-    bool hasStats = false;
 
-    List<Widget> statWidgets = [];
-
-    if (rawStats is Map<String, dynamic>) {
-      hasStats = rawStats.isNotEmpty;
-      rawStats.forEach((category, items) {
-        if (items is List) {
-          statWidgets.add(
-            Padding(
-              padding: EdgeInsets.only(top: 16.h, bottom: 8.h),
-              child: _buildSectionTitle(
-                category.toUpperCase(),
-              ), // Usually dynamic from API, but keeping as is for now
-            ),
-          );
-          statWidgets.addAll(
-            items.map((s) => _buildStatRow(s as Map<String, dynamic>)),
-          );
-        }
-      });
-    } else if (rawStats is List) {
-      hasStats = rawStats.isNotEmpty;
-      if (hasStats) {
-        statWidgets.add(
-          Padding(
-            padding: EdgeInsets.only(top: 16.h, bottom: 8.h),
-            child: _buildSectionTitle(AppLocalizations.of(context)!.matchStats),
-          ),
-        );
-        statWidgets.addAll(
-          rawStats.map((s) => _buildStatRow(s as Map<String, dynamic>)),
-        );
-      }
-    }
-
-    if (!hasInfo && !hasStats && !hasForm) {
+    if (!hasInfo && !hasForm) {
       return _buildNoDataWidget(
         context: context,
-        icon: Icons.bar_chart_outlined,
+        icon: Icons.info_outline,
         message: AppLocalizations.of(context)!.matchInfoNotAvailable,
       );
     }
@@ -605,34 +782,262 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   context,
                   homeForm,
                   awayForm,
-                  scoreInfo['home_team']?.toString() ??
+                  ArabicNameExtension(scoreInfo['home_team']?.toString() ??
                       widget.match['home_team']?.toString() ??
-                      AppLocalizations.of(context)!.homeTeam,
-                  scoreInfo['away_team']?.toString() ??
+                      AppLocalizations.of(context)!.homeTeam).toArabicName(context),
+                  ArabicNameExtension(scoreInfo['away_team']?.toString() ??
                       widget.match['away_team']?.toString() ??
-                      AppLocalizations.of(context)!.awayTeam,
-                ),
-
-              if (hasStats)
-                ...statWidgets
-              else
-                Padding(
-                  padding: EdgeInsets.only(top: 40.h),
-                  child: Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.matchStatsNotAvailable,
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodySmall?.color,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                  ),
+                      AppLocalizations.of(context)!.awayTeam).toArabicName(context),
                 ),
             ]),
           ),
         ),
       ],
     );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  STATISTICS TAB
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Widget _buildStatisticsTab(BuildContext context) {
+    final rawStats = _overview['stats'];
+    bool hasStats = false;
+    List<Widget> statWidgets = [];
+
+    if (rawStats is Map<String, dynamic>) {
+      hasStats = rawStats.isNotEmpty;
+      rawStats.forEach((category, items) {
+        if (items is List) {
+          statWidgets.add(
+            Padding(
+              padding: EdgeInsets.only(top: 16.h, bottom: 8.h),
+              child: _buildSectionTitle(
+                _localizeStatCategory(context, category),
+              ),
+            ),
+          );
+          statWidgets.addAll(
+            items.map((s) => _buildStatRow(s as Map<String, dynamic>)),
+          );
+        }
+      });
+    } else if (rawStats is List) {
+      hasStats = rawStats.isNotEmpty;
+      if (hasStats) {
+        statWidgets.add(
+          Padding(
+            padding: EdgeInsets.only(top: 16.h, bottom: 8.h),
+            child: _buildSectionTitle(AppLocalizations.of(context)!.matchStats),
+          ),
+        );
+        statWidgets.addAll(
+          rawStats.map((s) => _buildStatRow(s as Map<String, dynamic>)),
+        );
+      }
+    }
+
+    if (!hasStats) {
+      return _buildNoDataWidget(
+        context: context,
+        icon: Icons.bar_chart_outlined,
+        message: AppLocalizations.of(context)!.matchStatsNotAvailable,
+      );
+    }
+
+    return CustomScrollView(
+      key: const PageStorageKey('statistics'),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: ClampingScrollPhysics(),
+      ),
+      slivers: [
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 100.h),
+          sliver: SliverList(delegate: SliverChildListDelegate(statWidgets)),
+        ),
+      ],
+    );
+  }
+
+  String _localizeStatLabel(BuildContext context, String rawLabel) {
+    final langCode = Localizations.localeOf(context).languageCode;
+    if (langCode != 'ar') return rawLabel;
+
+    switch (rawLabel.trim().toLowerCase()) {
+      case 'ball possession':
+      case 'possession':
+        return 'الاستحواذ على الكرة';
+      case 'expected goals (xg)':
+      case 'expected goals':
+        return 'الأهداف المتوقعة (xG)';
+      case 'goal attempts':
+      case 'total shots':
+        return 'إجمالي التسديدات';
+      case 'shots on goal':
+      case 'shots on target':
+      case 'shot on target':
+        return 'التسديدات على المرمى';
+      case 'shots off goal':
+      case 'shots off target':
+      case 'shot off target':
+        return 'التسديدات خارج المرمى';
+      case 'blocked shots':
+        return 'التسديدات المعترضة';
+      case 'shots inside box':
+        return 'تسديدات داخل المنطقة';
+      case 'shots outside box':
+        return 'تسديدات خارج المنطقة';
+      case 'free kicks':
+      case 'free kick':
+        return 'الركلات الحرة';
+      case 'corner kicks':
+      case 'corners':
+      case 'corner total':
+        return 'الركلات الركنية';
+      case 'offsides':
+      case 'offside total':
+        return 'التسلل';
+      case 'goalkeeper saves':
+      case 'saves':
+      case 'save total':
+        return 'تصديات الحارس';
+      case 'fouls':
+      case 'foul commited':
+      case 'foul committed':
+        return 'الأخطاء';
+      case 'red cards':
+      case 'red card total':
+        return 'البطاقات الحمراء';
+      case 'yellow cards':
+      case 'yellow card total':
+        return 'البطاقات الصفراء';
+      case 'goal kicks':
+      case 'goal kick':
+        return 'ركلة مرمى';
+      case 'total passes':
+        return 'إجمالي التمريرات';
+      case 'passes':
+        return 'التمريرات';
+      case 'completed passes':
+        return 'التمريرات المكتملة';
+      case 'accurate passes':
+        return 'التمريرات الدقيقة';
+      case 'tackles':
+        return 'التدخلات';
+      case 'tackles won':
+        return 'التدخلات الناجحة';
+      case 'attacks':
+        return 'الهجمات';
+      case 'dangerous attacks':
+        return 'الهجمات الخطيرة';
+      case 'crosses':
+        return 'العرضيات';
+      case 'interceptions':
+        return 'الاعتراضات';
+      case 'clearances':
+        return 'التشتيت';
+      case 'long balls':
+        return 'الكرات الطويلة';
+      case 'throw-ins':
+      case 'throw ins':
+        return 'رميات التماس';
+      case 'duels won':
+        return 'الالتحامات الناجحة';
+      case 'aerials won':
+        return 'الالتحامات الهوائية';
+      case 'possession lost':
+        return 'فقدان الاستحواذ';
+      case 'big chances':
+        return 'فرص محققة';
+      case 'big chances missed':
+        return 'فرص محققة ضائعة';
+      case 'hit woodwork':
+        return 'تسديدات في العارضة';
+      default:
+        return rawLabel;
+    }
+  }
+
+  String _localizeStatCategory(BuildContext context, String rawCategory) {
+    final langCode = Localizations.localeOf(context).languageCode;
+    if (langCode != 'ar') return rawCategory.toUpperCase();
+
+    switch (rawCategory.trim().toLowerCase()) {
+      case 'general':
+      case 'match overview':
+      case 'overview':
+        return 'نظرة عامة';
+      case 'shots':
+        return 'تسديدات';
+      case 'possession':
+        return 'الاستحواذ';
+      case 'passes':
+        return 'تمريرات';
+      case 'defending':
+      case 'defense':
+        return 'دفاع';
+      case 'cards':
+        return 'بطاقات';
+      case 'discipline':
+        return 'انضباط';
+      case 'attacks':
+      case 'attack':
+        return 'هجمات';
+      case 'duels':
+        return 'التحامات';
+      case 'expected goals':
+        return 'الأهداف المتوقعة';
+      case 'goalkeeper':
+      case 'goalkeeping':
+        return 'حارس المرمى';
+      case 'player statistics':
+        return 'إحصائيات اللاعبين';
+      default:
+        return rawCategory.toUpperCase();
+    }
+  }
+
+  String _getArabicMonth(int month) {
+    const arabicMonths = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
+    if (month >= 1 && month <= 12) return arabicMonths[month - 1];
+    return '';
+  }
+
+  String _localizeWDL(BuildContext context, String wdl) {
+    final langCode = Localizations.localeOf(context).languageCode;
+    if (langCode != 'ar') return wdl;
+    switch (wdl.trim().toUpperCase()) {
+      case 'WIN':
+        return 'فوز';
+      case 'W':
+        return 'ف';
+      case 'DRAW':
+        return 'تعادل';
+      case 'D':
+        return 'ت';
+      case 'LOSS':
+        return 'خسارة';
+      case 'L':
+        return 'خ';
+      default:
+        return wdl;
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -885,7 +1290,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          player,
+                          ArabicNameExtension(player).toArabicName(context),
                           style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyMedium?.color,
@@ -894,7 +1299,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                         ),
                         Text(
-                          detail,
+                          ArabicNameExtension(detail).toArabicName(context),
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 10.sp,
@@ -929,7 +1334,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   iconWidget,
                   SizedBox(width: 4.w),
                   Text(
-                    minute,
+                    minute.toArabicNumbers(context),
                     style: TextStyle(
                       color: iconColor,
                       fontSize: 11.sp,
@@ -949,7 +1354,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          player,
+                          player.toArabicName(context),
                           style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyMedium?.color,
@@ -958,7 +1363,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                         ),
                         Text(
-                          detail,
+                          detail.toArabicName(context),
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 10.sp,
@@ -1177,7 +1582,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             SizedBox(width: 6.w),
             Expanded(
               child: Text(
-                info['venue'].toString(),
+                ArabicNameExtension(info['venue'].toString()).toArabicName(context),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodySmall?.color,
                   fontSize: 11.sp,
@@ -1187,7 +1592,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           ],
           if (info['date'] != null)
             Text(
-              formatHumanDetailedDate(info['date']?.toString()),
+              formatHumanDetailedDate(
+                info['date']?.toString(),
+                Localizations.localeOf(context).languageCode,
+              ),
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodySmall?.color,
                 fontSize: 11.sp,
@@ -1263,7 +1671,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                teamName,
+                ArabicNameExtension(teamName).toArabicName(context),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                   fontSize: 14.sp,
@@ -1311,22 +1719,31 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               try {
                 if (date.isNotEmpty) {
                   final dt = DateTime.parse(date).toLocal();
-                  const months = [
-                    'Jan',
-                    'Feb',
-                    'Mar',
-                    'Apr',
-                    'May',
-                    'Jun',
-                    'Jul',
-                    'Aug',
-                    'Sep',
-                    'Oct',
-                    'Nov',
-                    'Dec',
-                  ];
-                  dateLabel =
-                      '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+                  final isAr =
+                      Localizations.localeOf(context).languageCode == 'ar';
+
+                  if (isAr) {
+                    dateLabel =
+                        '${dt.day.toString().padLeft(2, '0')} ${_getArabicMonth(dt.month)} ${dt.year}';
+                  } else {
+                    const months = [
+                      'Jan',
+                      'Feb',
+                      'Mar',
+                      'Apr',
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec',
+                    ];
+                    dateLabel =
+                        '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+                  }
+
                   timeLabel =
                       '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
                 }
@@ -1369,7 +1786,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              dateLabel,
+                              dateLabel.toArabicNumbers(context),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -1393,7 +1810,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               ),
                               SizedBox(width: 4.w),
                               Text(
-                                timeLabel,
+                                timeLabel.toArabicNumbers(context),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w600,
@@ -1420,7 +1837,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                             ),
                           ),
                           child: Text(
-                            wdl,
+                            _localizeWDL(context, wdl),
                             style: TextStyle(
                               color: wdlColor,
                               fontSize: 9.sp,
@@ -1439,7 +1856,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       children: [
                         Expanded(
                           child: Text(
-                            teamName,
+                            ArabicNameExtension(teamName).toArabicName(context),
                             textAlign: TextAlign.right,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -1467,7 +1884,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               ),
                             ),
                             child: Text(
-                              scoreStr,
+                              scoreStr.toArabicNumbers(context),
                               style: TextStyle(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w900,
@@ -1481,7 +1898,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         ),
                         Expanded(
                           child: Text(
-                            opp,
+                            ArabicNameExtension(opp).toArabicName(context),
                             textAlign: TextAlign.left,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -1519,7 +1936,8 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   }
 
   Widget _buildStatRow(Map<String, dynamic> stat) {
-    final label = stat['label']?.toString() ?? '';
+    final rawLabel = stat['label']?.toString() ?? '';
+    final label = _localizeStatLabel(context, rawLabel);
     final home = stat['home_value']?.toString() ?? '-';
     final away = stat['away_value']?.toString() ?? '-';
 
@@ -1530,6 +1948,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
     final hasBar = homeNum != null && awayNum != null && total > 0;
     final homeVal = homeNum ?? 0.0;
     final awayVal = awayNum ?? 0.0;
+
+    final displayHome = home.toArabicNumbers(context);
+    final displayAway = away.toArabicNumbers(context);
 
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
@@ -1543,7 +1964,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           Row(
             children: [
               Text(
-                home,
+                displayHome,
                 style: TextStyle(
                   color: GoalioColors.blueAccent,
                   fontWeight: FontWeight.bold,
@@ -1562,7 +1983,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 ),
               ),
               Text(
-                away,
+                displayAway,
                 style: TextStyle(
                   color: GoalioColors.greenAccent,
                   fontWeight: FontWeight.bold,
@@ -1707,7 +2128,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 if (homeFormation != null) ...[
                   SizedBox(height: 4.h),
                   Text(
-                    homeFormation,
+                    homeFormation.toArabicNumbers(context),
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 18.sp,
@@ -1751,7 +2172,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 if (awayFormation != null) ...[
                   SizedBox(height: 4.h),
                   Text(
-                    awayFormation,
+                    awayFormation.toArabicNumbers(context),
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 18.sp,
@@ -1862,7 +2283,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   isRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  ArabicNameExtension(name).toArabicName(context),
                   textAlign: align,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2016,7 +2437,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   ),
                   child: Center(
                     child: Text(
-                      number,
+                      number.toArabicNumbers(context),
                       style: TextStyle(
                         color: isHome ? Colors.black : Colors.white,
                         fontSize: 9.sp,
@@ -2055,7 +2476,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 borderRadius: BorderRadius.circular(3.w),
               ),
               child: Text(
-                name.contains(' ') ? name.split(' ').last : name,
+                ArabicNameExtension(name.contains(' ') ? name.split(' ').last : name).toArabicName(context),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 7.sp,
@@ -2080,7 +2501,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
       ),
       child: Center(
         child: Text(
-          number,
+          number.toArabicNumbers(context),
           style: TextStyle(
             color: GoalioColors.greenAccent,
             fontSize: 10.sp,

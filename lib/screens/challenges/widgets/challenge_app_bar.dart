@@ -20,14 +20,12 @@ class ChallengeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     bool isViewingGroup = selectedGroup != null;
-    return SliverAppBar(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+    return AppBar(
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       centerTitle: false,
       automaticallyImplyLeading: false,
-      floating: false,
-      pinned: true,
       titleSpacing: 0,
       leading:
           isViewingGroup

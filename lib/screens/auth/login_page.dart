@@ -13,6 +13,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../../core/utils/messages.dart';
 import 'dart:io' show Platform;
 import '../../l10n/app_localizations.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -40,8 +41,15 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
 
     setState(() => _isLoginLoading = true);
-
-    final result = await ApiService.login(email, password);
+    
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
+    
+    final result = await ApiService.login(email, password, fcmToken: fcmToken);
 
     if (mounted) {
       setState(() => _isLoginLoading = false);
@@ -56,6 +64,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
+    
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
+
     try {
       final googleSignIn = GoogleSignIn(
         clientId:
@@ -64,39 +80,61 @@ class _LoginPageState extends State<LoginPage> {
                 : null,
         serverClientId:
             '1039306559815-t8egv3tivv56apg7k61479v2h1kd5h1a.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
       );
+      
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {}
+
       final GoogleSignInAccount? account = await googleSignIn.signIn();
 
       if (account != null) {
         final GoogleSignInAuthentication auth = await account.authentication;
-        final String? token = auth.idToken ?? auth.accessToken;
-
-        if (token == null) {
-          throw Exception("Could not get ID Token from Google");
-        }
-
-        final result = await ApiService.socialLogin(
-          provider: 'google',
-          token: account.id,
-          email: account.email,
-          name: account.displayName,
+        
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: auth.accessToken,
+          idToken: auth.idToken,
         );
 
-        if (mounted) {
-          if (result.containsKey('data') || result.containsKey('token')) {
-            widget.onLoginSuccess();
-          } else {
-            GoalioMessages.showError(
-              context,
-              result['error'] ?? "Google sign-in failed",
-            );
+        final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        final user = userCredential.user;
+
+        if (user != null) {
+          final result = await ApiService.socialLogin(
+            provider: 'google',
+            token: user.uid,
+            email: user.email,
+            name: user.displayName,
+            fcmToken: fcmToken,
+          );
+
+          if (mounted) {
+            if (result.containsKey('data') || result.containsKey('token')) {
+              widget.onLoginSuccess();
+            } else {
+              GoalioMessages.showError(
+                context,
+                result['error'] ?? "Google sign-in failed on server",
+              );
+            }
           }
         }
       }
     } catch (e) {
       debugPrint('Google Sign-In Error: $e');
       if (mounted) {
-        GoalioMessages.showError(context, "Google Sign-In Error: $e");
+        String errorMessage = "Google Sign-In Error";
+        if (e.toString().contains("PlatformException(10,")) {
+          errorMessage = "Configuration Error (10). Please check your SHA-1 in Google Play Console.";
+        } else if (e.toString().contains("PlatformException(12500,")) {
+          errorMessage = "Internal Error (12500). Please check your Google Services configuration.";
+        } else if (e.toString().contains("PlatformException(12501,")) {
+          errorMessage = "Sign-in cancelled by user.";
+        } else {
+          errorMessage = "Google Error: $e";
+        }
+        GoalioMessages.showError(context, errorMessage);
       }
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
@@ -105,6 +143,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleAppleSignIn() async {
     setState(() => _isAppleLoading = true);
+    
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
+
     try {
       final appleProvider = AppleAuthProvider();
       appleProvider.addScope('email');
@@ -120,6 +166,7 @@ class _LoginPageState extends State<LoginPage> {
           token: user.uid, // This is the stable Apple/Firebase User ID
           email: user.email,
           name: user.displayName,
+          fcmToken: fcmToken,
         );
 
         if (mounted) {
@@ -145,8 +192,19 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleFacebookSignIn() async {
     setState(() => _isFacebookLoading = true);
+    
+    String? fcmToken;
     try {
-      final LoginResult fbResult = await FacebookAuth.instance.login();
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
+
+    try {
+      final LoginResult fbResult = await FacebookAuth.instance.login(
+        permissions: ['public_profile', 'email']
+      );
+      
       if (fbResult.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData();
 
@@ -155,6 +213,7 @@ class _LoginPageState extends State<LoginPage> {
           token: userData['id'],
           email: userData['email'],
           name: userData['name'],
+          fcmToken: fcmToken,
         );
 
         if (mounted) {

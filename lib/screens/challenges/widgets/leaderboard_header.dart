@@ -3,6 +3,7 @@ import 'dart:ui';
 import '../../../core/utils/size_config.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/number_utils.dart';
 
 class LeaderboardHeaderWidget extends StatelessWidget {
   final bool isDark;
@@ -61,7 +62,7 @@ class LeaderboardHeaderDelegate extends SliverPersistentHeaderDelegate {
         alignment: AlignmentDirectional.centerStart,
         child: Text(
           AppLocalizations.of(context)!.lastUpdated(
-            DateFormat("dd MMM yyyy, HH:mm").format(DateTime.now()).toUpperCase(),
+            DateFormat("dd MMM yyyy, HH:mm").format(DateTime.now()).toUpperCase().toArabicNumbers(context),
           ),
           style: TextStyle(
             fontSize: 9.sp,

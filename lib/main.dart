@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Managers & Utils
 import 'core/theme/theme_manager.dart';
@@ -31,6 +32,12 @@ import 'screens/fixtures/match_detail_page.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+  
+  // Check preference before reporting or handling
+  final prefs = await SharedPreferences.getInstance();
+  final isEnabled = prefs.getBool('notifications_enabled') ?? true;
+  if (!isEnabled) return;
+
   if (kDebugMode)
     debugPrint("Handling a background message: ${message.messageId}");
 
@@ -41,6 +48,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<MainPageState> mainPageKey = GlobalKey<MainPageState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -185,7 +193,7 @@ class Initializer extends StatefulWidget {
       if (context.mounted) {
         if (teamsCount > 0 && leaguesCount > 0) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MainPage()),
+            MaterialPageRoute(builder: (context) => MainPage(key: mainPageKey)),
           );
         } else {
           Navigator.of(context).pushReplacement(
@@ -199,7 +207,7 @@ class Initializer extends StatefulWidget {
       // Fallback if profile fetch fails
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainPage()),
+          MaterialPageRoute(builder: (context) => MainPage(key: mainPageKey)),
         );
       }
     }
@@ -254,7 +262,7 @@ class _InitializerState extends State<Initializer> {
 
     if (_isLoggedIn) {
       if (_hasFavorites) {
-        return const MainPage();
+        return MainPage(key: mainPageKey);
       } else {
         return const FavoriteTeamsPage(isOnboarding: true);
       }
@@ -270,10 +278,10 @@ class MainPage extends ConsumerStatefulWidget {
   const MainPage({super.key});
 
   @override
-  ConsumerState<MainPage> createState() => _MainPageState();
+  ConsumerState<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends ConsumerState<MainPage> {
+class MainPageState extends ConsumerState<MainPage> {
   int _currentIndex = 0;
   final List<int> _navigationHistory = [0];
   // Keys to access screen states for automatic refresh
@@ -303,36 +311,53 @@ class _MainPageState extends ConsumerState<MainPage> {
     }
   }
 
-  void _handleNotificationMessage(Map<String, dynamic> data) {
+  void _handleNotificationMessage(Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    final isEnabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!isEnabled) return;
+
     debugPrint("Handling notification: $data");
     final type = data['type'];
-    
+
     if (type == 'matchday_notification' || type == 'score_notification') {
       final leagueIdStr = data['league_id'];
       final dateStr = data['date'];
 
       if (leagueIdStr != null) {
         // Find the league and select it
-        final leaguesAsync = ref.read(challengeLeaguesListProvider);
-        leaguesAsync.whenData((leagues) {
-          try {
-            final leagueId = int.parse(leagueIdStr);
+        try {
+          final leagueId = int.parse(leagueIdStr);
+
+          // We wait until leagues are available (at most 5 seconds)
+          int retries = 0;
+          while (ref.read(challengeLeaguesListProvider).isLoading &&
+              retries < 10) {
+            await Future.delayed(const Duration(milliseconds: 500));
+            retries++;
+          }
+
+          final leaguesAsync = ref.read(challengeLeaguesListProvider);
+          leaguesAsync.whenData((leagues) {
             final league = leagues.firstWhere((l) => l.id == leagueId);
-            ref.read(selectedChallengeLeagueProvider.notifier).selectLeague(league);
-            
-            // If it's a score notification and we have a date, maybe we want to jump to that date
+            ref
+                .read(selectedChallengeLeagueProvider.notifier)
+                .selectLeague(league);
+
+            // If it's a score notification and we have a date, jump to it
             if (type == 'score_notification' && dateStr != null) {
               try {
                 final date = DateTime.parse(dateStr);
-                ref.read(selectedChallengeDateProvider.notifier).selectDate(date);
+                ref
+                    .read(selectedChallengeDateProvider.notifier)
+                    .selectDate(date);
               } catch (_) {}
             }
-          } catch (e) {
-            debugPrint("Error selecting league from notification: $e");
-          }
-        });
+          });
+        } catch (e) {
+          debugPrint("Error selecting league from notification: $e");
+        }
       }
-      
+
       // Navigate to Challenge Tab
       onDestinationSelected(3);
     } else if (type == 'match_status' || type == 'match_event') {
@@ -360,6 +385,13 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   void _onLanguageChanged() {
     if (mounted) {
+      // Sync language change with backend for push notifications
+      FirebaseMessaging.instance.getToken().then((token) {
+        if (token != null) {
+          ApiService.updateFcmToken(token);
+        }
+      });
+      
       // Refresh all screens that support it
       _homeKey.currentState?.resetState();
       _homeKey.currentState?.loadData(forceScrape: true);
@@ -451,20 +483,31 @@ class _MainPageState extends ConsumerState<MainPage> {
         }
 
         // 1. Handle foreground messages
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+          final prefs = await SharedPreferences.getInstance();
+          final isEnabled = prefs.getBool('notifications_enabled') ?? true;
+          if (!isEnabled) return;
+
           debugPrint("Foreground message received: ${message.messageId}");
           if (message.messageId != null) {
             ApiService.markNotificationAsReceived(message.messageId!);
           }
 
-          // Show local notification so it's clickable in foreground
-          RemoteNotification? notification = message.notification;
+          // Force local notification presentation for ALL messages in foreground
+          // Handle both 'notification' payload and 'data' payload for display
+          String? title = message.notification?.title ?? message.data['title'];
+          String? body = message.notification?.body ?? message.data['body'];
 
-          if (notification != null) {
+          if (title != null || body != null) {
+            final notificationId =
+                message.messageId != null
+                    ? message.messageId.hashCode
+                    : DateTime.now().millisecond;
+
             flutterLocalNotificationsPlugin.show(
-              id: notification.hashCode,
-              title: notification.title,
-              body: notification.body,
+              id: notificationId,
+              title: title,
+              body: body,
               notificationDetails: NotificationDetails(
                 android: AndroidNotificationDetails(
                   channel.id,
@@ -472,6 +515,12 @@ class _MainPageState extends ConsumerState<MainPage> {
                   channelDescription: channel.description,
                   importance: Importance.max,
                   priority: Priority.high,
+                  icon: '@mipmap/ic_launcher',
+                ),
+                iOS: const DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBadge: true,
+                  presentSound: true,
                 ),
               ),
               payload: jsonEncode(message.data),

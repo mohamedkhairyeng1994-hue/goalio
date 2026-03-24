@@ -31,6 +31,7 @@ class Group {
 }
 
 class UserRank {
+  final int id;
   final String name;
   final int rank;
   final int points;
@@ -38,6 +39,7 @@ class UserRank {
   final int rankChange;
 
   UserRank({
+    required this.id,
     required this.name,
     required this.rank,
     required this.points,

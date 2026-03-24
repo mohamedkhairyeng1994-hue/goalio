@@ -90,6 +90,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noNewsAvailable => 'لا توجد أخبار متاحة';
 
   @override
+  String noNewsAvailableFor(Object league) {
+    return 'لا توجد أخبار متاحة لدوري $league';
+  }
+
+  @override
   String get leagueStandings => 'ترتيب الدوريات';
 
   @override
@@ -145,6 +150,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get retry => 'إعادة المحاولة';
+
+  @override
+  String get checkAgain => 'تحقق مرة أخرى';
 
   @override
   String get goals => 'أهداف';
@@ -595,7 +603,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get matchInfoNotAvailable =>
-      'معلومات المباراة ليست متاحة بعد.\\nيرجى التحقق مرة أخرى بالقرب من وقت الانطلاق.';
+      'معلومات المباراة ليست متاحة بعد.\nيرجى التحقق مرة أخرى بالقرب من وقت الانطلاق.';
 
   @override
   String get matchOverviewLabel => 'نظرة عامة على المباراة';
@@ -859,4 +867,169 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get feedbackSentError =>
       'فشل إرسال الملاحظات. يرجى المحاولة مرة أخرى لاحقاً.';
+
+  @override
+  String get addedToFavorites => 'تمت الإضافة إلى المفضلة';
+
+  @override
+  String get removedFromFavorites => 'تمت الإزالة من المفضلة';
+
+  @override
+  String get matchNotificationsEnabled => 'تم تفعيل إشعارات المباراة';
+
+  @override
+  String get matchNotificationsDisabled => 'تم إيقاف إشعارات المباراة';
+
+  @override
+  String get notificationsTitle => 'الإشعارات';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get markAllRead => 'تعيين الكل كمقروء';
+
+  @override
+  String get noNotificationsYet => 'لا توجد إشعارات حتى الآن';
+
+  @override
+  String get userPredictions => 'توقعات المستخدم';
+
+  @override
+  String get noPredictionsFound => 'لم يتم العثور على توقعات لهذا المستخدم.';
+
+  @override
+  String get question => 'السؤال';
+
+  @override
+  String get answer => 'الإجابة';
+
+  @override
+  String get statistics => 'الإحصائيات';
+
+  @override
+  String get lastUpdatedLabel => 'آخر تحديث: 29 يناير 2026';
+
+  @override
+  String get privacyPolicyIntro =>
+      'خصوصيتك تهمنا. توضح سياسة الخصوصية هذه كيف يقوم جوليو بجمع واستخدام وحماية معلوماتك عند استخدام تطبيقنا على الهاتف المحمول.';
+
+  @override
+  String get privacySection1Title => '1. المعلومات التي نجمعها';
+
+  @override
+  String get privacySection1Content =>
+      'نقوم بجمع المعلومات التي تقدمها لنا مباشرة عند إنشاء حساب، مثل اسمك الكامل وعنوان بريدك الإلكتروني. كما نقوم بتخزين تفضيلات \'الفرق المفضلة\' الخاصة بك كجزء من ملف تعريف المستخدم الخاص بك لتخصيص تجربتك.';
+
+  @override
+  String get privacySection2Title => '2. كيف نستخدم معلوماتك';
+
+  @override
+  String get privacySection2Content =>
+      'نستخدم المعلومات التي نجمعها من أجل:\n• تقديم خدماتنا وصيانتها وتحسينها.\n• تخصيص تجربتك من خلال إظهار فرقك المفضلة أولاً.\n• التواصل معك بشأن التحديثات أو التنبيهات الأمنية.\n• حماية سلامة ونزاهة خدماتنا.';
+
+  @override
+  String get privacySection3Title => '3. حفظ البيانات';
+
+  @override
+  String get privacySection3Content =>
+      'يتم تخزين بيانات حسابك وفرقك المفضلة بأمان في قاعدة بياناتنا الخلفية. نحن لا نبيع أو نشارك بياناتك الشخصية مع معلنين من أطراف ثالثة.';
+
+  @override
+  String get privacySection4Title => '4. الأمان';
+
+  @override
+  String get privacySection4Content =>
+      'ننفذ تدابير أمنية متوافقة مع معايير الصناعة لحماية بياناتك، بما في ذلك كلمات المرور المشفرة والاتصال المشفر (HTTPS). ومع ذلك، لا توجد وسيلة نقل عبر الإنترنت آمنة 100%.';
+
+  @override
+  String get privacySection5Title => '5. خياراتك';
+
+  @override
+  String get privacySection5Content =>
+      'يمكنك تحديث فرقك المفضلة في أي وقت داخل التطبيق. يمكنك أيضاً الاتصال بنا لطلب حذف حسابك وبياناتك الشخصية.';
+
+  @override
+  String get privacySection6Title => '6. اتصل بنا';
+
+  @override
+  String get privacySection6Content =>
+      'إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى التواصل معنا عبر قنوات الدعم الخاصة بنا.';
+
+  @override
+  String get allRightsReserved => '© 2026 جوليو. جميع الحقوق محفوظة.';
+
+  @override
+  String get termsSection1Title => '1. قبول الشروط';
+
+  @override
+  String get termsSection1Content =>
+      'من خلال الوصول واستخدام تطبيق جوليو، فإنك توافق على الالتزام بشروط الخدمة هذه. إذا كنت لا توافق على هذه الشروط، يرجى عدم استخدام التطبيق.';
+
+  @override
+  String get termsSection2Title => '2. استخدام الخدمات';
+
+  @override
+  String get termsSection2Content =>
+      'يقدم جوليو مباريات كرة القدم، والأخبار، والميزات المخصصة. أنت توافق على استخدام الخدمات لأغراض قانونية فقط وبطريقة لا تنتهك حقوق الآخرين.';
+
+  @override
+  String get termsSection3Title => '3. حسابات المستخدمين';
+
+  @override
+  String get termsSection3Content =>
+      'عند إنشاء حساب، أنت مسؤول عن الحفاظ على سرية بيانات الاعتماد الخاصة بك وعن جميع الأنشطة التي تحدث تحت حسابك.';
+
+  @override
+  String get termsSection4Title => '4. الملكية الفكرية';
+
+  @override
+  String get termsSection4Content =>
+      'إن المحتوى والميزات والوظائف الخاصة بجوليو مملوكة لجوليو وهي محمية بموجب قوانين حقوق الطبع والنشر والعلامات التجارية وغيرها من قوانين الملكية الفكرية الدولية.';
+
+  @override
+  String get termsSection5Title => '5. إخلاء المسؤولية عن الضمانات';
+
+  @override
+  String get termsSection5Content =>
+      'يتم تقديم جوليو \'كما هو\' دون أي ضمانات من أي نوع. بينما نسعى لتحقيق الدقة، لا نضمن أن بيانات المباريات أو النتائج أو الأخبار ستكون خالية من الأخطاء أو مُحدثة دقيقة بدقيقة.';
+
+  @override
+  String get termsSection6Title => '6. حدود المسؤولية';
+
+  @override
+  String get termsSection6Content =>
+      'لن يكون جوليو بأي حال من الأحوال مسؤولاً عن أي أضرار غير مباشرة أو عرضية أو تبعية ناشئة عن استخدامك أو عدم قدرتك على استخدام التطبيق.';
+
+  @override
+  String get termsSection7Title => '7. تغيير الشروط';
+
+  @override
+  String get termsSection7Content =>
+      'نحتفظ بالحق في تعديل شروط الخدمة هذه في أي وقت. إن استمرارك في استخدام التطبيق بعد هذه التغييرات يشكل قبولاً للشروط الجديدة.';
+
+  @override
+  String get selectLeague => 'اختر الدوري';
+
+  @override
+  String get tapToSearch => 'اضغط للبحث والاختيار...';
+
+  @override
+  String get searchPlaceholder => 'بحث...';
+
+  @override
+  String get minutesAbbr => 'د';
+
+  @override
+  String get hoursAbbr => 'س';
+
+  @override
+  String get daysAbbr => 'ي';
+
+  @override
+  String get pushNotifications => 'الإشعارات';
+
+  @override
+  String get notificationsSubtitle =>
+      'تفعيل أو تعطيل تلقي الإشعارات من التطبيق';
 }

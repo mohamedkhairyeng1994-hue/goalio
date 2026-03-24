@@ -8,6 +8,9 @@ import '../../core/services/api_service.dart';
 import '../../screens/news/news_detail_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/size_config.dart';
+import '../../core/utils/messages.dart';
+import '../../core/utils/number_utils.dart';
+import '../../core/utils/name_translator.dart';
 
 class LeaguesPage extends StatefulWidget {
   final Map<String, dynamic>? initialLeague;
@@ -29,6 +32,7 @@ class LeaguesPageState extends State<LeaguesPage>
   int _currentPage = 1;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  bool _showFavoritesOnly = false;
   String _searchQuery = '';
   Timer? _debounce;
   String _selectedPlayerStat = 'goals';
@@ -175,6 +179,7 @@ class LeaguesPageState extends State<LeaguesPage>
       final response = await ApiService.getAllLeagues(
         page: _currentPage,
         search: _searchQuery,
+        favoritesOnly: _showFavoritesOnly,
       );
 
       if (!mounted) return;
@@ -202,8 +207,10 @@ class LeaguesPageState extends State<LeaguesPage>
           enrichedLeagues.add({
             'id': entry['id'],
             'name': entry['name']?.toString() ?? '',
+            'name_ar': entry['name_ar']?.toString(),
             'original_name': entry['original_name']?.toString() ?? '',
             'logo_url': entry['logo_url'] ?? '',
+            'is_favorite_league': entry['is_favorite_league'] ?? false,
             'teams_count': _getRandomTeamCount(),
             'matches_today': _getRandomMatchesCount(),
             'season': '2024/25',
@@ -237,6 +244,10 @@ class LeaguesPageState extends State<LeaguesPage>
         debugPrint('Stack trace: $stack');
       }
       if (mounted) {
+        GoalioMessages.showError(
+          context,
+          '${AppLocalizations.of(context)!.errorLoadingLeagues}: $e',
+        );
         setState(() {
           _isLoading = false;
           _isLoadingMore = false;
@@ -362,7 +373,8 @@ class LeaguesPageState extends State<LeaguesPage>
   }
 
   Future<void> _selectLeagueAndScrape(Map<String, dynamic> league) async {
-    final leagueName = league['name']?.toString() ?? '';
+    final leagueName = league['name']?.toString() ?? ''; // For UI
+    final originalName = league['original_name']?.toString() ?? leagueName; // For API
     final isDifferentLeague = _selectedLeague?['name'] != leagueName;
 
     final leagueId = league['id'];
@@ -384,9 +396,9 @@ class LeaguesPageState extends State<LeaguesPage>
 
     // 1. Initial fetch of existing data from DB (FAST)
     await Future.wait([
-      _loadLeagueNews(leagueName: leagueName, leagueId: leagueId),
-      _loadStandings(leagueName: leagueName, leagueId: leagueId),
-      _loadTopPlayers(leagueName: leagueName, leagueId: leagueId),
+      _loadLeagueNews(leagueName: originalName, leagueId: leagueId),
+      _loadStandings(leagueName: originalName, leagueId: leagueId),
+      _loadTopPlayers(leagueName: originalName, leagueId: leagueId),
     ]);
 
     // If we already have some data, we can stop the blocking scraper and continue in background
@@ -399,27 +411,27 @@ class LeaguesPageState extends State<LeaguesPage>
     // 2. Trigger background scraping in parallel
     if (kDebugMode)
       debugPrint(
-        'Starting background scraping for: $leagueName (ID: $leagueId)',
+        'Starting background scraping for: $originalName (ID: $leagueId)',
       );
 
     try {
       final results = await Future.wait([
         ApiService.scrapeStandingsForLeague(
-          leagueName,
+          originalName,
           leagueId: leagueId,
         ).catchError((e) {
           if (kDebugMode) debugPrint('Error scraping standings: $e');
           return false;
         }),
         ApiService.scrapeNewsForLeague(
-          leagueName,
+          originalName,
           leagueId: leagueId,
         ).catchError((e) {
           if (kDebugMode) debugPrint('Error scraping news: $e');
           return false;
         }),
         ApiService.scrapeTopPlayersForLeague(
-          leagueName,
+          originalName,
           leagueId: leagueId,
         ).catchError((e) {
           if (kDebugMode) debugPrint('Error scraping players: $e');
@@ -430,7 +442,7 @@ class LeaguesPageState extends State<LeaguesPage>
       final allSuccess = results.every((res) => res == true);
       if (kDebugMode) {
         debugPrint(
-          'Background scraping for $leagueName finished. Success: $allSuccess',
+          'Background scraping for $originalName finished. Success: $allSuccess',
         );
       }
 
@@ -438,9 +450,9 @@ class LeaguesPageState extends State<LeaguesPage>
 
       // 3. Reload data from DB after scraping is done
       await Future.wait([
-        _loadLeagueNews(leagueName: leagueName, leagueId: leagueId),
-        _loadStandings(leagueName: leagueName, leagueId: leagueId),
-        _loadTopPlayers(leagueName: leagueName, leagueId: leagueId),
+        _loadLeagueNews(leagueName: originalName, leagueId: leagueId),
+        _loadStandings(leagueName: originalName, leagueId: leagueId),
+        _loadTopPlayers(leagueName: originalName, leagueId: leagueId),
       ]);
 
       if (mounted) {
@@ -623,24 +635,40 @@ class LeaguesPageState extends State<LeaguesPage>
             color: GoalioColors.greenAccent,
             size: 24,
           ),
-          suffixIcon:
-              _searchController.text.isNotEmpty
-                  ? IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: secondaryTextColor,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      _debounce?.cancel();
-                      setState(() {
-                        _searchController.clear();
-                        _searchQuery = '';
-                      });
-                      _loadLeagues(isInitial: true);
-                    },
-                  )
-                  : null,
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: secondaryTextColor,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    _debounce?.cancel();
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                    });
+                    _loadLeagues(isInitial: true);
+                  },
+                ),
+              IconButton(
+                icon: Icon(
+                  _showFavoritesOnly ? Icons.star_rounded : Icons.star_outline_rounded,
+                  color: _showFavoritesOnly ? Colors.amber : secondaryTextColor,
+                  size: 22,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _showFavoritesOnly = !_showFavoritesOnly;
+                  });
+                  _loadLeagues(isInitial: true);
+                },
+              ),
+            ],
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 20,
@@ -746,6 +774,7 @@ class LeaguesPageState extends State<LeaguesPage>
       selectedLeague: _selectedLeague,
       onRefresh: () => _loadLeagues(silent: true),
       onLeagueTap: _selectLeagueAndScrape,
+      onToggleFavorite: _toggleFavoriteLeague,
       controller: _mainListController,
       enabledLeagues: const [
         'England - Premier League',
@@ -756,6 +785,58 @@ class LeaguesPageState extends State<LeaguesPage>
         'Saudi Arabia - Saudi Pro League',
       ],
     );
+  }
+
+  Future<void> _toggleFavoriteLeague(Map<String, dynamic> league) async {
+    final leagueId = league['id'];
+    final name = league['original_name'] ?? league['name'];
+    final image = league['logo_url'];
+
+    setState(() {
+      final index = _allLeagues.indexWhere((l) => l['id'] == leagueId);
+      if (index != -1) {
+        _allLeagues[index]['is_favorite_league'] =
+            !(_allLeagues[index]['is_favorite_league'] ?? false);
+      } else {
+        // Fallback for current reference
+        league['is_favorite_league'] = !(league['is_favorite_league'] ?? false);
+      }
+    });
+
+    final result = await ApiService.toggleFavoriteLeague(
+      leagueId: leagueId,
+      name: name,
+      image: image,
+    );
+
+    if (result.containsKey('error')) {
+      setState(() {
+        final index = _allLeagues.indexWhere((l) => l['id'] == leagueId);
+        if (index != -1) {
+          _allLeagues[index]['is_favorite_league'] =
+              !(_allLeagues[index]['is_favorite_league'] ?? false);
+        } else {
+          league['is_favorite_league'] =
+              !(league['is_favorite_league'] ?? false);
+        }
+      });
+      if (mounted) {
+        GoalioMessages.showError(
+          context,
+          result['error'] ?? 'Error updating favorite',
+        );
+      }
+    } else {
+      if (mounted) {
+        final isFavorite = league['is_favorite_league'] == true;
+        GoalioMessages.showSuccess(
+          context,
+          isFavorite
+              ? AppLocalizations.of(context)!.addedToFavorites
+              : AppLocalizations.of(context)!.removedFromFavorites,
+        );
+      }
+    }
   }
 
   Widget _buildLeagueDetails() {
@@ -954,8 +1035,11 @@ class LeaguesPageState extends State<LeaguesPage>
             ),
             const SizedBox(height: 16),
             Text(
-              'No news available for ${_selectedLeague!['name']}',
+              AppLocalizations.of(context)!.noNewsAvailableFor(
+                _selectedLeague!['name'].toString().toArabicName(context),
+              ),
               style: TextStyle(color: secondaryTextColor, fontSize: 16),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -971,9 +1055,9 @@ class LeaguesPageState extends State<LeaguesPage>
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Check Again',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Text(
+                AppLocalizations.of(context)!.checkAgain,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -1749,7 +1833,7 @@ class LeaguesPageState extends State<LeaguesPage>
               ),
               child: Center(
                 child: Text(
-                  '$rank',
+                  '$rank'.toArabicNumbers(context),
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 14,
@@ -1802,7 +1886,7 @@ class LeaguesPageState extends State<LeaguesPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    player['player_name'] ?? 'Unknown',
+                    (player['player_name']?.toString() ?? 'Unknown').toArabicName(context),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: textColor,
@@ -1839,7 +1923,7 @@ class LeaguesPageState extends State<LeaguesPage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${player['stat_value']}',
+                    '${player['stat_value']}'.toArabicNumbers(context),
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,

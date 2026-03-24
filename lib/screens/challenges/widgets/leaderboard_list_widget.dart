@@ -5,6 +5,8 @@ import '../../../core/utils/size_config.dart';
 import '../../../l10n/app_localizations.dart';
 import '../challenge_models.dart';
 import '../challenge_providers.dart';
+import '../../../core/utils/number_utils.dart';
+import '../user_predictions_page.dart';
 
 class LeaderboardListWidget extends ConsumerWidget {
   final bool isDark;
@@ -19,6 +21,8 @@ class LeaderboardListWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ranksState = ref.watch(groupRanksProvider);
+    final selectedLeague = ref.watch(selectedChallengeLeagueProvider);
+    final selectedDate = ref.watch(selectedChallengeDateProvider);
 
     return ranksState.when(
       skipLoadingOnRefresh: true,
@@ -27,7 +31,9 @@ class LeaderboardListWidget extends ConsumerWidget {
         return SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             // Trigger load more when reaching the end
-            if (index >= ranks.length - 3 && state.hasMore && !state.isLoadingMore) {
+            if (index >= ranks.length - 3 &&
+                state.hasMore &&
+                !state.isLoadingMore) {
               Future.microtask(() {
                 if (context.mounted) {
                   ref.read(groupRanksProvider.notifier).loadMore();
@@ -45,139 +51,219 @@ class LeaderboardListWidget extends ConsumerWidget {
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: user.isYou
-                      ? (isDark
-                          ? GoalioColors.greenAccent.withValues(alpha: 0.15)
-                          : GoalioColors.greenAccent.withValues(alpha: 0.08))
-                      : (isEven
-                          ? (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC))
-                          : (isDark
-                              ? const Color(0xFF1E293B).withValues(alpha: 0.3)
-                              : Colors.white)),
-                  borderRadius: isLast ? BorderRadius.vertical(bottom: Radius.circular(16.w)) : null,
-                  border: Border(
-                    left: user.isYou
-                        ? BorderSide(color: GoalioColors.greenAccent, width: 3.w)
-                        : BorderSide.none,
-                    bottom: isLast
-                        ? BorderSide.none
-                        : BorderSide(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.03)
-                                : Colors.black.withValues(alpha: 0.02),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => UserPredictionsPage(
+                            userId: user.id,
+                            userName: user.name,
+                            leagueId: selectedLeague?.id,
+                            initialDate: selectedDate,
                           ),
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                child: Row(
-                  children: [
-                    // POS
-                    SizedBox(
-                      width: 55.w,
-                      child: Row(
-                        children: [
-                          _buildRankBadge(user.rank, user.rankChange, isDark),
-                          const Spacer(),
-                          _buildRankChangeIcon(user.rankChange),
-                          SizedBox(width: 8.w),
-                        ],
-                      ),
                     ),
-
-                    // USER NAME + AVATAR
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 22.w,
-                            height: 22.w,
-                            decoration: BoxDecoration(
-                              color: user.isYou
-                                  ? GoalioColors.greenAccent
-                                  : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                              shape: BoxShape.circle,
+                  );
+                },
+                borderRadius:
+                    isLast
+                        ? BorderRadius.vertical(bottom: Radius.circular(16.w))
+                        : BorderRadius.circular(8.w),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color:
+                        user.isYou
+                            ? (isDark
+                                ? GoalioColors.greenAccent.withValues(
+                                  alpha: 0.15,
+                                )
+                                : GoalioColors.greenAccent.withValues(
+                                  alpha: 0.08,
+                                ))
+                            : (isEven
+                                ? (isDark
+                                    ? const Color(0xFF0F172A)
+                                    : const Color(0xFFF8FAFC))
+                                : (isDark
+                                    ? const Color(
+                                      0xFF1E293B,
+                                    ).withValues(alpha: 0.3)
+                                    : Colors.white)),
+                    borderRadius:
+                        isLast
+                            ? BorderRadius.vertical(
+                              bottom: Radius.circular(16.w),
+                            )
+                            : null,
+                    border: Border(
+                      left:
+                          user.isYou
+                              ? BorderSide(
+                                color: GoalioColors.greenAccent,
+                                width: 3.w,
+                              )
+                              : BorderSide.none,
+                      bottom:
+                          isLast
+                              ? BorderSide.none
+                              : BorderSide(
+                                color:
+                                    isDark
+                                        ? Colors.white.withValues(alpha: 0.03)
+                                        : Colors.black.withValues(alpha: 0.02),
+                              ),
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  child: Row(
+                    children: [
+                      // POS
+                      SizedBox(
+                        width: 55.w,
+                        child: Row(
+                          children: [
+                            _buildRankBadge(
+                              user.rank,
+                              user.rankChange,
+                              isDark,
+                              context,
                             ),
-                            child: Center(
-                              child: Text(
-                                (() {
-                                  final n = user.name.trim();
-                                  if (n.isEmpty) return "?";
-                                  final parts = n.split(RegExp(r'\s+'));
-                                  if (parts.length > 1 && parts[1].isNotEmpty) {
-                                    return parts[0][0] + parts[1][0];
-                                  }
-                                  return n.length >= 2 ? n.substring(0, 2) : n;
-                                })().toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 8.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: user.isYou ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
+                            const Spacer(),
+                            _buildRankChangeIcon(user.rankChange),
+                            SizedBox(width: 8.w),
+                          ],
+                        ),
+                      ),
+
+                      // USER NAME + AVATAR
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 22.w,
+                              height: 22.w,
+                              decoration: BoxDecoration(
+                                color:
+                                    user.isYou
+                                        ? GoalioColors.greenAccent
+                                        : (isDark
+                                            ? Colors.white10
+                                            : Colors.black.withValues(
+                                              alpha: 0.05,
+                                            )),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  (() {
+                                    final n = user.name.trim();
+                                    if (n.isEmpty) return "?";
+                                    final parts = n.split(RegExp(r'\s+'));
+                                    if (parts.length > 1 &&
+                                        parts[1].isNotEmpty) {
+                                      return parts[0][0] + parts[1][0];
+                                    }
+                                    return n.length >= 2
+                                        ? n.substring(0, 2)
+                                        : n;
+                                  })().toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color:
+                                        user.isYou
+                                            ? Colors.black
+                                            : (isDark
+                                                ? Colors.white70
+                                                : Colors.black87),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 10.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.name,
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    fontWeight: user.isYou ? FontWeight.w900 : FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  ),
-                                ),
-                                if (user.isYou)
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    AppLocalizations.of(context)!.globalRank(user.rank.toString()),
+                                    user.name,
                                     style: TextStyle(
-                                      fontSize: 7.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: GoalioColors.greenAccent,
+                                      fontSize: 10.sp,
+                                      fontWeight:
+                                          user.isYou
+                                              ? FontWeight.w900
+                                              : FontWeight.w700,
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
                                     ),
                                   ),
-                              ],
+                                  if (user.isYou)
+                                    Text(
+                                      AppLocalizations.of(context)!.globalRank(
+                                        user.rank.toString().toArabicNumbers(
+                                          context,
+                                        ),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 7.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: GoalioColors.greenAccent,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // TOTAL POINTS
-                    SizedBox(
-                      width: 55.w,
-                      child: Text(
-                        _formatNumber(user.points),
-                        textAlign: TextAlign.end,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w900,
-                          color: user.isYou ? GoalioColors.greenAccent : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+
+                      // TOTAL POINTS
+                      SizedBox(
+                        width: 55.w,
+                        child: Text(
+                          _formatNumber(user.points, context),
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w900,
+                            color:
+                                user.isYou
+                                    ? GoalioColors.greenAccent
+                                    : (isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
           }, childCount: ranks.length + (state.hasMore ? 1 : 0)),
         );
       },
-      loading: () => SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) => _buildSkeletonRow(isDark),
-          childCount: 10,
-        ),
-      ),
-      error: (err, stack) => SliverToBoxAdapter(
-        child: Center(
-          child: Text(AppLocalizations.of(context)!.errorLoadingLeaderboard),
-        ),
-      ),
+      loading:
+          () => SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _buildSkeletonRow(isDark),
+              childCount: 10,
+            ),
+          ),
+      error:
+          (err, stack) => SliverToBoxAdapter(
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context)!.errorLoadingLeaderboard,
+              ),
+            ),
+          ),
     );
   }
 
@@ -188,13 +274,21 @@ class LeaderboardListWidget extends ConsumerWidget {
         child: SizedBox(
           width: 20.w,
           height: 20.w,
-          child: const CircularProgressIndicator(color: GoalioColors.greenAccent, strokeWidth: 2),
+          child: const CircularProgressIndicator(
+            color: GoalioColors.greenAccent,
+            strokeWidth: 2,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRankBadge(int rank, int change, bool isDark) {
+  Widget _buildRankBadge(
+    int rank,
+    int change,
+    bool isDark,
+    BuildContext context,
+  ) {
     Color color;
     if (change > 0) {
       color = Colors.green;
@@ -208,9 +302,12 @@ class LeaderboardListWidget extends ConsumerWidget {
       width: 24.w,
       height: 24.w,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
+      ),
       child: Text(
-        "$rank",
+        "$rank".toArabicNumbers(context),
         style: TextStyle(
           fontSize: 10.sp,
           fontWeight: FontWeight.w900,
@@ -238,7 +335,10 @@ class LeaderboardListWidget extends ConsumerWidget {
     return Container(
       width: 14.w,
       height: 14.w,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
+      ),
       child: Center(child: Icon(icon, color: color, size: 12.w)),
     );
   }
@@ -249,26 +349,56 @@ class LeaderboardListWidget extends ConsumerWidget {
       child: Container(
         height: 60.h,
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(12.w),
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: Row(
           children: [
-            Container(width: 30.w, height: 30.w, decoration: BoxDecoration(color: isDark ? Colors.white10 : Colors.black12, shape: BoxShape.circle)),
+            Container(
+              width: 30.w,
+              height: 30.w,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : Colors.black12,
+                shape: BoxShape.circle,
+              ),
+            ),
             SizedBox(width: 16.w),
-            Container(width: 120.w, height: 12.h, decoration: BoxDecoration(color: isDark ? Colors.white10 : Colors.black12, borderRadius: BorderRadius.circular(4))),
+            Container(
+              width: 120.w,
+              height: 12.h,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : Colors.black12,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             const Spacer(),
-            Container(width: 40.w, height: 12.h, decoration: BoxDecoration(color: isDark ? Colors.white10 : Colors.black12, borderRadius: BorderRadius.circular(4))),
+            Container(
+              width: 40.w,
+              height: 12.h,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : Colors.black12,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  String _formatNumber(int number) {
-    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
-    return number.toString();
+  String _formatNumber(int number, BuildContext context) {
+    String formatted;
+    if (number >= 1000000) {
+      formatted = '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      formatted = '${(number / 1000).toStringAsFixed(1)}K';
+    } else {
+      formatted = number.toString();
+    }
+    return formatted.toArabicNumbers(context);
   }
 }

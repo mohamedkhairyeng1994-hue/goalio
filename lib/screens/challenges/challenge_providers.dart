@@ -97,6 +97,7 @@ class GroupRanksNotifier extends AsyncNotifier<LeaderboardState> {
   List<UserRank> _parseUsers(List<dynamic> list) {
     return list.map((json) {
       return UserRank(
+        id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
         rank: json['rank'] ?? 0,
         name: json['name'] ?? 'Unknown',
         points: (json['points'] as num?)?.toInt() ?? 0,
@@ -295,15 +296,19 @@ final selectedChallengeDateProvider =
       () => SelectedChallengeDateNotifier(),
     );
 
-final challengeDataRawProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final challengeDataByDateProvider = FutureProvider.family<Map<String, dynamic>, DateTime>((ref, date) async {
   ref.watch(appLocaleProvider);
-  final date = ref.watch(selectedChallengeDateProvider);
   final league = ref.watch(selectedChallengeLeagueProvider);
   
   final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   final data = await ApiService.getChallengeMatches(date: dateStr, leagueId: league?.id);
   if (data == null) return {};
   return Map<String, dynamic>.from(data);
+});
+
+final challengeDataRawProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final date = ref.watch(selectedChallengeDateProvider);
+  return await ref.watch(challengeDataByDateProvider(date).future);
 });
 
 final challengeMatchesProvider = FutureProvider<List<dynamic>>((ref) async {

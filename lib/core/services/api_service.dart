@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../core/constants/constants.dart';
 
 class ApiService {
@@ -71,8 +72,9 @@ class ApiService {
   static Future<Map<String, dynamic>> signup(
     String fullname,
     String email,
-    String password,
-  ) async {
+    String password, {
+    String? fcmToken,
+  }) async {
     try {
       final response = await http
           .post(
@@ -82,6 +84,7 @@ class ApiService {
               'fullname': fullname,
               'email': email,
               'password': password,
+              if (fcmToken != null) 'fcm_token': fcmToken,
             }),
           )
           .timeout(const Duration(seconds: 120));
@@ -103,10 +106,15 @@ class ApiService {
 
   static Future<Map<String, dynamic>> login(
     String email,
-    String password,
-  ) async {
+    String password, {
+    String? fcmToken,
+  }) async {
     final url = '$baseUrl/user/login';
-    final body = jsonEncode({'email': email, 'password': password});
+    final body = jsonEncode({
+      'email': email,
+      'password': password,
+      if (fcmToken != null) 'fcm_token': fcmToken,
+    });
     try {
       final response = await http
           .post(Uri.parse(url), headers: await reqHeaders, body: body)
@@ -147,6 +155,7 @@ class ApiService {
     required String token,
     String? email,
     String? name,
+    String? fcmToken,
   }) async {
     final url = '$baseUrl/user/social-login';
     try {
@@ -159,6 +168,7 @@ class ApiService {
               'token': token,
               if (email != null) 'email': email,
               if (name != null) 'name': name,
+              if (fcmToken != null) 'fcm_token': fcmToken,
             }),
           )
           .timeout(const Duration(seconds: 120));
@@ -552,6 +562,76 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getNotifications({int page = 1}) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/notifications?page=$page'), headers: await reqHeaders)
+          .timeout(const Duration(seconds: 30));
+
+      _checkAuth(response);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {};
+    } catch (e) {
+      debugPrint("Error fetching notifications: $e");
+      return {};
+    }
+  }
+
+  static Future<int> getUnreadNotificationsCount() async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/notifications/unread-count'), headers: await reqHeaders)
+          .timeout(const Duration(seconds: 15));
+
+      _checkAuth(response);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['unread_count'] ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      debugPrint("Error fetching unread count: $e");
+      return 0;
+    }
+  }
+
+  static Future<bool> markNotificationAsRead(int id) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/notifications/read'), 
+            headers: await reqHeaders,
+            body: jsonEncode({'notification_id': id})
+          )
+          .timeout(const Duration(seconds: 15));
+
+      _checkAuth(response);
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("Error marking notification as read: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> markAllNotificationsAsRead() async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/notifications/read-all'), 
+            headers: await reqHeaders
+          )
+          .timeout(const Duration(seconds: 15));
+
+      _checkAuth(response);
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("Error marking all notifications as read: $e");
+      return false;
+    }
+  }
+
   static Future<List<dynamic>> getMatches({String? date}) async {
     try {
       final query = date != null ? '?date=$date' : '';
@@ -749,6 +829,77 @@ class ApiService {
     } catch (e) {
       debugPrint("Error saving favorite leagues: $e");
       return false;
+    }
+  }
+
+  static Future<Map<String, dynamic>> toggleMatchNotification(
+      dynamic matchId, bool isEnabled) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/notifications/toggle-match'),
+            headers: await reqHeaders,
+            body: jsonEncode({'match_id': matchId, 'is_enabled': isEnabled}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {'status': 'error'};
+    } catch (e) {
+      debugPrint("Error toggling match notification: $e");
+      return {'status': 'error'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> toggleFavoriteTeam({
+    dynamic teamId,
+    String? name,
+    String? logo,
+    String? leagueName,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/user/toggle-favorite-team'),
+            headers: await reqHeaders,
+            body: jsonEncode({
+              'team_id': teamId,
+              'team_name': name,
+              'team_logo': logo,
+              'league_name': leagueName,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      return _handleResponse(response);
+    } catch (e) {
+      return {'error': e.toString(), 'code': 500};
+    }
+  }
+
+  static Future<Map<String, dynamic>> toggleFavoriteLeague({
+    dynamic leagueId,
+    String? name,
+    String? image,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/user/toggle-favorite-league'),
+            headers: await reqHeaders,
+            body: jsonEncode({
+              'league_id': leagueId,
+              'league_name': name,
+              'league_image': image,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      return _handleResponse(response);
+    } catch (e) {
+      return {'error': e.toString(), 'code': 500};
     }
   }
 
@@ -1051,21 +1202,83 @@ class ApiService {
     }
   }
 
+  static Future<List<dynamic>> getUserPredictions(int userId, {int? leagueId, String? date}) async {
+    try {
+      String url = '$baseUrl/challenge/user/$userId/predictions';
+      String sep = '?';
+      if (leagueId != null) {
+        url += '$sep' + 'league_id=$leagueId';
+        sep = '&';
+      }
+      if (date != null) {
+        url += '$sep' + 'date=$date';
+      }
+      final response = await http
+          .get(Uri.parse(url), headers: await reqHeaders)
+          .timeout(const Duration(seconds: 30));
+
+      _checkAuth(response);
+      if (response.statusCode == 200) {
+        return _parseList(jsonDecode(response.body));
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error fetching user predictions: $e");
+      return [];
+    }
+  }
+
   static Future<void> updateFcmToken(String token) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final language = prefs.getString('user_language_code') ?? 'en';
+      final notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+
       final response = await http
           .post(
             Uri.parse('$baseUrl/user/fcm-token'),
             headers: await reqHeaders,
-            body: jsonEncode({'fcm_token': token}),
+            body: jsonEncode({
+              'fcm_token': token,
+              'language': language,
+              'notifications_enabled': notificationsEnabled,
+            }),
           )
           .timeout(const Duration(seconds: 30));
 
       if (kDebugMode) {
-        debugPrint("FCM token update status: ${response.statusCode}");
+        debugPrint(
+          "FCM token update status: ${response.statusCode} (Language: $language)",
+        );
       }
     } catch (e) {
       if (kDebugMode) debugPrint("Error updating FCM token: $e");
+    }
+  }
+
+  static Future<bool> togglePushNotifications(bool isEnabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notifications_enabled', isEnabled);
+
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return false;
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/notifications/toggle-global'),
+            headers: await reqHeaders,
+            body: jsonEncode({
+              'fcm_token': token,
+              'notifications_enabled': isEnabled,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error toggling global notifications: $e");
+      return false;
     }
   }
 

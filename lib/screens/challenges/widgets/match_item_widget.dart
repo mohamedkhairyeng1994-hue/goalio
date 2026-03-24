@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../prediction_page.dart';
 import '../../fixtures/match_detail_page.dart';
 import '../challenge_providers.dart';
+import '../../../core/utils/number_utils.dart';
 
 class MatchItemWidget extends ConsumerWidget {
   final dynamic match;
@@ -116,18 +117,54 @@ class MatchItemWidget extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          started ? "$homeScore-$awayScore" : "VS",
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w900,
-                            color:
-                                isFinished
-                                    ? (isDark ? Colors.white38 : Colors.black38)
-                                    : GoalioColors.greenAccent,
-                            letterSpacing: started ? 0 : 0.5,
-                          ),
-                        ),
+                        started
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    homeScore.toArabicNumbers(context),
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: isFinished
+                                          ? (isDark ? Colors.white38 : Colors.black38)
+                                          : GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  Text(
+                                    "-",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: isFinished
+                                          ? (isDark ? Colors.white38 : Colors.black38)
+                                          : GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  Text(
+                                    awayScore.toArabicNumbers(context),
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: isFinished
+                                          ? (isDark ? Colors.white38 : Colors.black38)
+                                          : GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                "VS",
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: GoalioColors.greenAccent,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                         if (!isFinished) ...[
                           SizedBox(height: 1.h),
                           Text(
@@ -233,9 +270,10 @@ class _MatchActionButton extends ConsumerWidget {
           );
 
           if (!started) {
-            ref.invalidate(challengeMatchesProvider);
-            ref.invalidate(userPointsProvider);
+            final date = ref.read(selectedChallengeDateProvider);
+            ref.invalidate(challengeDataByDateProvider(date));
             ref.invalidate(userTotalPointsProvider);
+            ref.invalidate(groupsProvider);
           }
         },
         child: Container(
@@ -271,7 +309,7 @@ class _MatchActionButton extends ConsumerWidget {
                 )
               else ...[
                 Text(
-                  pointsValue,
+                  pointsValue.toArabicNumbers(context),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w900,
@@ -308,8 +346,10 @@ class _MatchActionButton extends ConsumerWidget {
             ),
           );
 
-          ref.invalidate(challengeDataRawProvider);
+          final date = ref.read(selectedChallengeDateProvider);
+          ref.invalidate(challengeDataByDateProvider(date));
           ref.invalidate(userTotalPointsProvider);
+          ref.invalidate(groupsProvider);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: GoalioColors.greenAccent,

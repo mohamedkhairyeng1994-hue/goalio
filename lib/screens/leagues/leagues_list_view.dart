@@ -9,6 +9,7 @@ class LeaguesListView extends StatelessWidget {
   final Map<String, dynamic>? selectedLeague;
   final Future<void> Function() onRefresh;
   final Function(Map<String, dynamic>) onLeagueTap;
+  final Function(Map<String, dynamic>)? onToggleFavorite;
   final bool isLoadingMore;
   final List<String> enabledLeagues;
   final ScrollController? controller;
@@ -23,6 +24,7 @@ class LeaguesListView extends StatelessWidget {
     this.selectedLeague,
     required this.onRefresh,
     required this.onLeagueTap,
+    this.onToggleFavorite,
     this.enabledLeagues = const [],
     this.controller,
   });
@@ -35,8 +37,6 @@ class LeaguesListView extends StatelessWidget {
 
     return Column(
       children: [
-        // Leagues grid - Responsive
-
         // Leagues grid - Responsive
         Expanded(
           child: RefreshIndicator(
@@ -55,19 +55,18 @@ class LeaguesListView extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          // Responsive grid: 1 column for small screens, 2 for medium, 3 for large
                           int crossAxisCount = 1;
-                          double childAspectRatio = 5.0;
+                          double childAspectRatio = 4.8; // Increased from 3.2 to decrease height
 
                           if (constraints.maxWidth > 1200) {
                             crossAxisCount = 3;
-                            childAspectRatio = 5.5;
+                            childAspectRatio = 4.0;
                           } else if (constraints.maxWidth > 800) {
                             crossAxisCount = 2;
-                            childAspectRatio = 5.8;
+                            childAspectRatio = 4.2;
                           } else if (constraints.maxWidth > 600) {
                             crossAxisCount = 2;
-                            childAspectRatio = 6.0;
+                            childAspectRatio = 4.5;
                           }
 
                           if (leagues.isEmpty) {
@@ -139,6 +138,9 @@ class LeaguesListView extends StatelessWidget {
                                   );
 
                               return GestureDetector(
+                                key: ValueKey(
+                                  '${league['id']}_${league['is_favorite_league']}',
+                                ),
                                 onTap: () {
                                   if (isScraping || !isEnabled) return;
                                   onLeagueTap(league);
@@ -215,14 +217,14 @@ class LeaguesListView extends StatelessWidget {
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 16,
-                                            vertical: 12,
+                                            vertical: 8, // Decreased from 12
                                           ),
                                           child: Row(
                                             children: [
                                               // Logo with enhanced styling
                                               Container(
-                                                width: 52,
-                                                height: 52,
+                                                width: 44, // Decreased from 52
+                                                height: 44, // Decreased from 52
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   shape: BoxShape.circle,
@@ -299,21 +301,20 @@ class LeaguesListView extends StatelessWidget {
                                                       CrossAxisAlignment.start,
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      league['name']
-                                                              ?.toString() ??
-                                                          'Unknown',
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        color: textColor,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 14,
+                                                    children: [
+                                                      Text(
+                                                        (() {
+                                                          final isAr = Localizations.localeOf(context).languageCode == 'ar';
+                                                          return (isAr ? league['name_ar'] ?? league['name'] : league['name']) ?? 'Unknown';
+                                                        })(),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(
+                                                          color: textColor,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 14,
+                                                        ),
                                                       ),
-                                                    ),
                                                     if (!isEnabled)
                                                       Text(
                                                         'COMING SOON',
@@ -340,6 +341,30 @@ class LeaguesListView extends StatelessWidget {
                                             ],
                                           ),
                                         ),
+                                        if (isEnabled && onToggleFavorite != null)
+                                          PositionedDirectional(
+                                            top: 8,
+                                            end: 8,
+                                            child: GestureDetector(
+                                              onTap: () => onToggleFavorite!(league),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  league['is_favorite_league'] == true
+                                                      ? Icons.star_rounded
+                                                      : Icons.star_outline_rounded,
+                                                  color: league['is_favorite_league'] == true
+                                                      ? Colors.amber
+                                                      : (isDark ? Colors.white38 : Colors.black26),
+                                                  size: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
                                   ),

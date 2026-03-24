@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'challenge_providers.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import '../../core/constants/constants.dart';
@@ -8,6 +10,8 @@ import '../../core/services/api_service.dart';
 import '../../core/utils/messages.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/time_utils.dart';
+import '../../core/utils/number_utils.dart';
+import '../../core/utils/name_translator.dart';
 
 String _formatFullDateTime(String? raw) {
   if (raw == null || raw.isEmpty) return '';
@@ -21,7 +25,7 @@ String _formatFullDateTime(String? raw) {
   }
 }
 
-class PredictionPage extends StatefulWidget {
+class PredictionPage extends ConsumerStatefulWidget {
   final Map<String, dynamic> match;
   final bool isReadOnly;
 
@@ -32,10 +36,10 @@ class PredictionPage extends StatefulWidget {
   });
 
   @override
-  State<PredictionPage> createState() => _PredictionPageState();
+  ConsumerState<PredictionPage> createState() => _PredictionPageState();
 }
 
-class _PredictionPageState extends State<PredictionPage> {
+class _PredictionPageState extends ConsumerState<PredictionPage> {
   bool _isLoading = true;
   bool _isSubmitting = false;
   List<dynamic> _questions = [];
@@ -164,6 +168,12 @@ class _PredictionPageState extends State<PredictionPage> {
           context,
           AppLocalizations.of(context)!.predictionsSubmitted,
         );
+        // Invalidate all relevant providers to update the parent screen automatically
+        final date = ref.read(selectedChallengeDateProvider);
+        ref.invalidate(challengeDataByDateProvider(date));
+        ref.invalidate(userTotalPointsProvider);
+        ref.invalidate(groupsProvider);
+
         Navigator.pop(context);
       }
     }
@@ -587,7 +597,9 @@ class _PredictionPageState extends State<PredictionPage> {
         child = _buildTextInput(
           hint: AppLocalizations.of(context)!.enterPredictionHint,
           isDark: isDark,
-          initialValue: currentAnswer ?? "",
+          initialValue: widget.isReadOnly && currentAnswer != null 
+              ? currentAnswer.toArabicNumbers(context)
+              : (currentAnswer ?? ""),
           onChanged: (val) => _answers[qId] = val,
         );
         break;
@@ -597,7 +609,7 @@ class _PredictionPageState extends State<PredictionPage> {
       isDark: isDark,
       number: q['order_num'] ?? 0,
       points: q['points'] ?? 0,
-      question: q['question'] ?? "",
+      question: ArabicNameExtension(q['question']?.toString() ?? "").toArabicName(context).toArabicNumbers(context),
       isCorrect:
           widget.isReadOnly
               ? (q['is_correct'] == true || q['is_correct'] == 1)
@@ -701,7 +713,7 @@ class _PredictionPageState extends State<PredictionPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            homeTeam,
+                            homeTeam.toArabicName(context),
                             textAlign: TextAlign.end,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -746,15 +758,48 @@ class _PredictionPageState extends State<PredictionPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          started ? "$homeScore-$awayScore" : "VS",
-                          style: TextStyle(
-                            fontSize: started ? 22.sp : 14.sp,
-                            fontWeight: FontWeight.w900,
-                            color: GoalioColors.greenAccent,
-                            letterSpacing: started ? 0 : 2,
-                          ),
-                        ),
+                        started
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    homeScore.toString().toArabicNumbers(context),
+                                    style: TextStyle(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  Text(
+                                    "-",
+                                    style: TextStyle(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  Text(
+                                    awayScore.toString().toArabicNumbers(context),
+                                    style: TextStyle(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: GoalioColors.greenAccent,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                Localizations.maybeLocaleOf(context)?.languageCode == 'ar' ? "ضد" : "VS",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: GoalioColors.greenAccent,
+                                  letterSpacing: 2,
+                                ),
+                              ),
                         SizedBox(height: 4.h),
                         Container(
                           padding: EdgeInsets.symmetric(
@@ -777,10 +822,10 @@ class _PredictionPageState extends State<PredictionPage> {
                                     (status == 'HT' ||
                                         status == 'FT' ||
                                         status.contains("'"))
-                                ? localizeMatchStatus(context, status)
+                                ? localizeMatchStatus(context, status).toArabicNumbers(context)
                                 : _formatFullDateTime(
-                                  widget.match['match_time']?.toString(),
-                                ),
+                                    widget.match['match_time']?.toString(),
+                                  ).toArabicNumbers(context),
                             style: TextStyle(
                               fontSize: 7.5.sp,
                               fontWeight: FontWeight.w800,
@@ -823,7 +868,7 @@ class _PredictionPageState extends State<PredictionPage> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            awayTeam,
+                            awayTeam.toArabicName(context),
                             textAlign: TextAlign.start,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -941,7 +986,7 @@ class _PredictionPageState extends State<PredictionPage> {
                       ),
                     ),
                     child: Text(
-                      '$number',
+                      '$number'.toArabicNumbers(context),
                       style: TextStyle(
                         fontSize: 8.5.sp,
                         fontWeight: FontWeight.w900,
@@ -954,7 +999,7 @@ class _PredictionPageState extends State<PredictionPage> {
                   // Question
                   Expanded(
                     child: Text(
-                      question,
+                      ArabicNameExtension(question).toArabicName(context),
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w800,
@@ -971,7 +1016,7 @@ class _PredictionPageState extends State<PredictionPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'PTS',
+                        AppLocalizations.of(context)!.ptsShort.toUpperCase(),
                         style: TextStyle(
                           fontSize: 6.sp,
                           fontWeight: FontWeight.w900,
@@ -980,7 +1025,7 @@ class _PredictionPageState extends State<PredictionPage> {
                         ),
                       ),
                       Text(
-                        '+$points',
+                        '+$points'.toArabicNumbers(context),
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w900,
@@ -1069,7 +1114,7 @@ class _PredictionPageState extends State<PredictionPage> {
                             ],
                   ),
                   child: Text(
-                    option,
+                    ArabicNameExtension(option.toString()).toArabicName(context).toArabicNumbers(context),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 11.5.sp,
@@ -1142,10 +1187,10 @@ class _PredictionPageState extends State<PredictionPage> {
                     TextSpan(
                       text:
                           effectiveValue == null
-                              ? "Tap to search & select..."
+                              ? AppLocalizations.of(context)!.tapToSearch
                               : (effectiveValue.contains(' - ')
-                                  ? effectiveValue.split(' - ')[0]
-                                  : effectiveValue),
+                                  ? ArabicNameExtension(effectiveValue.split(' - ')[0]).toArabicName(context).toArabicNumbers(context)
+                                  : ArabicNameExtension(effectiveValue).toArabicName(context).toArabicNumbers(context)),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight:
@@ -1164,7 +1209,7 @@ class _PredictionPageState extends State<PredictionPage> {
                     if (effectiveValue != null &&
                         effectiveValue.contains(' - '))
                       TextSpan(
-                        text: "   ${effectiveValue.split(' - ').last}",
+                        text: "   ${ArabicNameExtension(effectiveValue.split(' - ').last).toArabicName(context)}",
                         style: TextStyle(
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w400,
@@ -1207,7 +1252,8 @@ class _PredictionPageState extends State<PredictionPage> {
                 options
                     .where(
                       (opt) =>
-                          opt.toLowerCase().contains(searchQuery.toLowerCase()),
+                          opt.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                          ArabicNameExtension(opt).toArabicName(context).toLowerCase().contains(searchQuery.toLowerCase()),
                     )
                     .toList();
 
@@ -1253,7 +1299,7 @@ class _PredictionPageState extends State<PredictionPage> {
                         });
                       },
                       decoration: InputDecoration(
-                        hintText: "Search...",
+                        hintText: AppLocalizations.of(context)!.searchPlaceholder,
                         hintStyle: TextStyle(
                           color: isDark ? Colors.white38 : Colors.black38,
                           fontSize: 14.sp,
@@ -1283,7 +1329,7 @@ class _PredictionPageState extends State<PredictionPage> {
                         filteredOptions.isEmpty
                             ? Center(
                               child: Text(
-                                "No matches found.",
+                                AppLocalizations.of(context)!.noMatchesFound,
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   color:
@@ -1345,10 +1391,8 @@ class _PredictionPageState extends State<PredictionPage> {
                                                 TextSpan(
                                                   text:
                                                       option.contains(' - ')
-                                                          ? option.split(
-                                                            ' - ',
-                                                          )[0]
-                                                          : option,
+                                                          ? ArabicNameExtension(option.split(' - ')[0]).toArabicName(context).toArabicNumbers(context)
+                                                          : ArabicNameExtension(option).toArabicName(context).toArabicNumbers(context),
                                                   style: TextStyle(
                                                     fontSize: 13.sp,
                                                     fontWeight:
@@ -1368,7 +1412,7 @@ class _PredictionPageState extends State<PredictionPage> {
                                                 if (option.contains(' - '))
                                                   TextSpan(
                                                     text:
-                                                        "   ${option.split(' - ').last}",
+                                                        "   ${ArabicNameExtension(option.split(' - ').last).toArabicName(context).toArabicNumbers(context)}",
                                                     style: TextStyle(
                                                       fontSize: 11.5.sp,
                                                       fontWeight:
@@ -1456,7 +1500,7 @@ class _PredictionPageState extends State<PredictionPage> {
                 width: 36.w,
                 alignment: Alignment.center,
                 child: Text(
-                  '$score',
+                  '$score'.toArabicNumbers(context),
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w900,

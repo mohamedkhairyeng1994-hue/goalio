@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/constants.dart';
 import '../../core/utils/size_config.dart';
+import '../../l10n/app_localizations.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -12,7 +13,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Privacy Policy'),
+        title: Text(AppLocalizations.of(context)!.privacyPolicy),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(
@@ -28,46 +29,46 @@ class PrivacyPolicyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader("Privacy Policy"),
+            _buildHeader(AppLocalizations.of(context)!.privacyPolicy),
             _buildSection(
               context,
-              "Last Updated: January 29, 2026",
-              "Your privacy is important to us. This Privacy Policy explains how Goalio collects, uses, and protects your information when you use our mobile application.",
+              AppLocalizations.of(context)!.lastUpdatedLabel,
+              AppLocalizations.of(context)!.privacyPolicyIntro,
             ),
             _buildSection(
               context,
-              "1. Information We Collect",
-              "We collect information you provide directly to us when you create an account, such as your fullname and email address. We also store your 'Favorite Teams' preferences as part of your user profile to personalize your experience.",
+              AppLocalizations.of(context)!.privacySection1Title,
+              AppLocalizations.of(context)!.privacySection1Content,
             ),
             _buildSection(
               context,
-              "2. How We Use Your Information",
-              "We use the information we collect to:\n• Provide, maintain, and improve our services.\n• Personalize your experience by showing your favorite teams first.\n• Communicate with you about updates or security alerts.\n• Protect the safety and integrity of our services.",
+              AppLocalizations.of(context)!.privacySection2Title,
+              AppLocalizations.of(context)!.privacySection2Content,
             ),
             _buildSection(
               context,
-              "3. Data Persistence",
-              "Your account data and favorite teams are stored securely in our backend database. We do not sell or share your personal data with third-party advertisers.",
+              AppLocalizations.of(context)!.privacySection3Title,
+              AppLocalizations.of(context)!.privacySection3Content,
             ),
             _buildSection(
               context,
-              "4. Security",
-              "We implement industry-standard security measures to protect your data, including hashed passwords and encrypted communication (HTTPS). However, no method of transmission over the internet is 100% secure.",
+              AppLocalizations.of(context)!.privacySection4Title,
+              AppLocalizations.of(context)!.privacySection4Content,
             ),
             _buildSection(
               context,
-              "5. Your Choices",
-              "You can update your favorite teams at any time within the app. You may also contact us to request the deletion of your account and personal data.",
+              AppLocalizations.of(context)!.privacySection5Title,
+              AppLocalizations.of(context)!.privacySection5Content,
             ),
             _buildSection(
               context,
-              "6. Contact Us",
-              "If you have any questions about this Privacy Policy, please reach out via our support channels.",
+              AppLocalizations.of(context)!.privacySection6Title,
+              AppLocalizations.of(context)!.privacySection6Content,
             ),
             SizedBox(height: 40.h),
             Center(
               child: Text(
-                "© 2026 Goalio. All rights reserved.",
+                AppLocalizations.of(context)!.allRightsReserved,
                 style: TextStyle(
                   color: isDark ? Colors.white30 : Colors.black26,
                   fontSize: 12.sp,

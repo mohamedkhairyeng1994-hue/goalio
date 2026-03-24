@@ -5,6 +5,8 @@ import '../../../core/utils/size_config.dart';
 import '../../../core/utils/logo_utils.dart';
 import '../challenge_models.dart';
 import '../challenge_providers.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/name_translator.dart';
 
 class ChallengeLeagueSelector extends ConsumerWidget {
   final bool isDark;
@@ -22,7 +24,7 @@ class ChallengeLeagueSelector extends ConsumerWidget {
 
         return PopupMenuButton<ChallengeLeagueItem>(
           initialValue: selectedLeague,
-          tooltip: 'Select League',
+          tooltip: AppLocalizations.of(context)!.selectLeague,
           onSelected: (league) {
             ref
                 .read(selectedChallengeLeagueProvider.notifier)
@@ -58,12 +60,14 @@ class ChallengeLeagueSelector extends ConsumerWidget {
                     if (leagues.isNotEmpty && selectedLeague != null) {
                       try {
                         final current = leagues.firstWhere((l) => l.id == selectedLeague.id);
-                        return current.displayName;
+                        return ArabicNameExtension(current.displayName).toArabicName(context);
                       } catch (_) {
-                        return selectedLeague.displayName;
+                        return ArabicNameExtension(selectedLeague.displayName).toArabicName(context);
                       }
                     }
-                    return selectedLeague?.displayName ?? 'Select League';
+                    return selectedLeague != null 
+                        ? ArabicNameExtension(selectedLeague.displayName).toArabicName(context) 
+                        : AppLocalizations.of(context)!.selectLeague;
                   })(),
                   style: TextStyle(
                     fontSize: 8.5.sp,
@@ -94,7 +98,7 @@ class ChallengeLeagueSelector extends ConsumerWidget {
                     ],
                     Expanded(
                       child: Text(
-                        league.displayName,
+                        ArabicNameExtension(league.displayName).toArabicName(context),
                         style: TextStyle(
                           color:
                               isSelected

@@ -90,6 +90,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNewsAvailable => 'No news available.';
 
   @override
+  String noNewsAvailableFor(Object league) {
+    return 'No news available for $league';
+  }
+
+  @override
   String get leagueStandings => 'LEAGUES STANDINGS';
 
   @override
@@ -145,6 +150,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get checkAgain => 'Check Again';
 
   @override
   String get goals => 'Goals';
@@ -598,7 +606,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchInfoNotAvailable =>
-      'Match information is not available yet.\\nCheck back closer to kick-off.';
+      'Match information is not available yet.\nCheck back closer to kick-off.';
 
   @override
   String get matchOverviewLabel => 'MATCH OVERVIEW';
@@ -863,4 +871,169 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feedbackSentError =>
       'Failed to send feedback. Please try again later.';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get matchNotificationsEnabled => 'Match notifications enabled';
+
+  @override
+  String get matchNotificationsDisabled => 'Match notifications disabled';
+
+  @override
+  String get notificationsTitle => 'NOTIFICATIONS';
+
+  @override
+  String get notifications => 'NOTIFICATIONS';
+
+  @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get userPredictions => 'User Predictions';
+
+  @override
+  String get noPredictionsFound => 'No predictions found by this user.';
+
+  @override
+  String get question => 'Question';
+
+  @override
+  String get answer => 'Answer';
+
+  @override
+  String get statistics => 'STATISTICS';
+
+  @override
+  String get lastUpdatedLabel => 'Last Updated: January 29, 2026';
+
+  @override
+  String get privacyPolicyIntro =>
+      'Your privacy is important to us. This Privacy Policy explains how Goalio collects, uses, and protects your information when you use our mobile application.';
+
+  @override
+  String get privacySection1Title => '1. Information We Collect';
+
+  @override
+  String get privacySection1Content =>
+      'We collect information you provide directly to us when you create an account, such as your fullname and email address. We also store your \'Favorite Teams\' preferences as part of your user profile to personalize your experience.';
+
+  @override
+  String get privacySection2Title => '2. How We Use Your Information';
+
+  @override
+  String get privacySection2Content =>
+      'We use the information we collect to:\n• Provide, maintain, and improve our services.\n• Personalize your experience by showing your favorite teams first.\n• Communicate with you about updates or security alerts.\n• Protect the safety and integrity of our services.';
+
+  @override
+  String get privacySection3Title => '3. Data Persistence';
+
+  @override
+  String get privacySection3Content =>
+      'Your account data and favorite teams are stored securely in our backend database. We do not sell or share your personal data with third-party advertisers.';
+
+  @override
+  String get privacySection4Title => '4. Security';
+
+  @override
+  String get privacySection4Content =>
+      'We implement industry-standard security measures to protect your data, including hashed passwords and encrypted communication (HTTPS). However, no method of transmission over the internet is 100% secure.';
+
+  @override
+  String get privacySection5Title => '5. Your Choices';
+
+  @override
+  String get privacySection5Content =>
+      'You can update your favorite teams at any time within the app. You may also contact us to request the deletion of your account and personal data.';
+
+  @override
+  String get privacySection6Title => '6. Contact Us';
+
+  @override
+  String get privacySection6Content =>
+      'If you have any questions about this Privacy Policy, please reach out via our support channels.';
+
+  @override
+  String get allRightsReserved => '© 2026 Goalio. All rights reserved.';
+
+  @override
+  String get termsSection1Title => '1. Acceptance of Terms';
+
+  @override
+  String get termsSection1Content =>
+      'By accessing and using the Goalio application, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.';
+
+  @override
+  String get termsSection2Title => '2. Use of Services';
+
+  @override
+  String get termsSection2Content =>
+      'Goalio provides football fixtures, news, and personalized features. You agree to use the services only for lawful purposes and in a manner that does not infringe the rights of others.';
+
+  @override
+  String get termsSection3Title => '3. User Accounts';
+
+  @override
+  String get termsSection3Content =>
+      'When you create an account, you are responsible for maintaining the confidentiality of your credentials and for all activities that occur under your account.';
+
+  @override
+  String get termsSection4Title => '4. Intellectual Property';
+
+  @override
+  String get termsSection4Content =>
+      'The content, features, and functionality of Goalio are owned by Goalio and are protected by international copyright, trademark, and other intellectual property laws.';
+
+  @override
+  String get termsSection5Title => '5. Disclaimer of Warranties';
+
+  @override
+  String get termsSection5Content =>
+      'Goalio is provided \'as is\' without warranties of any kind. While we strive for accuracy, we do not guarantee that match data, scores, or news will always be error-free or up-to-the-minute.';
+
+  @override
+  String get termsSection6Title => '6. Limitation of Liability';
+
+  @override
+  String get termsSection6Content =>
+      'In no event shall Goalio be liable for any indirect, incidental, or consequential damages arising out of your use or inability to use the application.';
+
+  @override
+  String get termsSection7Title => '7. Changes to Terms';
+
+  @override
+  String get termsSection7Content =>
+      'We reserve the right to modify these Terms of Service at any time. Your continued use of the app after such changes constitutes acceptance of the new terms.';
+
+  @override
+  String get selectLeague => 'Select League';
+
+  @override
+  String get tapToSearch => 'Tap to search & select...';
+
+  @override
+  String get searchPlaceholder => 'Search...';
+
+  @override
+  String get minutesAbbr => 'm';
+
+  @override
+  String get hoursAbbr => 'h';
+
+  @override
+  String get daysAbbr => 'd';
+
+  @override
+  String get pushNotifications => 'Push Notifications';
+
+  @override
+  String get notificationsSubtitle =>
+      'Enable or disable receiving notifications from the app';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/constants.dart';
 import '../../core/utils/size_config.dart';
+import '../../l10n/app_localizations.dart';
 
 class TermsOfServicePage extends StatelessWidget {
   const TermsOfServicePage({super.key});
@@ -12,7 +13,7 @@ class TermsOfServicePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Terms of Service'),
+        title: Text(AppLocalizations.of(context)!.termsOfService),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(
@@ -28,46 +29,46 @@ class TermsOfServicePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader("Terms of Service"),
+            _buildHeader(AppLocalizations.of(context)!.termsOfService),
             _buildSection(
               context,
-              "1. Acceptance of Terms",
-              "By accessing and using the Goalio application, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.",
+              AppLocalizations.of(context)!.termsSection1Title,
+              AppLocalizations.of(context)!.termsSection1Content,
             ),
             _buildSection(
               context,
-              "2. Use of Services",
-              "Goalio provides football fixtures, news, and personalized features. You agree to use the services only for lawful purposes and in a manner that does not infringe the rights of others.",
+              AppLocalizations.of(context)!.termsSection2Title,
+              AppLocalizations.of(context)!.termsSection2Content,
             ),
             _buildSection(
               context,
-              "3. User Accounts",
-              "When you create an account, you are responsible for maintaining the confidentiality of your credentials and for all activities that occur under your account.",
+              AppLocalizations.of(context)!.termsSection3Title,
+              AppLocalizations.of(context)!.termsSection3Content,
             ),
             _buildSection(
               context,
-              "4. Intellectual Property",
-              "The content, features, and functionality of Goalio are owned by Goalio and are protected by international copyright, trademark, and other intellectual property laws.",
+              AppLocalizations.of(context)!.termsSection4Title,
+              AppLocalizations.of(context)!.termsSection4Content,
             ),
             _buildSection(
               context,
-              "5. Disclaimer of Warranties",
-              "Goalio is provided 'as is' without warranties of any kind. While we strive for accuracy, we do not guarantee that match data, scores, or news will always be error-free or up-to-the-minute.",
+              AppLocalizations.of(context)!.termsSection5Title,
+              AppLocalizations.of(context)!.termsSection5Content,
             ),
             _buildSection(
               context,
-              "6. Limitation of Liability",
-              "In no event shall Goalio be liable for any indirect, incidental, or consequential damages arising out of your use or inability to use the application.",
+              AppLocalizations.of(context)!.termsSection6Title,
+              AppLocalizations.of(context)!.termsSection6Content,
             ),
             _buildSection(
               context,
-              "7. Changes to Terms",
-              "We reserve the right to modify these Terms of Service at any time. Your continued use of the app after such changes constitutes acceptance of the new terms.",
+              AppLocalizations.of(context)!.termsSection7Title,
+              AppLocalizations.of(context)!.termsSection7Content,
             ),
             SizedBox(height: 40.h),
             Center(
               child: Text(
-                "© 2026 Goalio. All rights reserved.",
+                AppLocalizations.of(context)!.allRightsReserved,
                 style: TextStyle(
                   color: isDark ? Colors.white30 : Colors.black26,
                   fontSize: 12.sp,

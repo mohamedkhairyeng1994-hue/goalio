@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/services/api_service.dart';
 import '../../core/theme/theme_manager.dart';
 import '../../core/constants/constants.dart';
 import '../../screens/favorites/favorite_teams_page.dart';
@@ -20,30 +21,23 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  String _version = "..."; // Will be updated in build or initState
+  bool _notificationsEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    _loadVersion();
+    _loadNotificationPreference();
   }
 
-  Future<void> _loadVersion() async {
-    try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      if (mounted) {
-        setState(() {
-          _version = "${packageInfo.version}+${packageInfo.buildNumber}";
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _version = "1.0.0"; // Fallback
-        });
-      }
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+      });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -120,43 +114,31 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
               ),
 
-              // SizedBox(height: 24.h),
-              // _buildSectionHeader(context, "Notifications"),
-              // _buildSettingTile(
-              //   context,
-              //   icon: Icons.notifications_active,
-              //   title: "Match Alerts",
-              //   trailing: Switch(
-              //     value: true,
-              //     onChanged: (v) {},
-              //     activeColor: GoalioColors.greenAccent,
-              //   ),
-              // ),
-              // _buildSettingTile(
-              //   context,
-              //   icon: Icons.newspaper,
-              //   title: "News Digest",
-              //   trailing: Switch(
-              //     value: false,
-              //     onChanged: (v) {},
-              //     activeColor: GoalioColors.greenAccent,
-              //   ),
-              // ),
               SizedBox(height: 24.h),
-              _buildSectionHeader(context, AppLocalizations.of(context)!.about),
+              _buildSectionHeader(
+                context,
+                AppLocalizations.of(context)!.notifications,
+              ),
               _buildSettingTile(
                 context,
-                icon: Icons.info_outline,
-                title: AppLocalizations.of(context)!.version,
-                trailing: Text(
-                  _version == "..."
-                      ? AppLocalizations.of(context)!.loading
-                      : _version,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
+                icon: Icons.notifications_active_outlined,
+                title: AppLocalizations.of(context)!.pushNotifications,
+                // subtitle: AppLocalizations.of(context)!.notificationsSubtitle,
+                trailing: Switch(
+                  value: _notificationsEnabled,
+                  onChanged: (v) async {
+                    setState(() => _notificationsEnabled = v);
+                    final success = await ApiService.togglePushNotifications(v);
+                    if (!success) {
+                      // Revert if failed
+                      setState(() => _notificationsEnabled = !v);
+                    }
+                  },
+                  activeColor: GoalioColors.greenAccent,
                 ),
               ),
+              SizedBox(height: 24.h),
+              _buildSectionHeader(context, AppLocalizations.of(context)!.about),
               _buildSettingTile(
                 context,
                 icon: Icons.privacy_tip_outlined,
