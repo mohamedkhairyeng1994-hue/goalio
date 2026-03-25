@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/constants/constants.dart';
 import '../../core/localization/language_manager.dart';
@@ -43,9 +44,19 @@ class ChallengePageState extends ConsumerState<ChallengePage> {
     try {
       final leagues = await ref.read(challengeLeaguesListProvider.future);
       if (leagues.isNotEmpty) {
-        final defaultLeague = leagues.any((l) => l.id == 1)
-            ? leagues.firstWhere((l) => l.id == 1)
-            : leagues.first;
+        final prefs = await SharedPreferences.getInstance();
+        final lastLeagueId = prefs.getInt('last_challenge_league_id');
+        
+        ChallengeLeagueItem defaultLeague;
+        
+        if (lastLeagueId != null && leagues.any((l) => l.id == lastLeagueId)) {
+          defaultLeague = leagues.firstWhere((l) => l.id == lastLeagueId);
+        } else {
+          defaultLeague = leagues.any((l) => l.id == 1)
+              ? leagues.firstWhere((l) => l.id == 1)
+              : leagues.first;
+        }
+        
         ref.read(selectedChallengeLeagueProvider.notifier).selectLeague(defaultLeague);
       }
     } catch (e) {

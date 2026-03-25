@@ -1736,6 +1736,18 @@ abstract class AppLocalizations {
   /// **'Match notifications disabled'**
   String get matchNotificationsDisabled;
 
+  /// No description provided for @mdSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'MD'**
+  String get mdSmall;
+
+  /// No description provided for @totalSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get totalSmall;
+
   /// No description provided for @notificationsTitle.
   ///
   /// In en, this message translates to:

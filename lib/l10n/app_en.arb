@@ -327,6 +327,8 @@
   "start": "START",
   "edit": "EDIT",
   "overall": "OVERALL",
+  "mdSmall": "MD",
+  "totalSmall": "TOTAL",
   "predictAndEarn": "PREDICT & EARN MATCHDAY POINTS",
   "leagueCreated": "League Created!",
   "enterLeagueName": "Enter league name",
@@ -520,5 +522,7 @@
   "hoursAbbr": "h",
   "daysAbbr": "d",
   "pushNotifications": "Push Notifications",
-  "notificationsSubtitle": "Enable or disable receiving notifications from the app"
+  "notificationsSubtitle": "Enable or disable receiving notifications from the app",
+  "mdSmall": "MD",
+  "totalSmall": "TOTAL"
 }

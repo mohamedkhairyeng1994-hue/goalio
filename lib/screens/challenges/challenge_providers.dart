@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/localization/language_manager.dart';
 import '../../core/services/api_service.dart';
 import 'challenge_models.dart';
@@ -101,6 +102,7 @@ class GroupRanksNotifier extends AsyncNotifier<LeaderboardState> {
         rank: json['rank'] ?? 0,
         name: json['name'] ?? 'Unknown',
         points: (json['points'] as num?)?.toInt() ?? 0,
+        matchdayPoints: (json['matchday_points'] as num?)?.toInt() ?? 0,
         isYou: json['isYou'] ?? false,
         rankChange: json['rankChange'] ?? 0,
       );
@@ -172,10 +174,16 @@ class SelectedChallengeLeagueNotifier extends Notifier<ChallengeLeagueItem?> {
   @override
   ChallengeLeagueItem? build() => null;
 
-  void selectLeague(ChallengeLeagueItem? league) {
+  void selectLeague(ChallengeLeagueItem? league) async {
     if (state?.id == league?.id) return;
     state = league;
     
+    // Persist selection
+    if (league != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('last_challenge_league_id', league.id);
+    }
+
     // Reset secondary states
     ref.read(selectedGroupProvider.notifier).selectGroup(null);
     ref.read(selectedChallengeDateProvider.notifier).resetToToday();

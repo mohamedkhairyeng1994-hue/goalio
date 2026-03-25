@@ -881,6 +881,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get matchNotificationsDisabled => 'تم إيقاف إشعارات المباراة';
 
   @override
+  String get mdSmall => 'الجولة';
+
+  @override
+  String get totalSmall => 'الإجمالي';
+
+  @override
   String get notificationsTitle => 'الإشعارات';
 
   @override

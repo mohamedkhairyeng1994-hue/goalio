@@ -223,6 +223,20 @@ class LeaderboardListWidget extends ConsumerWidget {
                         ),
                       ),
 
+                      // MATCHDAY POINTS
+                      SizedBox(
+                        width: 45.w,
+                        child: Text(
+                          _formatNumber(user.matchdayPoints, context),
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ),
+
                       // TOTAL POINTS
                       SizedBox(
                         width: 55.w,

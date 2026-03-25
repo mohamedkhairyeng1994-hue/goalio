@@ -111,9 +111,17 @@ class LeaderboardHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
                 ),
                 SizedBox(
+                  width: 45.w,
+                  child: Text(
+                    AppLocalizations.of(context)!.mdSmall.toUpperCase(),
+                    textAlign: TextAlign.end,
+                    style: _tableHeaderStyle(isDark),
+                  ),
+                ),
+                SizedBox(
                   width: 55.w,
                   child: Text(
-                    AppLocalizations.of(context)!.overall.toUpperCase(),
+                    AppLocalizations.of(context)!.totalSmall.toUpperCase(),
                     textAlign: TextAlign.end,
                     style: _tableHeaderStyle(isDark),
                   ),

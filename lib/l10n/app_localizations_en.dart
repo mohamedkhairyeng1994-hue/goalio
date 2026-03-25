@@ -885,6 +885,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchNotificationsDisabled => 'Match notifications disabled';
 
   @override
+  String get mdSmall => 'MD';
+
+  @override
+  String get totalSmall => 'TOTAL';
+
+  @override
   String get notificationsTitle => 'NOTIFICATIONS';
 
   @override

@@ -328,5 +328,7 @@
   "notificationsSubtitle": "تفعيل أو تعطيل تلقي الإشعارات من التطبيق",
   "notificationsTitle": "الإشعارات",
   "notifications": "الإشعارات",
-  "noNotificationsYet": "لا توجد إشعارات حتى الآن"
+  "noNotificationsYet": "لا توجد إشعارات حتى الآن",
+  "mdSmall": "الجولة",
+  "totalSmall": "الإجمالي"
 }

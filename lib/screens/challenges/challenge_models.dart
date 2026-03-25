@@ -35,6 +35,7 @@ class UserRank {
   final String name;
   final int rank;
   final int points;
+  final int matchdayPoints;
   final bool isYou;
   final int rankChange;
 
@@ -43,6 +44,7 @@ class UserRank {
     required this.name,
     required this.rank,
     required this.points,
+    this.matchdayPoints = 0,
     this.isYou = false,
     this.rankChange = 0,
   });
