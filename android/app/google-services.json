@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1039306559815-029du4btjmae92r5cdkc0fuovmo3s52h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.goalioApp.fixtures",
+            "certificate_hash": "d47c0ad361d1cc02ffc45039b9abbe51a02ef3e1"
+          }
+        },
+        {
           "client_id": "1039306559815-0kv0su08leo6asptr54siaog944tk5lb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -37,6 +45,13 @@
             {
               "client_id": "1039306559815-t8egv3tivv56apg7k61479v2h1kd5h1a.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1039306559815-b4m9stbq0jldg6u32ja8f2vkiq8kje62.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.goalFixturesApp"
+              }
             }
           ]
         }
