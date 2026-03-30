@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // Managers & Utils
 import 'core/theme/theme_manager.dart';
@@ -28,6 +29,7 @@ import 'screens/challenges/challenge_providers.dart';
 import 'screens/auth/splash_page.dart';
 import 'screens/favorites/favorite_teams_page.dart';
 import 'screens/fixtures/match_detail_page.dart';
+import 'core/widgets/banner_ad_widget.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -74,7 +76,11 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Initialize Managers (Wait for them to load preferences)
-  await Future.wait([LanguageManager.initialize(), ThemeManager.initialize()]);
+  await Future.wait([
+    LanguageManager.initialize(),
+    ThemeManager.initialize(),
+    MobileAds.instance.initialize()
+  ]);
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -645,7 +651,13 @@ class MainPageState extends ConsumerState<MainPage> {
           ),
         ),
         extendBody: true,
-        bottomNavigationBar: _buildBeautifulNavBar(),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const BannerAdWidget(),
+            _buildBeautifulNavBar(),
+          ],
+        ),
       ),
     );
   }

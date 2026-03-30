@@ -83,5 +83,7 @@
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
 	</array>
+    <key>GADApplicationIdentifier</key>
+    <string>ca-app-pub-4262739856695834~3926725229</string>
 </dict>
 </plist>
