@@ -1,41 +1,14 @@
 import 'package:flutter/material.dart';
 
 extension ArabicNameExtension on String {
-  /// Converts English names to Arabic using a simple dictionary and transliteration fallback.
-  /// If the current locale is not Arabic, returns the original string.
+  /// Apply only the hardcoded mapped names list.
+  /// Returns original text if name not found.
   String toArabicName(BuildContext context) {
     if (this.isEmpty) return this;
-    
-    final locale = Localizations.maybeLocaleOf(context);
-    if (locale?.languageCode != 'ar') {
-      return this;
-    }
 
-    // NEW: If string already contains Arabic characters, don't try to translate
-    bool containsArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(this);
-    if (containsArabic) return this;
-
-    // 1. Check strict dictionary for famous players or exact matches
-    final normalizedInput = this.trim().toLowerCase();
-    if (_famousPlayersMap.containsKey(normalizedInput)) {
-      return _famousPlayersMap[normalizedInput]!;
-    }
-
-    // 2. Check word by word for known partials (e.g. "Mohamed", "Salah")
-    final words = this.trim().split(RegExp(r'\s+'));
-    List<String> translatedWords = [];
-    
-    for (var word in words) {
-      final normalizedWord = word.toLowerCase();
-      if (_famousPlayersMap.containsKey(normalizedWord)) {
-        translatedWords.add(_famousPlayersMap[normalizedWord]!);
-      } else {
-        // 3. Fallback: Transliteration
-        translatedWords.add(_transliterate(word));
-      }
-    }
-
-    return translatedWords.join(' ');
+    // Attempt map lookup case-insensitive.
+    final key = this.trim().toLowerCase();
+    return _famousPlayersMap[key] ?? this;
   }
 
   // Basic map for famous/common names to ensure accuracy
@@ -236,49 +209,5 @@ extension ArabicNameExtension on String {
     'fulham': 'فولهام',
   };
 
-  static String _transliterate(String word) {
-    if (word.isEmpty) return word;
-    
-    // Very basic transliteration logic, covers standard English mapping dynamically
-    // In production, an AI or complete library is ideal, but this gives a readable approximation.
-    String w = word.toLowerCase();
-    
-    w = w.replaceAll('sh', 'ش');
-    w = w.replaceAll('ch', 'تش');
-    w = w.replaceAll('th', 'ث');
-    w = w.replaceAll('ph', 'ف');
-    w = w.replaceAll('kh', 'خ');
-    w = w.replaceAll('gh', 'غ');
-    
-    // Vowels (simplistic approximation)
-    w = w.replaceAll('ee', 'ي');
-    w = w.replaceAll('oo', 'و');
-    
-    // Consonants
-    Map<String, String> mappedLetters = {
-      'a': 'ا', 'b': 'ب', 'c': 'ك', 'd': 'د', 'e': 'ي', 'f': 'ف',
-      'g': 'غ', 'h': 'ه', 'i': 'ي', 'j': 'ج', 'k': 'ك', 'l': 'ل',
-      'm': 'م', 'n': 'ن', 'o': 'و', 'p': 'ب', 'q': 'ق', 'r': 'ر',
-      's': 'س', 't': 'ت', 'u': 'و', 'v': 'ف', 'w': 'و', 'x': 'كس',
-      'y': 'ي', 'z': 'ز',
-    };
-    
-    StringBuffer result = StringBuffer();
-    for (int i = 0; i < w.length; i++) {
-        String char = w[i];
-        if (mappedLetters.containsKey(char)) {
-            result.write(mappedLetters[char]);
-        } else {
-            result.write(char);
-        }
-    }
-    
-    // Cleanup repeating arabic vowels/letters that look unnatural at the start
-    String transliterated = result.toString();
-    if (transliterated.startsWith('ا') && word.toLowerCase().startsWith('a')) {
-       transliterated = 'أ' + transliterated.substring(1);
-    }
-    
-    return transliterated;
-  }
+  // No transliteration fallback is used; map-only behavior is active.
 }

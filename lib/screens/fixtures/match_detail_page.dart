@@ -513,6 +513,77 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                         ],
                       ),
+                    if (match['home_score_pen'] != null &&
+                        match['home_score_pen'] != 'N/A' &&
+                        match['away_score_pen'] != null &&
+                        match['away_score_pen'] != 'N/A')
+                      Padding(
+                        padding: EdgeInsets.only(top: 2.h),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '(',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isDark
+                                        ? Colors.amber[300]
+                                        : Colors.orange[700],
+                              ),
+                            ),
+                            Text(
+                              "${match['home_score_pen']}".toArabicNumbers(
+                                context,
+                              ),
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isDark
+                                        ? Colors.amber[300]
+                                        : Colors.orange[700],
+                              ),
+                            ),
+                            Text(
+                              ' - ',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isDark
+                                        ? Colors.amber[300]
+                                        : Colors.orange[700],
+                              ),
+                            ),
+                            Text(
+                              "${match['away_score_pen']}".toArabicNumbers(
+                                context,
+                              ),
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isDark
+                                        ? Colors.amber[300]
+                                        : Colors.orange[700],
+                              ),
+                            ),
+                            Text(
+                              ')',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isDark
+                                        ? Colors.amber[300]
+                                        : Colors.orange[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     SizedBox(height: 4.h),
                     Container(
                       padding: EdgeInsets.symmetric(
@@ -782,12 +853,16 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   context,
                   homeForm,
                   awayForm,
-                  ArabicNameExtension(scoreInfo['home_team']?.toString() ??
-                      widget.match['home_team']?.toString() ??
-                      AppLocalizations.of(context)!.homeTeam).toArabicName(context),
-                  ArabicNameExtension(scoreInfo['away_team']?.toString() ??
-                      widget.match['away_team']?.toString() ??
-                      AppLocalizations.of(context)!.awayTeam).toArabicName(context),
+                  ArabicNameExtension(
+                    scoreInfo['home_team']?.toString() ??
+                        widget.match['home_team']?.toString() ??
+                        AppLocalizations.of(context)!.homeTeam,
+                  ).toArabicName(context),
+                  ArabicNameExtension(
+                    scoreInfo['away_team']?.toString() ??
+                        widget.match['away_team']?.toString() ??
+                        AppLocalizations.of(context)!.awayTeam,
+                  ).toArabicName(context),
                 ),
             ]),
           ),
@@ -1290,7 +1365,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          ArabicNameExtension(player).toArabicName(context),
+                          player,
                           style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyMedium?.color,
@@ -1299,7 +1374,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                         ),
                         Text(
-                          ArabicNameExtension(detail).toArabicName(context),
+                          detail,
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 10.sp,
@@ -1354,7 +1429,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          player.toArabicName(context),
+                          player,
                           style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyMedium?.color,
@@ -1363,7 +1438,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           ),
                         ),
                         Text(
-                          detail.toArabicName(context),
+                          detail,
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 10.sp,
@@ -1582,7 +1657,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             SizedBox(width: 6.w),
             Expanded(
               child: Text(
-                ArabicNameExtension(info['venue'].toString()).toArabicName(context),
+                ArabicNameExtension(
+                  info['venue'].toString(),
+                ).toArabicName(context),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodySmall?.color,
                   fontSize: 11.sp,
@@ -2476,7 +2553,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                 borderRadius: BorderRadius.circular(3.w),
               ),
               child: Text(
-                ArabicNameExtension(name.contains(' ') ? name.split(' ').last : name).toArabicName(context),
+                ArabicNameExtension(
+                  name.contains(' ') ? name.split(' ').last : name,
+                ).toArabicName(context),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 7.sp,

@@ -341,8 +341,6 @@ class FixturesPageState extends State<FixturesPage>
           setState(() {
             _sortMode = value;
           });
-        } else if (value == 'select_date') {
-          _selectDate(context);
         }
       },
       itemBuilder:
@@ -414,27 +412,6 @@ class FixturesPageState extends State<FixturesPage>
                       size: 16.w,
                     ),
                   ],
-                ],
-              ),
-            ),
-            const PopupMenuDivider(),
-            PopupMenuItem(
-              value: 'select_date',
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    color: GoalioColors.greenAccent,
-                    size: 22.w,
-                  ),
-                  SizedBox(width: 12.w),
-                  Text(
-                    AppLocalizations.of(context)!.selectDate,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -491,7 +468,10 @@ class FixturesPageState extends State<FixturesPage>
 
   // Removed _buildModalFavoritesFilterButton
 
-  Widget _buildModalCalendarButton(BuildContext modalContext) {
+  Widget _buildModalCalendarButton(
+    BuildContext modalContext,
+    DateTime currentDate,
+  ) {
     return IconButton(
       padding: EdgeInsets.all(4.w),
       constraints: BoxConstraints(minWidth: 28.w, minHeight: 28.h),
@@ -500,7 +480,12 @@ class FixturesPageState extends State<FixturesPage>
         color: GoalioColors.greenAccent,
         size: 20.w,
       ),
-      onPressed: () => _selectDate(modalContext, shouldPop: true),
+      onPressed:
+          () => _selectDate(
+            modalContext,
+            shouldPop: true,
+            initialDate: currentDate,
+          ),
     );
   }
 
@@ -533,8 +518,6 @@ class FixturesPageState extends State<FixturesPage>
             _sortMode = value;
           });
           setState(() {}); // Sync with main state
-        } else if (value == 'select_date') {
-          _selectDate(modalContext, shouldPop: true);
         }
       },
       itemBuilder:
@@ -609,27 +592,6 @@ class FixturesPageState extends State<FixturesPage>
                 ],
               ),
             ),
-            const PopupMenuDivider(),
-            PopupMenuItem(
-              value: 'select_date',
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    color: GoalioColors.greenAccent,
-                    size: 22.w,
-                  ),
-                  SizedBox(width: 12.w),
-                  Text(
-                    AppLocalizations.of(context)!.selectDate,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
     );
   }
@@ -637,10 +599,11 @@ class FixturesPageState extends State<FixturesPage>
   Future<void> _selectDate(
     BuildContext context, {
     bool shouldPop = false,
+    DateTime? initialDate,
   }) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate ?? DateTime.now(),
       firstDate: DateTime(2024),
       lastDate: DateTime(2030),
       builder: (context, child) {
@@ -668,9 +631,9 @@ class FixturesPageState extends State<FixturesPage>
   }
 
   void _showDateMatches(String dateStr) {
-    final now = DateTime.now();
-    final todayStr = _formatDate(now);
-    final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
+    DateTime currentDate = DateTime.parse(dateStr);
+    String modalSearchQuery = '';
+    final TextEditingController modalSearchController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -693,8 +656,14 @@ class FixturesPageState extends State<FixturesPage>
                     builder: (modalContext, setModalState) {
                       final isDark =
                           Theme.of(context).brightness == Brightness.dark;
+                      final currentDateStr = _formatDate(currentDate);
+                      final todayStr = _formatDate(DateTime.now());
+                      final yesterdayStr = _formatDate(
+                        DateTime.now().subtract(const Duration(days: 1)),
+                      );
                       final isLiveAvailable =
-                          dateStr == todayStr || dateStr == yesterdayStr;
+                          currentDateStr == todayStr ||
+                          currentDateStr == yesterdayStr;
 
                       return Column(
                         children: [
@@ -708,35 +677,85 @@ class FixturesPageState extends State<FixturesPage>
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w),
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        AppLocalizations.of(
-                                          modalContext,
-                                        )!.matches,
-                                        style: TextStyle(
-                                          fontSize: 20.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: GoalioColors.greenAccent,
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 20.w),
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            modalContext,
+                                          )!.matches,
+                                          style: TextStyle(
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: GoalioColors.greenAccent,
+                                          ),
                                         ),
                                       ),
-                                      Text(
-                                        dateStr,
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          color:
-                                              isDark
-                                                  ? Colors.white54
-                                                  : Colors.black54,
-                                        ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(
+                                              minWidth: 28.w,
+                                              minHeight: 28.h,
+                                            ),
+                                            icon: Icon(
+                                              Icons.chevron_left_rounded,
+                                              color: GoalioColors.greenAccent,
+                                              size: 22.w,
+                                            ),
+                                            onPressed: () {
+                                              setModalState(() {
+                                                currentDate = currentDate
+                                                    .subtract(
+                                                      const Duration(days: 1),
+                                                    );
+                                                modalSearchQuery = '';
+                                                modalSearchController.clear();
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            _formatDate(currentDate),
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color:
+                                                  isDark
+                                                      ? Colors.white54
+                                                      : Colors.black54,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(
+                                              minWidth: 28.w,
+                                              minHeight: 28.h,
+                                            ),
+                                            icon: Icon(
+                                              Icons.chevron_right_rounded,
+                                              color: GoalioColors.greenAccent,
+                                              size: 22.w,
+                                            ),
+                                            onPressed: () {
+                                              setModalState(() {
+                                                currentDate = currentDate.add(
+                                                  const Duration(days: 1),
+                                                );
+                                                modalSearchQuery = '';
+                                                modalSearchController.clear();
+                                              });
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -748,7 +767,10 @@ class FixturesPageState extends State<FixturesPage>
                                       _buildModalLiveFilterButton(
                                         setModalState,
                                       ),
-                                    _buildModalCalendarButton(modalContext),
+                                    _buildModalCalendarButton(
+                                      modalContext,
+                                      currentDate,
+                                    ),
                                     _buildModalSortMenu(
                                       setModalState,
                                       modalContext,
@@ -778,9 +800,71 @@ class FixturesPageState extends State<FixturesPage>
                           Divider(
                             color: isDark ? Colors.white10 : Colors.black12,
                           ),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 8.h,
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                            decoration: BoxDecoration(
+                              color:
+                                  isDark
+                                      ? Colors.white12
+                                      : Colors.black.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12.w),
+                            ),
+                            child: TextField(
+                              controller: modalSearchController,
+                              onChanged: (value) {
+                                setModalState(() {
+                                  modalSearchQuery = value;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                icon: Icon(
+                                  Icons.search,
+                                  size: 20.w,
+                                  color: GoalioColors.greenAccent,
+                                ),
+                                border: InputBorder.none,
+                                hintText:
+                                    AppLocalizations.of(
+                                      modalContext,
+                                    )!.searchHint,
+                                hintStyle: TextStyle(
+                                  color:
+                                      isDark ? Colors.white54 : Colors.black45,
+                                  fontSize: 14.sp,
+                                ),
+                                suffixIcon:
+                                    modalSearchQuery.isNotEmpty
+                                        ? GestureDetector(
+                                          onTap: () {
+                                            setModalState(() {
+                                              modalSearchQuery = '';
+                                              modalSearchController.clear();
+                                            });
+                                          },
+                                          child: Icon(
+                                            Icons.clear,
+                                            size: 18.w,
+                                            color:
+                                                isDark
+                                                    ? Colors.white70
+                                                    : Colors.black45,
+                                          ),
+                                        )
+                                        : null,
+                              ),
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ),
                           Expanded(
                             child: FixtureList(
-                              day: dateStr,
+                              day: _formatDate(currentDate),
                               showLiveOnly:
                                   isLiveAvailable ? _showLiveOnly : false,
                               showFavoritesOnly: _showFavoritesOnly,
@@ -788,7 +872,7 @@ class FixturesPageState extends State<FixturesPage>
                               sortMode: _sortMode,
                               refreshNotifier:
                                   isLiveAvailable ? _refreshNotifier : null,
-                              searchQuery: _searchController.text,
+                              searchQuery: modalSearchQuery,
                             ),
                           ),
                         ],
@@ -863,6 +947,9 @@ class _FixtureListState extends State<FixtureList>
     if (oldWidget.refreshNotifier != widget.refreshNotifier) {
       oldWidget.refreshNotifier?.removeListener(_handleRefresh);
       widget.refreshNotifier?.addListener(_handleRefresh);
+    }
+    if (oldWidget.day != widget.day) {
+      _loadMatches();
     }
     // Note: showFavoritesOnly / showLiveOnly / sortMode are client-side filters
     // handled in _getFilteredCompetitions — no server reload needed.
@@ -1719,7 +1806,11 @@ class MatchCard extends StatelessWidget {
       child: Column(
         children: [
           if (isLive || isFinishedStatus(status.toString()))
-            _buildScoreBoard(context, isDark, isFinishedStatus(status.toString()))
+            _buildScoreBoard(
+              context,
+              isDark,
+              isFinishedStatus(status.toString()),
+            )
           else
             _buildTimeOrSpecialStatus(context, status, isDark),
           if (isLive)
@@ -1758,9 +1849,10 @@ class MatchCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: isFinished
-                    ? (isDark ? Colors.white54 : Colors.black45)
-                    : Colors.redAccent,
+                color:
+                    isFinished
+                        ? (isDark ? Colors.white54 : Colors.black45)
+                        : Colors.redAccent,
               ),
             ),
             Text(
@@ -1768,9 +1860,10 @@ class MatchCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: isFinished
-                    ? (isDark ? Colors.white54 : Colors.black45)
-                    : Colors.redAccent,
+                color:
+                    isFinished
+                        ? (isDark ? Colors.white54 : Colors.black45)
+                        : Colors.redAccent,
               ),
             ),
             Text(
@@ -1778,9 +1871,10 @@ class MatchCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: isFinished
-                    ? (isDark ? Colors.white54 : Colors.black45)
-                    : Colors.redAccent,
+                color:
+                    isFinished
+                        ? (isDark ? Colors.white54 : Colors.black45)
+                        : Colors.redAccent,
               ),
             ),
           ],

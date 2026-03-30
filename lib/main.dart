@@ -32,7 +32,7 @@ import 'screens/fixtures/match_detail_page.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  
+
   // Check preference before reporting or handling
   final prefs = await SharedPreferences.getInstance();
   final isEnabled = prefs.getBool('notifications_enabled') ?? true;
@@ -247,7 +247,8 @@ class _InitializerState extends State<Initializer> {
     if (mounted) {
       setState(() {
         _isLoggedIn = token != null && token.isNotEmpty;
-        _hasFavorites = false; // Will be checked again if we fetch profile later
+        _hasFavorites =
+            false; // Will be checked again if we fetch profile later
         _isLoading = false;
       });
     }
@@ -290,7 +291,8 @@ class MainPageState extends ConsumerState<MainPage> {
   final GlobalKey<FixturesPageState> _fixturesKey =
       GlobalKey<FixturesPageState>();
   final GlobalKey<LeaguesPageState> _leaguesKey = GlobalKey<LeaguesPageState>();
-  final GlobalKey<ChallengePageState> _challengeKey = GlobalKey<ChallengePageState>();
+  final GlobalKey<ChallengePageState> _challengeKey =
+      GlobalKey<ChallengePageState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -298,14 +300,15 @@ class MainPageState extends ConsumerState<MainPage> {
     super.initState();
     _setupFirebaseMessaging();
     LanguageManager().addListener(_onLanguageChanged);
-    
+
     // 3. Handle notification that opened the app
     _handleInitialNotification();
   }
 
   Future<void> _handleInitialNotification() async {
     // Check if app was opened via a notification when it was terminated
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
       _handleNotificationMessage(initialMessage.data);
     }
@@ -391,7 +394,7 @@ class MainPageState extends ConsumerState<MainPage> {
           ApiService.updateFcmToken(token);
         }
       });
-      
+
       // Refresh all screens that support it
       _homeKey.currentState?.resetState();
       _homeKey.currentState?.loadData(forceScrape: true);
@@ -450,9 +453,8 @@ class MainPageState extends ConsumerState<MainPage> {
       // 1.5 Initialize Local Notifications
       const AndroidInitializationSettings initializationSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
-      const InitializationSettings initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid,
-      );
+      const InitializationSettings initializationSettings =
+          InitializationSettings(android: initializationSettingsAndroid);
       await flutterLocalNotificationsPlugin.initialize(
         settings: initializationSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
@@ -557,7 +559,8 @@ class MainPageState extends ConsumerState<MainPage> {
               MaterialPageRoute(
                 builder:
                     (context) => LoginPage(
-                      onLoginSuccess: () => Initializer.navigateAfterAuth(context),
+                      onLoginSuccess:
+                          () => Initializer.navigateAfterAuth(context),
                     ),
               ),
               (route) => false,
@@ -808,7 +811,8 @@ class MainPageState extends ConsumerState<MainPage> {
           _newsKey.currentState?.resetState();
           _newsKey.currentState?.loadNews(forceScrape: true, silent: true);
         } else {
-          _newsKey.currentState?.loadNews(silent: true);
+          // When navigating to the news tab, run a quick scraper pass and append new items.
+          _newsKey.currentState?.appendLatestNews(silent: true);
         }
         break;
       case 3:

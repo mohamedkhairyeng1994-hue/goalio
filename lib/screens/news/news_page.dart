@@ -60,23 +60,31 @@ class NewsPageState extends State<NewsPage> {
     }
   }
 
-  Future<void> loadNews({bool silent = false, bool forceScrape = false}) async {
+  Future<void> loadNews({
+    bool silent = false,
+    bool forceScrape = false,
+    bool append = false,
+  }) async {
     if (mounted) {
       setState(() {
         // Show loader if not silent OR if we have no data yet
         _isLoading = !silent || _news.isEmpty;
         _errorMessage = null;
-        if (!silent) _news = []; // Only clear if not silent
+        if (!silent && !append)
+          _news = []; // Only clear if not silent and not appending
       });
     }
 
-    _offset = 0;
-    _hasMore = true;
+    // Keep offset when appending latest items, otherwise reset for fresh load
+    if (!append) {
+      _offset = 0;
+      _hasMore = true;
+    }
 
     try {
       final fetchedNews = await ApiService.getNews(
         limit: _limit,
-        offset: _offset,
+        offset: append ? 0 : _offset,
         scrape: forceScrape,
       );
 
@@ -84,9 +92,32 @@ class NewsPageState extends State<NewsPage> {
 
       if (mounted) {
         setState(() {
-          _news = fetchedNews;
-          _offset += fetchedNews.length;
-          _hasMore = fetchedNews.length == _limit;
+          if (append) {
+            // Add freshly scraped items at the top while avoiding duplicates by id
+            final existingIds =
+                _news
+                    .whereType<Map<String, dynamic>>()
+                    .map((item) => item['id'])
+                    .toSet();
+            final newItems =
+                fetchedNews
+                    .whereType<Map<String, dynamic>>()
+                    .where(
+                      (item) =>
+                          item['id'] != null &&
+                          !existingIds.contains(item['id']),
+                    )
+                    .toList();
+
+            _news = [...newItems, ..._news];
+            _offset = _news.length;
+            _hasMore = newItems.length == _limit;
+          } else {
+            _news = fetchedNews;
+            _offset += fetchedNews.length;
+            _hasMore = fetchedNews.length == _limit;
+          }
+
           _isLoading = false;
           _errorMessage = null;
         });
@@ -100,6 +131,10 @@ class NewsPageState extends State<NewsPage> {
         });
       }
     }
+  }
+
+  Future<void> appendLatestNews({bool silent = true}) async {
+    await loadNews(silent: silent, forceScrape: true, append: true);
   }
 
   Future<void> _loadMoreNews() async {
