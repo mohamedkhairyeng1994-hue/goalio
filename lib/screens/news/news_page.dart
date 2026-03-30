@@ -70,7 +70,7 @@ class NewsPageState extends State<NewsPage> {
       setState(() {
         _isLoading = !silent || _news.isEmpty;
         _errorMessage = null;
-        if (!silent && !append) _news = []; 
+        if (!silent && !append) _news = [];
       });
     }
 
@@ -236,6 +236,7 @@ class NewsPageState extends State<NewsPage> {
     }
 
     final layoutItems = _layoutItems;
+    final adCount = layoutItems.length ~/ 5;
 
     return Stack(
       children: [
@@ -246,15 +247,10 @@ class NewsPageState extends State<NewsPage> {
           child: ListView.builder(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              16.w,
-              100.h,
-              16.w,
-              120.h,
-            ),
-            itemCount: layoutItems.length + (layoutItems.length ~/ 2) + (_isLoadingMore ? 1 : 0),
+            padding: EdgeInsets.fromLTRB(16.w, 100.h, 16.w, 120.h),
+            itemCount: layoutItems.length + adCount + (_isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
-              if (index == layoutItems.length + (layoutItems.length ~/ 2)) {
+              if (index == layoutItems.length + adCount) {
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: const Center(
@@ -265,16 +261,17 @@ class NewsPageState extends State<NewsPage> {
                 );
               }
 
-              // Show Native Ad after every 2 layout items (total of 3 articles)
-              if (index > 0 && index % 3 == 2) {
+              // Show Native Ad after every 5 layout items
+              if (index > 0 && (index + 1) % 6 == 0) {
                 return const GoalioNativeAdWidget();
               }
 
               // Adjust index for ad positions
-              final adOffset = ((index + 1) / 3).floor();
+              final adOffset = (index + 1) ~/ 6;
               final actualIndex = index - adOffset;
-              
-              if (actualIndex >= layoutItems.length) return const SizedBox.shrink();
+
+              if (actualIndex >= layoutItems.length)
+                return const SizedBox.shrink();
 
               final item = layoutItems[actualIndex];
 

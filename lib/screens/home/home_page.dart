@@ -672,8 +672,8 @@ class HomePageState extends ConsumerState<HomePage> {
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    // Show Native Ad after every 2 items
-                    if (index > 0 && index % 3 == 2) {
+                    // Show Native Ad after every 5 items
+                    if (index > 0 && (index + 1) % 6 == 0) {
                       return Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: const GoalioNativeAdWidget(),
@@ -681,13 +681,14 @@ class HomePageState extends ConsumerState<HomePage> {
                     }
 
                     // Calculate correct news item index
-                    final adOffset = ((index + 1) / 3).floor();
+                    final adOffset = (index + 1) ~/ 6;
                     final actualIndex = index - adOffset;
 
-                    if (actualIndex >= _news.length) return const SizedBox.shrink();
+                    if (actualIndex >= _news.length)
+                      return const SizedBox.shrink();
 
                     return _buildImmersiveNewsCard(_news[actualIndex]);
-                  }, childCount: _news.length + (_news.length ~/ 2)),
+                  }, childCount: _news.length + (_news.length ~/ 5)),
                 ),
 
               SliverPadding(padding: EdgeInsets.only(bottom: 100.h)),
@@ -901,7 +902,35 @@ class HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  int _safeInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  Widget _buildRedCardBadge(int redCards, {double? fontSize}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(2.w),
+      ),
+      child: Text(
+        redCards.toString(),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: fontSize ?? 8.sp,
+          fontWeight: FontWeight.bold,
+          height: 1,
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeroMatchCard(dynamic match) {
+    final homeRedCards = _safeInt(match['home_red_cards']);
+    final awayRedCards = _safeInt(match['away_red_cards']);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -966,44 +995,27 @@ class HomePageState extends ConsumerState<HomePage> {
                       children: [
                         buildTeamLogo(match['home_team_image'], size: 56.w),
                         SizedBox(height: 12.h),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                match['home_team'] ??
-                                    AppLocalizations.of(context)!.homeTeam,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              match['home_team'] ??
+                                  AppLocalizations.of(context)!.homeTeam,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.bold,
                               ),
-                              if ((match['home_red_cards'] ?? 0) > 0) ...[
-                                SizedBox(height: 4.h),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 4.w,
-                                    vertical: 1.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.redAccent,
-                                    borderRadius: BorderRadius.circular(2.w),
-                                  ),
-                                  child: Text(
-                                    match['home_red_cards'].toString(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (homeRedCards > 0) ...[
+                              SizedBox(height: 4.h),
+                              _buildRedCardBadge(homeRedCards, fontSize: 9.sp),
                             ],
-                          ),
+                          ],
+                        ),
                       ],
                     ),
                     Column(
@@ -1106,44 +1118,27 @@ class HomePageState extends ConsumerState<HomePage> {
                       children: [
                         buildTeamLogo(match['away_team_image'], size: 56.w),
                         SizedBox(height: 12.h),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                match['away_team'] ??
-                                    AppLocalizations.of(context)!.awayTeam,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              match['away_team'] ??
+                                  AppLocalizations.of(context)!.awayTeam,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.bold,
                               ),
-                              if ((match['away_red_cards'] ?? 0) > 0) ...[
-                                SizedBox(height: 4.h),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 4.w,
-                                    vertical: 1.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.redAccent,
-                                    borderRadius: BorderRadius.circular(2.w),
-                                  ),
-                                  child: Text(
-                                    match['away_red_cards'].toString(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (awayRedCards > 0) ...[
+                              SizedBox(height: 4.h),
+                              _buildRedCardBadge(awayRedCards, fontSize: 9.sp),
                             ],
-                          ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
@@ -1206,6 +1201,8 @@ class HomePageState extends ConsumerState<HomePage> {
     final status = match['status']?.toString();
     final isLive = isLiveStatus(status);
     final isFinished = isFinishedStatus(status);
+    final homeRedCards = _safeInt(match['home_red_cards']);
+    final awayRedCards = _safeInt(match['away_red_cards']);
 
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth * 0.75).clamp(240.0, 320.0);
@@ -1313,28 +1310,11 @@ class HomePageState extends ConsumerState<HomePage> {
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        if ((match['home_red_cards'] ?? 0) >
-                                            0) ...[
+                                        if (homeRedCards > 0) ...[
                                           SizedBox(height: 2.h),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 3.w,
-                                              vertical: 1.h,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.redAccent,
-                                              borderRadius:
-                                                  BorderRadius.circular(2.w),
-                                            ),
-                                            child: Text(
-                                              match['home_red_cards']
-                                                  .toString(),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 8.sp,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
+                                          _buildRedCardBadge(
+                                            homeRedCards,
+                                            fontSize: 8.sp,
                                           ),
                                         ],
                                       ],
@@ -1374,20 +1354,34 @@ class HomePageState extends ConsumerState<HomePage> {
                               child: Row(
                                 children: [
                                   Flexible(
-                                    child: Text(
-                                      match['away_team'] ??
-                                          AppLocalizations.of(
-                                            context,
-                                          )!.awayTeam,
-                                      style: TextStyle(
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.bodyMedium?.color,
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          match['away_team'] ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.awayTeam,
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyMedium?.color,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (awayRedCards > 0) ...[
+                                          SizedBox(height: 2.h),
+                                          _buildRedCardBadge(
+                                            awayRedCards,
+                                            fontSize: 8.sp,
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                 ],

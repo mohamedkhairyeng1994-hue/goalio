@@ -922,6 +922,87 @@ class _FixtureListState extends State<FixtureList>
 
   final ScrollController _scrollController = ScrollController();
 
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  String _matchKey(Map<String, dynamic> match) {
+    final id = match['id']?.toString();
+    if (id != null && id.isNotEmpty) return 'id:$id';
+
+    final matchUrl = match['match_url']?.toString();
+    if (matchUrl != null && matchUrl.isNotEmpty) return 'url:$matchUrl';
+
+    final date = match['match_date']?.toString() ?? widget.day;
+    final home = match['home_team']?.toString() ?? '';
+    final away = match['away_team']?.toString() ?? '';
+    return '$date|$home|$away';
+  }
+
+  List<Map<String, dynamic>> _mergeIncomingMatches(List<dynamic> data) {
+    final previousByKey = <String, Map<String, dynamic>>{};
+
+    for (final competition in _competitions) {
+      final matches = List<Map<String, dynamic>>.from(
+        competition['matches'] as List? ?? const [],
+      );
+      for (final match in matches) {
+        previousByKey[_matchKey(match)] = match;
+      }
+    }
+
+    return data.map<Map<String, dynamic>>((item) {
+      final match = Map<String, dynamic>.from(item as Map);
+      final previous = previousByKey[_matchKey(match)];
+
+      if (previous != null) {
+        final previousHomeRed = _asInt(previous['home_red_cards']);
+        final previousAwayRed = _asInt(previous['away_red_cards']);
+        final incomingHomeRed = _asInt(match['home_red_cards']);
+        final incomingAwayRed = _asInt(match['away_red_cards']);
+
+        match['home_red_cards'] =
+            incomingHomeRed < previousHomeRed
+                ? previousHomeRed
+                : incomingHomeRed;
+        match['away_red_cards'] =
+            incomingAwayRed < previousAwayRed
+                ? previousAwayRed
+                : incomingAwayRed;
+      } else {
+        match['home_red_cards'] = _asInt(match['home_red_cards']);
+        match['away_red_cards'] = _asInt(match['away_red_cards']);
+      }
+
+      return match;
+    }).toList();
+  }
+
+  Map<String, Map<String, dynamic>> _groupMatchesByCompetition(
+    List<Map<String, dynamic>> matches,
+  ) {
+    final Map<String, Map<String, dynamic>> grouped = {};
+
+    for (final match in matches) {
+      final compName = match['competition'] ?? 'Unknown';
+      grouped.putIfAbsent(
+        compName,
+        () => {
+          'name': compName,
+          'image': match['competition_image'],
+          'league_id': match['league_id'],
+          'is_favorite_league': match['is_favorite_league'] ?? false,
+          'matches': <Map<String, dynamic>>[],
+        },
+      );
+      (grouped[compName]!['matches'] as List<Map<String, dynamic>>).add(match);
+    }
+
+    return grouped;
+  }
+
   void resetScroll() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -984,29 +1065,18 @@ class _FixtureListState extends State<FixtureList>
       }
 
       final List<dynamic> data = await ApiService.getMatches(date: date);
+      final mergedData = _mergeIncomingMatches(data);
 
-      final bool hasLive = data.any((m) => isLiveMatch(m['status'] as String?));
+      final bool hasLive = mergedData.any(
+        (m) => isLiveMatch(m['status'] as String?),
+      );
       widget.onLiveChanged?.call(hasLive);
 
-      final Map<String, Map<String, dynamic>> grouped = {};
-      for (var match in data) {
-        final compName = match['competition'] ?? 'Unknown';
-        grouped.putIfAbsent(
-          compName,
-          () => {
-            'name': compName,
-            'image': match['competition_image'],
-            'league_id': match['league_id'],
-            'is_favorite_league': match['is_favorite_league'] ?? false,
-            'matches': [],
-          },
-        );
-        grouped[compName]!['matches'].add(match);
-      }
+      final grouped = _groupMatchesByCompetition(mergedData);
 
       if (mounted) {
         setState(() {
-          if (data.isNotEmpty || _competitions.isEmpty) {
+          if (mergedData.isNotEmpty || _competitions.isEmpty) {
             _competitions = grouped.values.toList();
           }
           _isLoading = false;
@@ -1056,24 +1126,13 @@ class _FixtureListState extends State<FixtureList>
         return;
       }
 
-      final bool hasLive = data.any((m) => isLiveMatch(m['status'] as String?));
+      final mergedData = _mergeIncomingMatches(data);
+      final bool hasLive = mergedData.any(
+        (m) => isLiveMatch(m['status'] as String?),
+      );
       widget.onLiveChanged?.call(hasLive);
 
-      final Map<String, Map<String, dynamic>> grouped = {};
-      for (var match in data) {
-        final compName = match['competition'] ?? 'Unknown';
-        grouped.putIfAbsent(
-          compName,
-          () => {
-            'name': compName,
-            'image': match['competition_image'],
-            'league_id': match['league_id'],
-            'is_favorite_league': match['is_favorite_league'] ?? false,
-            'matches': [],
-          },
-        );
-        grouped[compName]!['matches'].add(match);
-      }
+      final grouped = _groupMatchesByCompetition(mergedData);
 
       if (mounted) {
         setState(() {
@@ -1172,7 +1231,7 @@ class _FixtureListState extends State<FixtureList>
       itemCount:
           (hasFavorites ? 1 : 0) +
           filteredCompetitions.length +
-          (filteredCompetitions.length ~/ 2),
+          (filteredCompetitions.length ~/ 5),
       itemBuilder: (context, index) {
         int currentIndex = index;
         if (hasFavorites) {
@@ -1182,16 +1241,17 @@ class _FixtureListState extends State<FixtureList>
           currentIndex = index - 1;
         }
 
-        // Show Native Ad after every 2 competitions
-        if (currentIndex > 0 && currentIndex % 3 == 2) {
+        // Show Native Ad after every 5 competitions
+        if (currentIndex > 0 && currentIndex % 6 == 5) {
           return const GoalioNativeAdWidget();
         }
 
         // Calculate correct competition item index
-        final adOffset = ((currentIndex + 1) / 3).floor();
+        final adOffset = ((currentIndex + 1) / 6).floor();
         final actualCompIndex = currentIndex - adOffset;
 
-        if (actualCompIndex < 0 || actualCompIndex >= filteredCompetitions.length) {
+        if (actualCompIndex < 0 ||
+            actualCompIndex >= filteredCompetitions.length) {
           return const SizedBox.shrink();
         }
 
@@ -1658,11 +1718,19 @@ class MatchCard extends StatelessWidget {
   final Function(Map<String, dynamic>, bool)? onToggleFavorite;
   const MatchCard({super.key, required this.match, this.onToggleFavorite});
 
+  int _safeInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = match['status'];
     final bool isLive = isLiveMatch(status);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final homeRedCards = _safeInt(match['home_red_cards']);
+    final awayRedCards = _safeInt(match['away_red_cards']);
 
     return InkWell(
       borderRadius: BorderRadius.circular(12.w),
@@ -1699,7 +1767,7 @@ class MatchCard extends StatelessWidget {
               true,
               isDark,
               match['home_is_favorite'] == true,
-              (match['home_red_cards'] ?? 0) as int,
+              homeRedCards,
             ),
             _buildMatchStatus(context, status, isLive, isDark),
             _buildTeamInfo(
@@ -1709,7 +1777,7 @@ class MatchCard extends StatelessWidget {
               false,
               isDark,
               match['away_is_favorite'] == true,
-              (match['away_red_cards'] ?? 0) as int,
+              awayRedCards,
             ),
           ],
         ),
@@ -1771,24 +1839,11 @@ class MatchCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (redCards > 0) ...[
-                  SizedBox(height: 4.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4.w,
-                      vertical: 1.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(2.w),
-                    ),
-                    child: Text(
-                      redCards.toString().toArabicNumbers(context),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  SizedBox(height: 3.h),
+                  Align(
+                    alignment:
+                        isHome ? Alignment.centerRight : Alignment.centerLeft,
+                    child: _buildRedCardBadge(context, redCards, isHome),
                   ),
                 ],
               ],
@@ -1815,6 +1870,39 @@ class MatchCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildRedCardBadge(BuildContext context, int redCards, bool isHome) {
+    final badge = Container(
+      width: 7.w,
+      height: 11.h,
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(1.5.w),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.18),
+          width: 0.4,
+        ),
+      ),
+    );
+
+    final count = Text(
+      redCards.toString().toArabicNumbers(context),
+      style: TextStyle(
+        color: Colors.redAccent,
+        fontSize: 8.sp,
+        fontWeight: FontWeight.w700,
+        height: 1,
+      ),
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children:
+          isHome
+              ? [count, SizedBox(width: 3.w), badge]
+              : [badge, SizedBox(width: 3.w), count],
     );
   }
 
