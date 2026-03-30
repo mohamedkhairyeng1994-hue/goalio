@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/constants/constants.dart'; // Import for GoalioColors
+import '../../core/constants/constants.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/size_config.dart';
 import '../../screens/news/news_detail_page.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/widgets/native_ad_widget.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -67,15 +68,12 @@ class NewsPageState extends State<NewsPage> {
   }) async {
     if (mounted) {
       setState(() {
-        // Show loader if not silent OR if we have no data yet
         _isLoading = !silent || _news.isEmpty;
         _errorMessage = null;
-        if (!silent && !append)
-          _news = []; // Only clear if not silent and not appending
+        if (!silent && !append) _news = []; 
       });
     }
 
-    // Keep offset when appending latest items, otherwise reset for fresh load
     if (!append) {
       _offset = 0;
       _hasMore = true;
@@ -93,7 +91,6 @@ class NewsPageState extends State<NewsPage> {
       if (mounted) {
         setState(() {
           if (append) {
-            // Add freshly scraped items at the top while avoiding duplicates by id
             final existingIds =
                 _news
                     .whereType<Map<String, dynamic>>()
@@ -169,21 +166,16 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Future<void> refreshNews() async {
-    // Calling loadNews with forceScrape: true will trigger the backend scraper
-    // and then update the UI with the fresh data in a single step.
     await loadNews(silent: true, forceScrape: true);
   }
 
-  /// Groups articles into a mix of hero and grid items
   List<dynamic> get _layoutItems {
     final List<dynamic> items = [];
     int i = 0;
     while (i < _news.length) {
-      // Add a Hero card (Full width)
       items.add(_news[i]);
       i++;
 
-      // Add a pair of small cards (Grid) if possible
       if (i + 1 < _news.length) {
         items.add([_news[i], _news[i + 1]]);
         i += 2;
@@ -247,10 +239,9 @@ class NewsPageState extends State<NewsPage> {
 
     return Stack(
       children: [
-        // Content with pull-to-refresh that triggers scraper
         RefreshIndicator(
           color: GoalioColors.greenAccent,
-          edgeOffset: 110.h, // Spinner starts below the floating header
+          edgeOffset: 110.h,
           onRefresh: refreshNews,
           child: ListView.builder(
             controller: _scrollController,
@@ -260,10 +251,10 @@ class NewsPageState extends State<NewsPage> {
               100.h,
               16.w,
               120.h,
-            ), // Padding for header/nav
-            itemCount: layoutItems.length + (_isLoadingMore ? 1 : 0),
+            ),
+            itemCount: layoutItems.length + (layoutItems.length ~/ 2) + (_isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
-              if (index == layoutItems.length) {
+              if (index == layoutItems.length + (layoutItems.length ~/ 2)) {
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: const Center(
@@ -274,10 +265,20 @@ class NewsPageState extends State<NewsPage> {
                 );
               }
 
-              final item = layoutItems[index];
+              // Show Native Ad after every 2 layout items (total of 3 articles)
+              if (index > 0 && index % 3 == 2) {
+                return const GoalioNativeAdWidget();
+              }
+
+              // Adjust index for ad positions
+              final adOffset = ((index + 1) / 3).floor();
+              final actualIndex = index - adOffset;
+              
+              if (actualIndex >= layoutItems.length) return const SizedBox.shrink();
+
+              final item = layoutItems[actualIndex];
 
               if (item is List) {
-                // Return a row of two small cards
                 return Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
                   child: Row(
@@ -326,7 +327,6 @@ class NewsPageState extends State<NewsPage> {
                 );
               }
 
-              // Return a full-width hero card
               return GoalioNewsCard(
                 article: item,
                 isSmall: false,
@@ -347,7 +347,6 @@ class NewsPageState extends State<NewsPage> {
           ),
         ),
 
-        // Floating Header with refresh icon
         Positioned(
           top: 0,
           left: 0,
@@ -401,7 +400,7 @@ class GoalioNewsCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: isSmall ? 0 : 20.h),
       height: isSmall ? 180.h : 220.h,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor, // Placeholder color behind image
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.w),
         boxShadow: [
           BoxShadow(
@@ -418,7 +417,6 @@ class GoalioNewsCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Background Image
               if (article['image_url'] != null)
                 Hero(
                   tag: 'news_tab_image_${article['id']}',
@@ -433,7 +431,6 @@ class GoalioNewsCard extends StatelessWidget {
               else
                 Container(color: Theme.of(context).cardColor),
 
-              // Gradient Overlay - Always dark to support white text
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -449,14 +446,12 @@ class GoalioNewsCard extends StatelessWidget {
                 ),
               ),
 
-              // Content
               Padding(
                 padding: EdgeInsets.all(isSmall ? 10.0.w : 16.0.w),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tag - Only show on Hero or if it fits
                     if (!isSmall)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -481,7 +476,7 @@ class GoalioNewsCard extends StatelessWidget {
                     Text(
                       article['title'] ?? AppLocalizations.of(context)!.noTitle,
                       style: TextStyle(
-                        color: Colors.white, // Always white on dark gradient
+                        color: Colors.white,
                         fontSize: isSmall ? 13.sp : 17.sp,
                         fontWeight: FontWeight.bold,
                         height: 1.2,

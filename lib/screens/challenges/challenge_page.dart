@@ -12,6 +12,7 @@ import 'widgets/groups_list_widget.dart';
 import 'widgets/leaderboard_header.dart';
 import 'widgets/leaderboard_list_widget.dart';
 import 'challenge_models.dart';
+import '../../core/widgets/native_ad_widget.dart';
 
 class ChallengePage extends ConsumerStatefulWidget {
   const ChallengePage({super.key});
@@ -201,6 +202,10 @@ class ChallengePageState extends ConsumerState<ChallengePage> {
                             ),
                           ),
                           GroupsListWidget(isDark: isDark),
+                          SliverPadding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.w),
+                            sliver: const SliverToBoxAdapter(child: GoalioNativeAdWidget()),
+                          ),
                           SliverToBoxAdapter(child: SizedBox(height: 100.h)),
                         ],
                       ),
@@ -252,6 +257,10 @@ class ChallengePageState extends ConsumerState<ChallengePage> {
         slivers: [
           LeaderboardHeaderWidget(isDark: isDark),
           LeaderboardListWidget(isDark: isDark, group: group),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            sliver: const SliverToBoxAdapter(child: GoalioNativeAdWidget()),
+          ),
           SliverToBoxAdapter(child: SizedBox(height: 100.h)),
         ],
       ),

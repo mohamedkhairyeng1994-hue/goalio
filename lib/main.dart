@@ -29,7 +29,7 @@ import 'screens/challenges/challenge_providers.dart';
 import 'screens/auth/splash_page.dart';
 import 'screens/favorites/favorite_teams_page.dart';
 import 'screens/fixtures/match_detail_page.dart';
-import 'core/widgets/banner_ad_widget.dart';
+import 'core/utils/ad_manager.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -309,6 +309,9 @@ class MainPageState extends ConsumerState<MainPage> {
 
     // 3. Handle notification that opened the app
     _handleInitialNotification();
+
+    // Pre-load interstitial ad so it's ready for tab switching
+    AdManager.loadInterstitial();
   }
 
   Future<void> _handleInitialNotification() async {
@@ -620,44 +623,40 @@ class MainPageState extends ConsumerState<MainPage> {
       child: Scaffold(
         key: _scaffoldKey,
         endDrawer: _buildSettingsDrawer(),
-        body: SafeArea(
-          top: false,
-          bottom: false,
-          child: IndexedStack(
-            index: _currentIndex,
-            children: [
-              HomePage(
-                key: _homeKey,
-                onNavigateToFixtures: () => onDestinationSelected(1),
-                onNavigateToNews: () => onDestinationSelected(2),
-                onNavigateToLeagues: () => onDestinationSelected(4),
-                onLeagueTap: (league) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LeaguesPage(initialLeague: league),
-                    ),
-                  );
-                },
-                onOpenSettings: () {
-                  _scaffoldKey.currentState?.openEndDrawer();
-                },
-              ),
-              FixturesPage(key: _fixturesKey),
-              NewsPage(key: _newsKey),
-              ChallengePage(key: _challengeKey),
-              LeaguesPage(key: _leaguesKey),
-            ],
-          ),
-        ),
-        extendBody: true,
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
+        body: Column(
           children: [
-            const BannerAdWidget(),
-            _buildBeautifulNavBar(),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  HomePage(
+                    key: _homeKey,
+                    onNavigateToFixtures: () => onDestinationSelected(1),
+                    onNavigateToNews: () => onDestinationSelected(2),
+                    onNavigateToLeagues: () => onDestinationSelected(4),
+                    onLeagueTap: (league) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LeaguesPage(initialLeague: league),
+                        ),
+                      );
+                    },
+                    onOpenSettings: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
+                  ),
+                  FixturesPage(key: _fixturesKey),
+                  NewsPage(key: _newsKey),
+                  ChallengePage(key: _challengeKey),
+                  LeaguesPage(key: _leaguesKey),
+                ],
+              ),
+            ),
           ],
         ),
+        extendBody: true,
+        bottomNavigationBar: _buildBeautifulNavBar(),
       ),
     );
   }
@@ -668,7 +667,7 @@ class MainPageState extends ConsumerState<MainPage> {
 
     return Container(
       height: 55.h + bottomPadding,
-      padding: EdgeInsets.only(bottom: bottomPadding - 8),
+      padding: EdgeInsets.only(bottom: (bottomPadding - 8).clamp(0.0, double.infinity)),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor.withOpacity(0.98),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.w)),
@@ -797,9 +796,23 @@ class MainPageState extends ConsumerState<MainPage> {
     );
   }
 
+
   void onDestinationSelected(int index) {
     bool isSameTab = _currentIndex == index;
 
+    // INTERSTITIAL DEACTIVATED (Keeping code for future use)
+    // if (!isSameTab && index > 0 && index % 2 == 0) {
+    //   AdManager.showInterstitial(() {
+    //     if (mounted) _handleTabSwitch(index, isSameTab);
+    //   });
+    // } else {
+    //   _handleTabSwitch(index, isSameTab);
+    // }
+    
+    _handleTabSwitch(index, isSameTab);
+  }
+
+  void _handleTabSwitch(int index, bool isSameTab) {
     // Reset/Refresh logic
     switch (index) {
       case 0:

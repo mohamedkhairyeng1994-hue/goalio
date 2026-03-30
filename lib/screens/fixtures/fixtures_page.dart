@@ -13,6 +13,7 @@ import '../../core/utils/name_translator.dart';
 import '../../screens/fixtures/match_detail_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/messages.dart';
+import '../../core/widgets/native_ad_widget.dart';
 
 enum FixtureSortMode { favorites, alphabetical }
 
@@ -1169,17 +1170,32 @@ class _FixtureListState extends State<FixtureList>
         MediaQuery.of(context).padding.bottom + 84.h,
       ),
       itemCount:
-          hasFavorites
-              ? filteredCompetitions.length + 1
-              : filteredCompetitions.length,
+          (hasFavorites ? 1 : 0) +
+          filteredCompetitions.length +
+          (filteredCompetitions.length ~/ 2),
       itemBuilder: (context, index) {
+        int currentIndex = index;
         if (hasFavorites) {
           if (index == 0) {
             return _buildFavoriteMatchesPinnedSection(favoriteMatches);
           }
-          return _buildCompetitionGroup(filteredCompetitions[index - 1]);
+          currentIndex = index - 1;
         }
-        return _buildCompetitionGroup(filteredCompetitions[index]);
+
+        // Show Native Ad after every 2 competitions
+        if (currentIndex > 0 && currentIndex % 3 == 2) {
+          return const GoalioNativeAdWidget();
+        }
+
+        // Calculate correct competition item index
+        final adOffset = ((currentIndex + 1) / 3).floor();
+        final actualCompIndex = currentIndex - adOffset;
+
+        if (actualCompIndex < 0 || actualCompIndex >= filteredCompetitions.length) {
+          return const SizedBox.shrink();
+        }
+
+        return _buildCompetitionGroup(filteredCompetitions[actualCompIndex]);
       },
     );
   }
@@ -1421,12 +1437,19 @@ class _FixtureListState extends State<FixtureList>
           });
         }),
         if (isExpanded)
-          ...comp['matches']
-              .map<Widget>(
-                (m) =>
-                    MatchCard(match: m, onToggleFavorite: _toggleFavoriteTeam),
-              )
-              .toList(),
+          ...() {
+            final List<Widget> listItems = [];
+            final matches = comp['matches'] as List;
+            for (int i = 0; i < matches.length; i++) {
+              listItems.add(
+                MatchCard(
+                  match: matches[i],
+                  onToggleFavorite: _toggleFavoriteTeam,
+                ),
+              );
+            }
+            return listItems;
+          }(),
         SizedBox(height: 16.h),
       ],
     );

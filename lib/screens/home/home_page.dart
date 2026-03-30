@@ -17,6 +17,7 @@ import '../../core/utils/messages.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifications/notifications_providers.dart';
 import '../notifications/notifications_page.dart';
+import '../../core/widgets/native_ad_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final VoidCallback onNavigateToFixtures;
@@ -671,8 +672,22 @@ class HomePageState extends ConsumerState<HomePage> {
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    return _buildImmersiveNewsCard(_news[index]);
-                  }, childCount: _news.length),
+                    // Show Native Ad after every 2 items
+                    if (index > 0 && index % 3 == 2) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: const GoalioNativeAdWidget(),
+                      );
+                    }
+
+                    // Calculate correct news item index
+                    final adOffset = ((index + 1) / 3).floor();
+                    final actualIndex = index - adOffset;
+
+                    if (actualIndex >= _news.length) return const SizedBox.shrink();
+
+                    return _buildImmersiveNewsCard(_news[actualIndex]);
+                  }, childCount: _news.length + (_news.length ~/ 2)),
                 ),
 
               SliverPadding(padding: EdgeInsets.only(bottom: 100.h)),
