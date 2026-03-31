@@ -1757,27 +1757,47 @@ class MatchCard extends StatelessWidget {
                     ),
                   ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTeamInfo(
-              context,
-              match['home_team'],
-              match['home_team_image'],
-              true,
-              isDark,
-              match['home_is_favorite'] == true,
-              homeRedCards,
-            ),
-            _buildMatchStatus(context, status, isLive, isDark),
-            _buildTeamInfo(
-              context,
-              match['away_team'],
-              match['away_team_image'],
-              false,
-              isDark,
-              match['away_is_favorite'] == true,
-              awayRedCards,
+            if (match['competition'] != null &&
+                match['competition'].toString().isNotEmpty) ...[
+              Text(
+                match['competition'].toString().toArabicName(context).toUpperCase(),
+                style: TextStyle(
+                  fontSize: 7.sp,
+                  color: GoalioColors.greenAccent,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 10.h),
+            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTeamInfo(
+                  context,
+                  match['home_team'],
+                  match['home_team_image'],
+                  true,
+                  isDark,
+                  match['home_is_favorite'] == true,
+                  homeRedCards,
+                ),
+                _buildMatchStatus(context, status, isLive, isDark),
+                _buildTeamInfo(
+                  context,
+                  match['away_team'],
+                  match['away_team_image'],
+                  false,
+                  isDark,
+                  match['away_is_favorite'] == true,
+                  awayRedCards,
+                ),
+              ],
             ),
           ],
         ),

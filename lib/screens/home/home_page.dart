@@ -442,6 +442,8 @@ class HomePageState extends ConsumerState<HomePage> {
                                 size: 28.w,
                               ),
                               onPressed: () {
+                                // Invalidate before navigation to ensure latest data
+                                ref.invalidate(notificationsProvider);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

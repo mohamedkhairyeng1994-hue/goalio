@@ -78,6 +78,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                     fav['logo_url']?.toString() ??
                     '',
                 'league_name': fav['league_name']?.toString() ?? '',
+                'leagues': fav['leagues'] ?? [],
               };
             }
           }
@@ -126,6 +127,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                     '',
                 'logo': team['logo_url']?.toString() ?? '',
                 'league_name': team['league_name']?.toString() ?? '',
+                'leagues': team['leagues'] ?? [],
               };
               _teams.add(teamMap);
               final String tid = teamMap['id'] ?? '';
@@ -208,6 +210,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
           'name': team['name'],
           'logo': team['logo'] ?? team['logo_url'],
           'league_name': team['league_name'],
+          'leagues': team['leagues'],
         });
       }
 
@@ -598,6 +601,23 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (team['league_name'] != null && team['league_name'].isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 2.h),
+                        child: Text(
+                          team['league_name'].toString().toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 6.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? GoalioColors.greenAccent.withOpacity(0.8)
+                                : (isDark ? Colors.white38 : Colors.black38),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                   ],
                 ),
               ),

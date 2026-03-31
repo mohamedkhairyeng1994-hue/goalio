@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+
 import '../../core/services/api_service.dart';
 import '../../core/constants/constants.dart';
 import '../../core/utils/logo_utils.dart';
@@ -463,6 +464,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         ),
                       ],
                     ),
+
                     _buildScorersAndCards(true),
                   ],
                 ),
@@ -663,6 +665,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         ),
                       ],
                     ),
+
                     _buildScorersAndCards(false),
                   ],
                 ),
@@ -674,6 +677,8 @@ class _MatchDetailPageState extends State<MatchDetailPage>
       ),
     );
   }
+
+
 
   Widget _buildScorersAndCards(bool isHome) {
     if (_overview.isEmpty) return const SizedBox.shrink();
