@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/constants.dart';
@@ -9,6 +10,7 @@ import '../prediction_page.dart';
 import '../../fixtures/match_detail_page.dart';
 import '../challenge_providers.dart';
 import '../../../core/utils/number_utils.dart';
+import '../../../core/utils/name_translator.dart';
 
 class MatchItemWidget extends ConsumerWidget {
   final dynamic match;
@@ -19,8 +21,8 @@ class MatchItemWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final homeTeam = match['home_team'] ?? l10n.homeTeam;
-    final awayTeam = match['away_team'] ?? l10n.awayTeam;
+    final homeTeam = (match['home_team'] ?? l10n.homeTeam).toString().toArabicName(context);
+    final awayTeam = (match['away_team'] ?? l10n.awayTeam).toString().toArabicName(context);
     final timeStr = formatMatchTime(match['match_time']?.toString());
     final status = match['status']?.toString() ?? 'TBD';
     final bool hasPredicted = match['has_predicted'] == true;
@@ -51,6 +53,9 @@ class MatchItemWidget extends ConsumerWidget {
         (match['away_score'] == null || match['away_score'] == 'N/A')
             ? '0'
             : match['away_score'].toString();
+
+    final homeRedCards = match['home_red_cards'];
+    final awayRedCards = match['away_red_cards'];
 
     if (match['home_score_pen'] != null && match['away_score_pen'] != null) {
       homeScore += "(${match['home_score_pen']})";
@@ -91,19 +96,33 @@ class MatchItemWidget extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: Text(
-                            homeTeam,
-                            textAlign: TextAlign.end,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 9.sp,
-                              color:
-                                  isDark
-                                      ? Colors.white
-                                      : const Color(0xFF0F172A),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                homeTeam,
+                                textAlign: TextAlign.end,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 9.sp,
+                                  color:
+                                      isDark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A),
+                                ),
+                              ),
+                              if (homeRedCards != null && (homeRedCards is! int || homeRedCards > 0)) ...[
+                                SizedBox(height: 2.h),
+                                _buildRedCardBadge(
+                                  context,
+                                  homeRedCards,
+                                  isHome: true,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         SizedBox(width: 6.w),
@@ -126,9 +145,12 @@ class MatchItemWidget extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w900,
-                                      color: isFinished
-                                          ? (isDark ? Colors.white38 : Colors.black38)
-                                          : GoalioColors.greenAccent,
+                                      color:
+                                          isFinished
+                                              ? (isDark
+                                                  ? Colors.white38
+                                                  : Colors.black38)
+                                              : GoalioColors.greenAccent,
                                       letterSpacing: 0,
                                     ),
                                   ),
@@ -137,9 +159,12 @@ class MatchItemWidget extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w900,
-                                      color: isFinished
-                                          ? (isDark ? Colors.white38 : Colors.black38)
-                                          : GoalioColors.greenAccent,
+                                      color:
+                                          isFinished
+                                              ? (isDark
+                                                  ? Colors.white38
+                                                  : Colors.black38)
+                                              : GoalioColors.greenAccent,
                                       letterSpacing: 0,
                                     ),
                                   ),
@@ -148,9 +173,12 @@ class MatchItemWidget extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w900,
-                                      color: isFinished
-                                          ? (isDark ? Colors.white38 : Colors.black38)
-                                          : GoalioColors.greenAccent,
+                                      color:
+                                          isFinished
+                                              ? (isDark
+                                                  ? Colors.white38
+                                                  : Colors.black38)
+                                              : GoalioColors.greenAccent,
                                       letterSpacing: 0,
                                     ),
                                   ),
@@ -172,8 +200,8 @@ class MatchItemWidget extends ConsumerWidget {
                                     (status == 'HT' ||
                                         status == 'FT' ||
                                         status.contains("'"))
-                                ? localizeMatchStatus(context, status)
-                                : timeStr,
+                                ? localizeMatchStatus(context, status).toArabicNumbers(context)
+                                : timeStr.toArabicNumbers(context),
                             style: TextStyle(
                               fontSize: 8.sp,
                               fontWeight: FontWeight.w900,
@@ -196,19 +224,33 @@ class MatchItemWidget extends ConsumerWidget {
                         buildTeamLogo(match['away_logo'], size: 18.w),
                         SizedBox(width: 6.w),
                         Expanded(
-                          child: Text(
-                            awayTeam,
-                            textAlign: TextAlign.start,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 9.sp,
-                              color:
-                                  isDark
-                                      ? Colors.white
-                                      : const Color(0xFF0F172A),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                awayTeam,
+                                textAlign: TextAlign.start,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 9.sp,
+                                  color:
+                                      isDark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A),
+                                ),
+                              ),
+                              if (awayRedCards != null && (awayRedCards is! int || awayRedCards > 0)) ...[
+                                SizedBox(height: 2.h),
+                                _buildRedCardBadge(
+                                  context,
+                                  awayRedCards,
+                                  isHome: false,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       ],
@@ -234,6 +276,128 @@ class MatchItemWidget extends ConsumerWidget {
               pointsValue: pointsValue,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRedCardBadge(
+    BuildContext context,
+    dynamic redCardsData, {
+    bool isHome = false,
+  }) {
+    if (redCardsData == null) return const SizedBox.shrink();
+
+    List<String> playerNames = [];
+    int count = 0;
+
+    if (redCardsData is int) {
+      count = redCardsData;
+    } else if (redCardsData is List) {
+      count = redCardsData.length;
+      playerNames =
+          redCardsData.map((e) {
+            if (e is Map) {
+              return e['player']?.toString() ?? e['name']?.toString() ?? '';
+            }
+            return e.toString();
+          }).where((e) => e.isNotEmpty).toList();
+    } else if (redCardsData is String) {
+      if (redCardsData.startsWith('[') || redCardsData.startsWith('{')) {
+        try {
+          final decoded = json.decode(redCardsData);
+          return _buildRedCardBadge(context, decoded, isHome: isHome);
+        } catch (e) {
+          // Fallback
+        }
+      }
+      final parsed = int.tryParse(redCardsData);
+      if (parsed != null) {
+        count = parsed;
+      } else if (redCardsData.isNotEmpty) {
+        count = 1;
+        playerNames = [redCardsData];
+      }
+    }
+
+    if (count == 0) return const SizedBox.shrink();
+
+    // If we have names, display them vertically aligned
+    if (playerNames.isNotEmpty) {
+      return Column(
+        crossAxisAlignment:
+            isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children:
+            playerNames.map((name) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                child: Row(
+                  mainAxisAlignment:
+                      isHome
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                  children:
+                      isHome
+                          ? [
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            _buildSingleRedCardIcon(),
+                          ]
+                          : [
+                            _buildSingleRedCardIcon(),
+                            SizedBox(width: 3.w),
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                ),
+              );
+            }).toList(),
+      );
+    }
+
+    // Fallback: if no player names but we have a count, show that many red card icons
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: List.generate(count, (index) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1.w),
+        child: _buildSingleRedCardIcon(),
+      )),
+    );
+  }
+
+  Widget _buildSingleRedCardIcon() {
+    return Container(
+      width: 5.w,
+      height: 7.h,
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(1.w),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.18),
+          width: 0.4,
         ),
       ),
     );

@@ -557,7 +557,7 @@ class LeaguesPageState extends State<LeaguesPage>
             ),
             child: Text(
               _selectedLeague != null
-                  ? _selectedLeague!['name'] ?? ''
+                  ? ArabicNameExtension(_selectedLeague!['name'] ?? '').toArabicName(context)
                   : AppLocalizations.of(context)!.leaguesTitle,
               style: const TextStyle(
                 fontSize: 24,

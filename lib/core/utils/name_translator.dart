@@ -6,6 +6,9 @@ extension ArabicNameExtension on String {
   String toArabicName(BuildContext context) {
     if (this.isEmpty) return this;
 
+    final langCode = Localizations.localeOf(context).languageCode;
+    if (langCode != 'ar') return this;
+
     // Attempt map lookup case-insensitive.
     final key = this.trim().toLowerCase();
     return _famousPlayersMap[key] ?? this;

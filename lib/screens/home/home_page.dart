@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../../core/utils/time_utils.dart';
+import '../../core/utils/name_translator.dart';
+import '../../core/utils/number_utils.dart';
 
 import 'dart:ui' as ui; // Needed for ImageFilter
 
@@ -910,28 +912,133 @@ class HomePageState extends ConsumerState<HomePage> {
     return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 
-  Widget _buildRedCardBadge(int redCards, {double? fontSize}) {
+  Widget _buildRedCardBadge(
+    dynamic redCardsData, {
+    double? fontSize,
+    bool isHome = false,
+    bool showNames = false,
+  }) {
+    if (redCardsData == null) return const SizedBox.shrink();
+
+    List<String> playerNames = [];
+    int count = 0;
+
+    if (redCardsData is int) {
+      count = redCardsData;
+    } else if (redCardsData is List) {
+      count = redCardsData.length;
+      playerNames =
+          redCardsData.map((e) {
+            if (e is Map) {
+              return e['player']?.toString() ?? e['name']?.toString() ?? '';
+            }
+            return e.toString();
+          }).where((e) => e.isNotEmpty).toList();
+    } else if (redCardsData is String) {
+      if (redCardsData.startsWith('[') || redCardsData.startsWith('{')) {
+        try {
+          final decoded = json.decode(redCardsData);
+          return _buildRedCardBadge(decoded,
+              fontSize: fontSize, isHome: isHome, showNames: showNames);
+        } catch (e) {
+          // Fallback
+        }
+      }
+      final parsed = int.tryParse(redCardsData);
+      if (parsed != null) {
+        count = parsed;
+      } else if (redCardsData.isNotEmpty) {
+        count = 1;
+        playerNames = [redCardsData];
+      }
+    }
+
+    if (count == 0) return const SizedBox.shrink();
+
+    // If we have names and it's allowed (usually for hero card or if space permits)
+    if (showNames && playerNames.isNotEmpty) {
+      return Column(
+        crossAxisAlignment:
+            isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children:
+            playerNames.map((name) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 1.h),
+                child: Row(
+                  mainAxisAlignment:
+                      isHome
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                  children:
+                      isHome
+                          ? [
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            _buildSingleRedCardIcon(),
+                          ]
+                          : [
+                            _buildSingleRedCardIcon(),
+                            SizedBox(width: 3.w),
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                ),
+              );
+            }).toList(),
+      );
+    }
+
+    // Fallback: if no player names but we have a count, show that many red card icons
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: List.generate(count, (index) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1.w),
+        child: _buildSingleRedCardIcon(),
+      )),
+    );
+  }
+
+  Widget _buildSingleRedCardIcon() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      width: 5.w,
+      height: 7.h,
       decoration: BoxDecoration(
         color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(2.w),
-      ),
-      child: Text(
-        redCards.toString(),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: fontSize ?? 8.sp,
-          fontWeight: FontWeight.bold,
-          height: 1,
+        borderRadius: BorderRadius.circular(1.w),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.18),
+          width: 0.4,
         ),
       ),
     );
   }
 
   Widget _buildHeroMatchCard(dynamic match) {
-    final homeRedCards = _safeInt(match['home_red_cards']);
-    final awayRedCards = _safeInt(match['away_red_cards']);
+    final homeRedCards = match['home_red_cards'];
+    final awayRedCards = match['away_red_cards'];
 
     return GestureDetector(
       onTap: () {
@@ -979,8 +1086,10 @@ class HomePageState extends ConsumerState<HomePage> {
                     borderRadius: BorderRadius.circular(20.w),
                   ),
                   child: Text(
-                    match['competition'] ??
-                        AppLocalizations.of(context)!.featuredMatch,
+                    (match['competition'] ??
+                         AppLocalizations.of(context)!.featuredMatch)
+                        .toString()
+                        .toArabicName(context),
                     style: TextStyle(
                       color: GoalioColors.greenAccent,
                       fontSize: 10.sp,
@@ -1001,8 +1110,10 @@ class HomePageState extends ConsumerState<HomePage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              match['home_team'] ??
-                                  AppLocalizations.of(context)!.homeTeam,
+                              (match['home_team'] ??
+                                   AppLocalizations.of(context)!.homeTeam)
+                                  .toString()
+                                  .toArabicName(context),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 13.sp,
@@ -1012,9 +1123,14 @@ class HomePageState extends ConsumerState<HomePage> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (homeRedCards > 0) ...[
+                            if (homeRedCards != null && (homeRedCards is! int || homeRedCards > 0)) ...[
                               SizedBox(height: 4.h),
-                              _buildRedCardBadge(homeRedCards, fontSize: 9.sp),
+                              _buildRedCardBadge(
+                                homeRedCards,
+                                fontSize: 9.sp,
+                                isHome: true,
+                                showNames: true,
+                              ),
                             ],
                           ],
                         ),
@@ -1027,7 +1143,8 @@ class HomePageState extends ConsumerState<HomePage> {
                           Column(
                             children: [
                               Text(
-                                "${match['home_score'] == 'N/A' ? '0' : match['home_score']} - ${match['away_score'] == 'N/A' ? '0' : match['away_score']}",
+                                "${match['home_score'] == 'N/A' ? '0' : match['home_score']} - ${match['away_score'] == 'N/A' ? '0' : match['away_score']}"
+                                    .toArabicNumbers(context),
                                 style: TextStyle(
                                   fontSize: 32.sp,
                                   fontWeight: FontWeight.w900,
@@ -1039,7 +1156,8 @@ class HomePageState extends ConsumerState<HomePage> {
                                   match['away_score_pen'] != null &&
                                   match['away_score_pen'] != 'N/A')
                                 Text(
-                                  "(${match['home_score_pen']} - ${match['away_score_pen']})",
+                                  "(${match['home_score_pen']} - ${match['away_score_pen']})"
+                                      .toArabicNumbers(context),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
@@ -1054,7 +1172,8 @@ class HomePageState extends ConsumerState<HomePage> {
                           )
                         else if (match['home_score'] != 'N/A')
                           Text(
-                            "${match['home_score']} - ${match['away_score']}",
+                            "${match['home_score']} - ${match['away_score']}"
+                                .toArabicNumbers(context),
                             style: TextStyle(
                               color: Colors.redAccent,
                               fontSize: 32.sp,
@@ -1088,7 +1207,8 @@ class HomePageState extends ConsumerState<HomePage> {
                                 ? (match['time'].toString().contains("'")
                                     ? match['time'].toString()
                                     : "${match['time']}'")
-                                : localizeMatchStatus(context, match['status']),
+                                : localizeMatchStatus(context, match['status'])
+                                    .toArabicNumbers(context),
                             style: TextStyle(
                               color: Colors.redAccent,
                               fontWeight: FontWeight.bold,
@@ -1098,7 +1218,8 @@ class HomePageState extends ConsumerState<HomePage> {
                         else if (match['status'] == 'HT' ||
                             match['status'] == 'FT')
                           Text(
-                            localizeMatchStatus(context, match['status']),
+                            localizeMatchStatus(context, match['status'])
+                                .toArabicNumbers(context),
                             style: TextStyle(
                               color: Colors.redAccent,
                               fontWeight: FontWeight.bold,
@@ -1107,7 +1228,7 @@ class HomePageState extends ConsumerState<HomePage> {
                           )
                         else
                           Text(
-                            formatMatchTime(match['time']),
+                            formatMatchTime(match['time']).toArabicNumbers(context),
                             style: TextStyle(
                               color: Colors.white54,
                               fontWeight: FontWeight.bold,
@@ -1124,8 +1245,10 @@ class HomePageState extends ConsumerState<HomePage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              match['away_team'] ??
-                                  AppLocalizations.of(context)!.awayTeam,
+                              (match['away_team'] ??
+                                   AppLocalizations.of(context)!.awayTeam)
+                                  .toString()
+                                  .toArabicName(context),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 13.sp,
@@ -1135,9 +1258,14 @@ class HomePageState extends ConsumerState<HomePage> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (awayRedCards > 0) ...[
+                            if (awayRedCards != null && (awayRedCards is! int || awayRedCards > 0)) ...[
                               SizedBox(height: 4.h),
-                              _buildRedCardBadge(awayRedCards, fontSize: 9.sp),
+                              _buildRedCardBadge(
+                                awayRedCards,
+                                fontSize: 9.sp,
+                                isHome: false,
+                                showNames: true,
+                              ),
                             ],
                           ],
                         ),
@@ -1203,8 +1331,9 @@ class HomePageState extends ConsumerState<HomePage> {
     final status = match['status']?.toString();
     final isLive = isLiveStatus(status);
     final isFinished = isFinishedStatus(status);
-    final homeRedCards = _safeInt(match['home_red_cards']);
-    final awayRedCards = _safeInt(match['away_red_cards']);
+    final l10n = AppLocalizations.of(context)!;
+    final homeRedCards = match['home_red_cards'];
+    final awayRedCards = match['away_red_cards'];
 
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth * 0.75).clamp(240.0, 320.0);
@@ -1250,7 +1379,10 @@ class HomePageState extends ConsumerState<HomePage> {
               children: [
                 Expanded(
                   child: Text(
-                    (match['competition'] ?? 'League').toString().toUpperCase(),
+                    (match['competition'] ?? 'League')
+                        .toString()
+                        .toArabicName(context)
+                        .toUpperCase(),
                     style: TextStyle(
                       color: GoalioColors.greenAccent,
                       fontSize: 8.sp,
@@ -1298,10 +1430,7 @@ class HomePageState extends ConsumerState<HomePage> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          match['home_team'] ??
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.homeTeam,
+                                          (match['home_team']?.toString().toArabicName(context) ?? l10n.homeTeam),
                                           style: TextStyle(
                                             color:
                                                 Theme.of(
@@ -1312,11 +1441,13 @@ class HomePageState extends ConsumerState<HomePage> {
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        if (homeRedCards > 0) ...[
+                                        if (homeRedCards != null && (homeRedCards is! int || homeRedCards > 0)) ...[
                                           SizedBox(height: 2.h),
                                           _buildRedCardBadge(
                                             homeRedCards,
                                             fontSize: 8.sp,
+                                            isHome: true,
+                                            showNames: true,
                                           ),
                                         ],
                                       ],
@@ -1332,8 +1463,8 @@ class HomePageState extends ConsumerState<HomePage> {
                       Text(
                         (isLive || isFinished)
                             ? (match['home_score'] != 'N/A'
-                                ? "${match['home_score']}"
-                                : '0')
+                                ? "${match['home_score']}".toArabicNumbers(context)
+                                : '0'.toArabicNumbers(context))
                             : "-",
                         style: TextStyle(
                           color: isLive ? Colors.redAccent : Colors.grey,
@@ -1362,10 +1493,7 @@ class HomePageState extends ConsumerState<HomePage> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          match['away_team'] ??
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.awayTeam,
+                                          (match['away_team']?.toString().toArabicName(context) ?? l10n.awayTeam),
                                           style: TextStyle(
                                             color:
                                                 Theme.of(
@@ -1376,11 +1504,13 @@ class HomePageState extends ConsumerState<HomePage> {
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        if (awayRedCards > 0) ...[
+                                        if (awayRedCards != null && (awayRedCards is! int || awayRedCards > 0)) ...[
                                           SizedBox(height: 2.h),
                                           _buildRedCardBadge(
                                             awayRedCards,
                                             fontSize: 8.sp,
+                                            isHome: false,
+                                            showNames: true,
                                           ),
                                         ],
                                       ],
@@ -1396,8 +1526,8 @@ class HomePageState extends ConsumerState<HomePage> {
                       Text(
                         (isLive || isFinished)
                             ? (match['away_score'] != 'N/A'
-                                ? "${match['away_score']}"
-                                : '0')
+                                ? "${match['away_score']}".toArabicNumbers(context)
+                                : '0'.toArabicNumbers(context))
                             : "-",
                         style: TextStyle(
                           color: isLive ? Colors.redAccent : Colors.grey,

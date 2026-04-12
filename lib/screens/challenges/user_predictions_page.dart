@@ -335,7 +335,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
         Expanded(
           flex: 5,
           child: Text(
-            match['home_team'],
+            ArabicNameExtension(match['home_team'] ?? '').toArabicName(context),
             style: TextStyle(
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
@@ -399,7 +399,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
         Expanded(
           flex: 5,
           child: Text(
-            match['away_team'],
+            ArabicNameExtension(match['away_team'] ?? '').toArabicName(context),
             style: TextStyle(
               fontSize: 11.sp,
               fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/utils/time_utils.dart';
 
@@ -963,17 +964,14 @@ class _FixtureListState extends State<FixtureList>
         final incomingHomeRed = _asInt(match['home_red_cards']);
         final incomingAwayRed = _asInt(match['away_red_cards']);
 
-        match['home_red_cards'] =
-            incomingHomeRed < previousHomeRed
-                ? previousHomeRed
-                : incomingHomeRed;
-        match['away_red_cards'] =
-            incomingAwayRed < previousAwayRed
-                ? previousAwayRed
-                : incomingAwayRed;
-      } else {
-        match['home_red_cards'] = _asInt(match['home_red_cards']);
-        match['away_red_cards'] = _asInt(match['away_red_cards']);
+        // Keep previous data if incoming count is lower (data lag prevention)
+        // but preserve the original object (which may contain names)
+        if (incomingHomeRed < previousHomeRed) {
+          match['home_red_cards'] = previous['home_red_cards'];
+        }
+        if (incomingAwayRed < previousAwayRed) {
+          match['away_red_cards'] = previous['away_red_cards'];
+        }
       }
 
       return match;
@@ -1729,8 +1727,8 @@ class MatchCard extends StatelessWidget {
     final status = match['status'];
     final bool isLive = isLiveMatch(status);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final homeRedCards = _safeInt(match['home_red_cards']);
-    final awayRedCards = _safeInt(match['away_red_cards']);
+    final homeRedCards = match['home_red_cards'];
+    final awayRedCards = match['away_red_cards'];
 
     return InkWell(
       borderRadius: BorderRadius.circular(12.w),
@@ -1760,10 +1758,15 @@ class MatchCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (match['competition'] != null &&
+            if ((match['home_is_favorite'] == true ||
+                    match['away_is_favorite'] == true) &&
+                match['competition'] != null &&
                 match['competition'].toString().isNotEmpty) ...[
               Text(
-                match['competition'].toString().toArabicName(context).toUpperCase(),
+                match['competition']
+                    .toString()
+                    .toArabicName(context)
+                    .toUpperCase(),
                 style: TextStyle(
                   fontSize: 7.sp,
                   color: GoalioColors.greenAccent,
@@ -1812,7 +1815,7 @@ class MatchCard extends StatelessWidget {
     bool isHome,
     bool isDark,
     bool isFavorite,
-    int redCards,
+    dynamic redCards,
   ) {
     return Expanded(
       flex: 4,
@@ -1847,7 +1850,7 @@ class MatchCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  ArabicNameExtension(name ?? '-').toArabicName(context),
+                  (name ?? '-').toString().toArabicName(context),
                   textAlign: isHome ? TextAlign.end : TextAlign.start,
                   style: TextStyle(
                     color: isDark ? Colors.white : Colors.black87,
@@ -1858,7 +1861,7 @@ class MatchCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (redCards > 0) ...[
+                if (redCards != null && (redCards is! int || redCards > 0)) ...[
                   SizedBox(height: 3.h),
                   Align(
                     alignment:
@@ -1893,36 +1896,126 @@ class MatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRedCardBadge(BuildContext context, int redCards, bool isHome) {
-    final badge = Container(
-      width: 7.w,
-      height: 11.h,
+  Widget _buildRedCardBadge(
+    BuildContext context,
+    dynamic redCardsData,
+    bool isHome,
+  ) {
+    if (redCardsData == null) return const SizedBox.shrink();
+
+    List<String> playerNames = [];
+    int count = 0;
+
+    if (redCardsData is int) {
+      count = redCardsData;
+    } else if (redCardsData is List) {
+      count = redCardsData.length;
+      playerNames =
+          redCardsData
+              .map((e) {
+                if (e is Map) {
+                  return e['player']?.toString() ?? e['name']?.toString() ?? '';
+                }
+                return e.toString();
+              })
+              .where((e) => e.isNotEmpty)
+              .toList();
+    } else if (redCardsData is String) {
+      if (redCardsData.startsWith('[') || redCardsData.startsWith('{')) {
+        try {
+          final decoded = json.decode(redCardsData);
+          return _buildRedCardBadge(context, decoded, isHome);
+        } catch (e) {
+          // Fallback to plain string
+        }
+      }
+      final parsed = int.tryParse(redCardsData);
+      if (parsed != null) {
+        count = parsed;
+      } else if (redCardsData.isNotEmpty) {
+        count = 1;
+        playerNames = [redCardsData];
+      }
+    }
+
+    if (count == 0) return const SizedBox.shrink();
+
+    // If we have names, we show them as rows like in match detail page
+    if (playerNames.isNotEmpty) {
+      return Column(
+        crossAxisAlignment:
+            isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children:
+            playerNames.map((name) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 1.h),
+                child: Row(
+                  mainAxisAlignment:
+                      isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  children:
+                      isHome
+                          ? [
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            _buildSingleRedCardIcon(),
+                          ]
+                          : [
+                            _buildSingleRedCardIcon(),
+                            SizedBox(width: 3.w),
+                            Flexible(
+                              child: Text(
+                                name.toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                ),
+              );
+            }).toList(),
+      );
+    }
+
+    // Fallback: if no player names but we have a count, show that many red card icons
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: List.generate(count, (index) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1.w),
+        child: _buildSingleRedCardIcon(),
+      )),
+    );
+  }
+
+  Widget _buildSingleRedCardIcon() {
+    return Container(
+      width: 5.w,
+      height: 7.h,
       decoration: BoxDecoration(
         color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(1.5.w),
+        borderRadius: BorderRadius.circular(1.w),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.18),
           width: 0.4,
         ),
       ),
-    );
-
-    final count = Text(
-      redCards.toString().toArabicNumbers(context),
-      style: TextStyle(
-        color: Colors.redAccent,
-        fontSize: 8.sp,
-        fontWeight: FontWeight.w700,
-        height: 1,
-      ),
-    );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children:
-          isHome
-              ? [count, SizedBox(width: 3.w), badge]
-              : [badge, SizedBox(width: 3.w), count],
     );
   }
 
@@ -2080,7 +2173,7 @@ class MatchCard extends StatelessWidget {
         text = formatMatchTime(match['time']);
     }
     return Text(
-      localizeMatchStatus(context, text),
+      localizeMatchStatus(context, text).toArabicNumbers(context),
       style: TextStyle(
         fontSize: 14.sp,
         fontWeight: FontWeight.bold,
