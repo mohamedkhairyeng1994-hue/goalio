@@ -30,7 +30,7 @@ import 'screens/challenges/challenge_providers.dart';
 import 'screens/auth/splash_page.dart';
 import 'screens/favorites/favorite_teams_page.dart';
 import 'screens/fixtures/match_detail_page.dart';
-import 'screens/for_you/for_you_page.dart';
+import 'screens/social/social_page.dart';
 import 'core/utils/ad_manager.dart';
 
 @pragma('vm:entry-point')
@@ -301,7 +301,6 @@ class MainPageState extends ConsumerState<MainPage> {
   final GlobalKey<LeaguesPageState> _leaguesKey = GlobalKey<LeaguesPageState>();
   final GlobalKey<ChallengePageState> _challengeKey =
       GlobalKey<ChallengePageState>();
-  final GlobalKey<ForYouPageState> _forYouKey = GlobalKey<ForYouPageState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -670,7 +669,7 @@ class MainPageState extends ConsumerState<MainPage> {
       onTap: () {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (context) => const ForYouPage()),
+          CupertinoPageRoute(builder: (context) => const SocialPage()),
         );
       },
       child: Container(
@@ -701,7 +700,7 @@ class MainPageState extends ConsumerState<MainPage> {
           ),
         ),
         child: Icon(
-          Icons.video_library_rounded,
+          Icons.dynamic_feed,
           color: Colors.white,
           size: 28.w,
         ),
@@ -930,11 +929,6 @@ class MainPageState extends ConsumerState<MainPage> {
           _leaguesKey.currentState?.refreshData(silent: true);
         } else {
           _leaguesKey.currentState?.refreshData(silent: true);
-        }
-        break;
-      case 5:
-        if (isSameTab) {
-          _forYouKey.currentState?.resetState();
         }
         break;
     }
