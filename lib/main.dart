@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,7 @@ import 'screens/challenges/challenge_providers.dart';
 import 'screens/auth/splash_page.dart';
 import 'screens/favorites/favorite_teams_page.dart';
 import 'screens/fixtures/match_detail_page.dart';
+import 'screens/for_you/for_you_page.dart';
 import 'core/utils/ad_manager.dart';
 
 @pragma('vm:entry-point')
@@ -299,6 +301,7 @@ class MainPageState extends ConsumerState<MainPage> {
   final GlobalKey<LeaguesPageState> _leaguesKey = GlobalKey<LeaguesPageState>();
   final GlobalKey<ChallengePageState> _challengeKey =
       GlobalKey<ChallengePageState>();
+  final GlobalKey<ForYouPageState> _forYouKey = GlobalKey<ForYouPageState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -657,6 +660,51 @@ class MainPageState extends ConsumerState<MainPage> {
         ),
         extendBody: true,
         bottomNavigationBar: _buildBeautifulNavBar(),
+        floatingActionButton: _buildSocialFab(),
+      ),
+    );
+  }
+
+  Widget _buildSocialFab() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => const ForYouPage()),
+        );
+      },
+      child: Container(
+        width: 60.w,
+        height: 60.w,
+        margin: EdgeInsets.only(bottom: 12.h, right: 4.w),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              GoalioColors.greenAccent,
+              Color(0xFF0F766E), // Deep elegant green
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: GoalioColors.greenAccent.withOpacity(0.4),
+              blurRadius: 16,
+              spreadRadius: 2,
+              offset: const Offset(0, 6),
+            ),
+          ],
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Icon(
+          Icons.video_library_rounded,
+          color: Colors.white,
+          size: 28.w,
+        ),
       ),
     );
   }
@@ -684,32 +732,32 @@ class MainPageState extends ConsumerState<MainPage> {
         alignment: Alignment.topCenter,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildNavItem(
                 0,
                 Icons.home_outlined,
                 Icons.home,
-                AppLocalizations.of(context)!.home,
+                AppLocalizations.of(context)?.home ?? 'Home',
               ),
               _buildNavItem(
                 1,
                 Icons.sports_soccer_outlined,
                 Icons.sports_soccer,
-                AppLocalizations.of(context)!.fixtures,
+                AppLocalizations.of(context)?.fixtures ?? 'Fixtures',
               ),
-              SizedBox(width: 70.w), // Increased space for center button
+              SizedBox(width: 50.w), // Space for center button
               _buildNavItem(
                 2,
                 Icons.newspaper_outlined,
                 Icons.newspaper,
-                AppLocalizations.of(context)!.news,
+                AppLocalizations.of(context)?.news ?? 'News',
               ),
               _buildNavItem(
                 4,
                 Icons.groups_outlined,
                 Icons.groups,
-                AppLocalizations.of(context)!.leagues,
+                AppLocalizations.of(context)?.leagues ?? 'Leagues',
               ),
             ],
           ),
@@ -729,7 +777,7 @@ class MainPageState extends ConsumerState<MainPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      width: 68.w,
+      width: 52.w, // Reduced width to accommodate more items
       child: GestureDetector(
         onTap: () => onDestinationSelected(index),
         behavior: HitTestBehavior.opaque,
@@ -882,6 +930,11 @@ class MainPageState extends ConsumerState<MainPage> {
           _leaguesKey.currentState?.refreshData(silent: true);
         } else {
           _leaguesKey.currentState?.refreshData(silent: true);
+        }
+        break;
+      case 5:
+        if (isSameTab) {
+          _forYouKey.currentState?.resetState();
         }
         break;
     }
