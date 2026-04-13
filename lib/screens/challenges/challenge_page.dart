@@ -227,7 +227,7 @@ class ChallengePageState extends ConsumerState<ChallengePage> {
                         filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
                         child: Container(
                           color: (isDark ? Colors.black : Colors.white)
-                              .withValues(alpha: 0.15),
+                              .withOpacity(0.15),
                           child: const Center(
                             child: CircularProgressIndicator(
                               color: GoalioColors.greenAccent,

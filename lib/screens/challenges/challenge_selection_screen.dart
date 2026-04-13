@@ -106,7 +106,7 @@ class ChallengeSelectionScreen extends StatelessWidget {
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -118,7 +118,7 @@ class ChallengeSelectionScreen extends StatelessWidget {
               height: 56.w,
               width: 56.w,
               decoration: BoxDecoration(
-                color: GoalioColors.greenAccent.withValues(alpha: 0.1),
+                color: GoalioColors.greenAccent.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16.w),
               ),
               child: Icon(icon, color: GoalioColors.greenAccent, size: 28.w),

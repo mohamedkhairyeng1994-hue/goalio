@@ -328,7 +328,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Divider(
-                    color: _posColor(pos).withValues(alpha: 0.15),
+                    color: _posColor(pos).withOpacity(0.15),
                     thickness: 1,
                   ),
                 ),
@@ -379,7 +379,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6.w),
       ),
       child: Row(
@@ -416,22 +416,19 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                _purple.withValues(alpha: 0.8),
+                _purple.withOpacity(0.8),
                 const Color(0xFF1E1B4B),
-                _purple.withValues(alpha: 0.8),
+                _purple.withOpacity(0.8),
               ],
               stops: const [0, 0.5, 1],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24.w),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.15),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
             boxShadow: [
               BoxShadow(
-                color: _purple.withValues(alpha: 0.3),
+                color: _purple.withOpacity(0.3),
                 blurRadius: 32,
                 offset: const Offset(0, 12),
               ),
@@ -450,7 +447,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                     height: 200,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _purpleLight.withValues(alpha: 0.1),
+                      color: _purpleLight.withOpacity(0.1),
                     ),
                   ),
                 ),
@@ -462,7 +459,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                     height: 140,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _green.withValues(alpha: 0.05),
+                      color: _green.withOpacity(0.05),
                     ),
                   ),
                 ),
@@ -474,7 +471,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                         (bounds) => LinearGradient(
                           colors: [
                             Colors.transparent,
-                            Colors.white.withValues(alpha: 0.08),
+                            Colors.white.withOpacity(0.08),
                             Colors.transparent,
                           ],
                           stops: [
@@ -503,10 +500,10 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                               vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
+                              color: Colors.white.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8.w),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: Colors.white.withOpacity(0.2),
                               ),
                             ),
                             child: Text(
@@ -529,7 +526,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                               letterSpacing: 4.0,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withValues(alpha: 0.5),
+                                  color: Colors.black.withOpacity(0.5),
                                   blurRadius: 10,
                                   offset: const Offset(0, 2),
                                 ),
@@ -564,9 +561,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                                   Text(
                                     homeFormation,
                                     style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.6,
-                                      ),
+                                      color: Colors.white.withOpacity(0.6),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -581,9 +576,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                               height: 32.w,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: Colors.white.withOpacity(0.1),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: Colors.white.withOpacity(0.2),
                                 ),
                               ),
                               child: Center(
@@ -616,9 +611,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                                   Text(
                                     awayFormation,
                                     style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.6,
-                                      ),
+                                      color: Colors.white.withOpacity(0.6),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -667,16 +660,16 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.12),
+        color: statusColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(16.w),
-        border: Border.all(color: statusColor.withValues(alpha: 0.2), width: 1),
+        border: Border.all(color: statusColor.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
+              color: statusColor.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
             child:
@@ -706,7 +699,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 Text(
                   statusSub,
                   style: TextStyle(
-                    color: statusColor.withValues(alpha: 0.7),
+                    color: statusColor.withOpacity(0.7),
                     fontSize: 9.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -740,11 +733,11 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         color: isDark ? _card : Colors.white,
         borderRadius: BorderRadius.circular(24.w),
         border: Border.all(
-          color: isDark ? _cardBorder : Colors.grey.withValues(alpha: 0.1),
+          color: isDark ? _cardBorder : Colors.grey.withOpacity(0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            color: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -756,11 +749,11 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: _purple.withValues(alpha: 0.12),
+              color: _purple.withOpacity(0.12),
               borderRadius: BorderRadius.vertical(top: Radius.circular(20.w)),
               border: Border(
                 bottom: BorderSide(
-                  color: _purpleLight.withValues(alpha: 0.1),
+                  color: _purpleLight.withOpacity(0.1),
                   width: 1,
                 ),
               ),
@@ -816,7 +809,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           if (scorer != null || assister != null) ...[
             Divider(
               height: 1,
-              color: isDark ? _cardBorder : Colors.grey.withValues(alpha: 0.1),
+              color: isDark ? _cardBorder : Colors.grey.withOpacity(0.1),
             ),
             Padding(
               padding: EdgeInsets.all(12.w),
@@ -871,7 +864,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
             color: color,
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 6),
+              BoxShadow(color: color.withOpacity(0.3), blurRadius: 6),
             ],
           ),
         ),
@@ -897,7 +890,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
               Container(
                 height: 8.h,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10.w),
                 ),
               ),
@@ -907,12 +900,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   height: 8.h,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [color.withValues(alpha: 0.6), color],
+                      colors: [color.withOpacity(0.6), color],
                     ),
                     borderRadius: BorderRadius.circular(10.w),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withValues(alpha: 0.2),
+                        color: color.withOpacity(0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -951,9 +944,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.07),
+        color: color.withOpacity(0.07),
         borderRadius: BorderRadius.circular(10.w),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
@@ -1015,8 +1008,8 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
     final bg =
         isDark
-            ? Colors.white.withValues(alpha: 0.05)
-            : Colors.black.withValues(alpha: 0.04);
+            ? Colors.white.withOpacity(0.05)
+            : Colors.black.withOpacity(0.04);
 
     return Container(
       height: 44.h,
@@ -1024,7 +1017,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(14.w),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Row(
         children: [
@@ -1049,6 +1042,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           margin: EdgeInsets.all(3.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           decoration: BoxDecoration(
             gradient:
                 selected
@@ -1063,7 +1057,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 selected
                     ? [
                       BoxShadow(
-                        color: _purple.withValues(alpha: 0.35),
+                        color: _purple.withOpacity(0.35),
                         blurRadius: 8,
                       ),
                     ]
@@ -1131,7 +1125,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
             decoration: BoxDecoration(
-              color: _purple.withValues(alpha: 0.15),
+              color: _purple.withOpacity(0.15),
               borderRadius: BorderRadius.circular(6.w),
             ),
             child: Text(
@@ -1168,28 +1162,26 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
         color:
-            isDark
-                ? (isBench ? _card.withValues(alpha: 0.5) : _card)
-                : Colors.white,
+            isDark ? (isBench ? _card.withOpacity(0.5) : _card) : Colors.white,
         borderRadius: BorderRadius.circular(20.w),
         border: Border.all(
           color:
               showActual && actualPts >= 10
-                  ? _gold.withValues(alpha: 0.3)
+                  ? _gold.withOpacity(0.3)
                   : isDark
-                      ? _cardBorder
-                      : Colors.grey.withValues(alpha: 0.1),
+                  ? _cardBorder
+                  : Colors.grey.withOpacity(0.1),
           width: showActual && actualPts >= 10 ? 1.5 : 1,
         ),
         boxShadow: [
           if (showActual && actualPts >= 10)
             BoxShadow(
-              color: _gold.withValues(alpha: 0.1),
+              color: _gold.withOpacity(0.1),
               blurRadius: 10,
               spreadRadius: 1,
             ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1205,7 +1197,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
               width: 24.w,
               height: 24.w,
               decoration: BoxDecoration(
-                color: teamColor.withValues(alpha: 0.1),
+                color: teamColor.withOpacity(0.1),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(18.w),
                   bottomRight: Radius.circular(12.w),
@@ -1220,7 +1212,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: teamColor.withValues(alpha: 0.4),
+                        color: teamColor.withOpacity(0.4),
                         blurRadius: 4,
                       ),
                     ],
@@ -1238,7 +1230,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 Container(
                   width: 52.w,
                   decoration: BoxDecoration(
-                    color: posColor.withValues(alpha: 0.04),
+                    color: posColor.withOpacity(0.04),
                     borderRadius: BorderRadius.horizontal(
                       left: Radius.circular(18.w),
                     ),
@@ -1251,10 +1243,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                             ? '–'
                             : player.number.toArabicNumbers(context),
                         style: TextStyle(
-                          color:
-                              isBench
-                                  ? posColor.withValues(alpha: 0.5)
-                                  : posColor,
+                          color: isBench ? posColor.withOpacity(0.5) : posColor,
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'RobotoCondensed',
@@ -1263,7 +1252,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                       Text(
                         player.position,
                         style: TextStyle(
-                          color: posColor.withValues(alpha: 0.6),
+                          color: posColor.withOpacity(0.6),
                           fontSize: 8.sp,
                           fontWeight: FontWeight.w900,
                         ),
@@ -1296,7 +1285,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                                               .textTheme
                                               .bodyMedium
                                               ?.color
-                                              ?.withValues(alpha: 0.6)
+                                              ?.withOpacity(0.6)
                                           : Theme.of(
                                             context,
                                           ).textTheme.bodyMedium?.color,
@@ -1330,7 +1319,10 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
                 // ── Points chip ────────────────────────────────────────────
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
                   child: _pointsColumn(
                     context,
                     player: player,
@@ -1369,7 +1361,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(5.w),
       ),
       child: Text(
@@ -1461,7 +1453,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           isEmoji
               ? null
               : BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: color.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(4.w),
               ),
       child: Text(
@@ -1510,7 +1502,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
               borderRadius: BorderRadius.circular(12.w),
               boxShadow: [
                 BoxShadow(
-                  color: _purple.withValues(alpha: 0.35),
+                  color: _purple.withOpacity(0.35),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -1564,9 +1556,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           height: 32.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: _gold.withValues(alpha: 0.1),
+            color: _gold.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12.w),
-            border: Border.all(color: _gold.withValues(alpha: 0.3)),
+            border: Border.all(color: _gold.withOpacity(0.3)),
           ),
           child: Text(
             player.suggestedPoints.toString().toArabicNumbers(context),
@@ -1583,7 +1575,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           style: TextStyle(
             color: Theme.of(
               context,
-            ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+            ).textTheme.bodySmall?.color?.withOpacity(0.4),
             fontSize: 8.sp,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.0,
@@ -1632,7 +1624,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   Icon(
                     Icons.emoji_events_outlined,
                     size: 64.w,
-                    color: _purple.withValues(alpha: 0.35),
+                    color: _purple.withOpacity(0.35),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -1742,11 +1734,11 @@ class _LiveDotState extends State<_LiveDot>
             width: 9.w,
             height: 9.w,
             decoration: BoxDecoration(
-              color: widget.color.withValues(alpha: _anim.value),
+              color: widget.color.withOpacity(_anim.value),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: widget.color.withValues(alpha: _anim.value * 0.5),
+                  color: widget.color.withOpacity(_anim.value * 0.5),
                   blurRadius: 6,
                   spreadRadius: 1,
                 ),

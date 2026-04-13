@@ -414,7 +414,8 @@ class GoalioNewsCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (article['image_url'] != null)
+              if (article['image_url'] != null &&
+                  article['image_url'].toString().isNotEmpty)
                 Hero(
                   tag: 'news_tab_image_${article['id']}',
                   child: Image.network(

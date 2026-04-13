@@ -222,7 +222,8 @@ class SocialPageState extends State<SocialPage> {
   }
 
   // ── Share Post ──────────────────────────────────────────────
-  void _sharePost(Map<String, dynamic> post) {
+  void _sharePost(BuildContext context, Map<String, dynamic> post) {
+    final box = context.findRenderObject() as RenderBox?;
     final content = post['content'] ?? '';
     final source = post['sourceName'] ?? 'Goalio';
     final mediaUrl = post['mediaUrl'];
@@ -232,7 +233,13 @@ class SocialPageState extends State<SocialPage> {
       shareText += '\nView media: $mediaUrl';
     }
     
-    Share.share(shareText, subject: 'Check out this post on Goalio');
+    Share.share(
+      shareText,
+      subject: 'Check out this post on Goalio',
+      sharePositionOrigin: (box != null && box.hasSize && !box.size.isEmpty) 
+          ? box.localToGlobal(Offset.zero) & box.size 
+          : null,
+    );
   }
 
   // ── Build ───────────────────────────────────────────────────
@@ -407,24 +414,7 @@ class SocialPageState extends State<SocialPage> {
           // 1. Header (Source Logo, Source Name, Time)
           Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.w),
-                child: Image.network(
-                  post['sourceLogo'] ?? 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(post['sourceName'] ?? 'A')}&background=00e676&color=fff',
-                  width: 40.w,
-                  height: 40.w,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.w),
-                      color: GoalioColors.greenAccent.withOpacity(0.2),
-                    ),
-                    child: Icon(Icons.person, color: GoalioColors.greenAccent, size: 22.w),
-                  ),
-                ),
-              ),
+              _buildSourceLogo(post),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(
@@ -463,8 +453,8 @@ class SocialPageState extends State<SocialPage> {
 
           // 2. Content
           if ((post['content'] as String? ?? '').isNotEmpty)
-            Text(
-              post['content'] ?? '',
+            _ExpandableText(
+              text: post['content'] ?? '',
               style: TextStyle(
                 color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
                 fontSize: 14.sp,
@@ -489,8 +479,10 @@ class SocialPageState extends State<SocialPage> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Image.network(
-                    post['mediaUrl'],
+                  if (post['mediaUrl'] != null &&
+                      post['mediaUrl'].toString().isNotEmpty)
+                    Image.network(
+                      post['mediaUrl'],
                     width: double.infinity,
                     fit: BoxFit.fitWidth,
                     loadingBuilder: (context, child, loadingProgress) {
@@ -568,11 +560,13 @@ class SocialPageState extends State<SocialPage> {
                 color: isDark ? Colors.white60 : Colors.black54,
                 onTap: () => _showCommentsSheet(context, isDark, post, index),
               ),
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: 'Share',
-                color: isDark ? Colors.white60 : Colors.black54,
-                onTap: () => _sharePost(post),
+              Builder(
+                builder: (btnContext) => _buildActionButton(
+                  icon: Icons.share_outlined,
+                  label: 'Share',
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  onTap: () => _sharePost(btnContext, post),
+                ),
               ),
             ],
           ),
@@ -650,6 +644,90 @@ class SocialPageState extends State<SocialPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildSourceLogo(Map<String, dynamic> post) {
+    final String? logoUrl = post['sourceLogo'];
+    if (logoUrl != null && logoUrl.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8.w),
+        child: Image.network(
+          logoUrl,
+          width: 40.w,
+          height: 40.w,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildSourcePlaceholder(post),
+        ),
+      );
+    }
+    return _buildSourcePlaceholder(post);
+  }
+
+  Widget _buildSourcePlaceholder(Map<String, dynamic> post) {
+    return Container(
+      width: 40.w,
+      height: 40.w,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.w),
+        color: GoalioColors.greenAccent.withOpacity(0.2),
+      ),
+      child: Icon(Icons.person, color: GoalioColors.greenAccent, size: 22.w),
+    );
+  }
+}
+
+class _ExpandableText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+  final int maxLines;
+
+  const _ExpandableText({
+    Key? key,
+    required this.text,
+    required this.style,
+    this.maxLines = 4,
+  }) : super(key: key);
+
+  @override
+  State<_ExpandableText> createState() => _ExpandableTextState();
+}
+
+class _ExpandableTextState extends State<_ExpandableText> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: Alignment.topCenter,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.text,
+              style: widget.style,
+              maxLines: _isExpanded ? null : widget.maxLines,
+              overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+            if (!_isExpanded && widget.text.length > 100)
+              Padding(
+                padding: EdgeInsets.only(top: 4.h),
+                child: Text(
+                  'See more...',
+                  style: TextStyle(
+                    color: GoalioColors.greenAccent,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

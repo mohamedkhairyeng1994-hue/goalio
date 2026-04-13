@@ -613,6 +613,22 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getLeagueFantasy(int leagueId) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/fantasy/league/$leagueId/round-team'),
+            headers: await reqHeaders,
+          )
+          .timeout(const Duration(seconds: 30));
+
+      return _handleResponse(response);
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error fetching league fantasy: $e");
+      return {'error': 'Connection error', 'code': 500};
+    }
+  }
+
   static Future<bool> scrapeTopPlayersForLeague(
     String leagueName, {
     dynamic leagueId,

@@ -1029,7 +1029,7 @@ class HomePageState extends ConsumerState<HomePage> {
         color: Colors.redAccent,
         borderRadius: BorderRadius.circular(1.w),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.18),
+          color: Colors.white.withOpacity(0.18),
           width: 0.4,
         ),
       ),
@@ -1617,7 +1617,8 @@ class HomePageState extends ConsumerState<HomePage> {
           child: Stack(
             children: [
               // Background Image
-              if (article['image_url'] != null)
+              if (article['image_url'] != null &&
+                  article['image_url'].toString().isNotEmpty)
                 Positioned.fill(
                   child: Hero(
                     tag: 'home_news_${article['id']}',

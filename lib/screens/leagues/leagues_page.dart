@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../screens/leagues/leagues_list_view.dart';
+import '../../screens/leagues/league_fantasy_tab.dart';
 
 import '../../core/constants/constants.dart';
 import '../../core/services/api_service.dart';
@@ -22,6 +23,12 @@ class LeaguesPage extends StatefulWidget {
 
 class LeaguesPageState extends State<LeaguesPage>
     with TickerProviderStateMixin {
+  bool _isPremierLeague(Map<String, dynamic>? league) {
+    if (league == null) return false;
+    final id = league['id']?.toString();
+    return id == '1';
+  }
+
   List<Map<String, dynamic>> _allLeagues = [];
   Map<String, dynamic>? _selectedLeague;
   bool _isLoading = true;
@@ -49,7 +56,10 @@ class LeaguesPageState extends State<LeaguesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: _isPremierLeague(widget.initialLeague) ? 4 : 3,
+      vsync: this,
+    );
     _loadLeagues(silent: true);
     _mainListController.addListener(_onScroll);
 
@@ -374,7 +384,8 @@ class LeaguesPageState extends State<LeaguesPage>
 
   Future<void> _selectLeagueAndScrape(Map<String, dynamic> league) async {
     final leagueName = league['name']?.toString() ?? ''; // For UI
-    final originalName = league['original_name']?.toString() ?? leagueName; // For API
+    final originalName =
+        league['original_name']?.toString() ?? leagueName; // For API
     final isDifferentLeague = _selectedLeague?['name'] != leagueName;
 
     final leagueId = league['id'];
@@ -384,6 +395,12 @@ class LeaguesPageState extends State<LeaguesPage>
       _scrapingLeague = leagueName;
 
       if (isDifferentLeague) {
+        final newLength = _isPremierLeague(league) ? 4 : 3;
+        if (_tabController.length != newLength) {
+          _tabController.dispose();
+          _tabController = TabController(length: newLength, vsync: this);
+        }
+
         _leagueNews = [];
         _leagueStandings = [];
         _topPlayers = {};
@@ -557,7 +574,9 @@ class LeaguesPageState extends State<LeaguesPage>
             ),
             child: Text(
               _selectedLeague != null
-                  ? ArabicNameExtension(_selectedLeague!['name'] ?? '').toArabicName(context)
+                  ? ArabicNameExtension(
+                    _selectedLeague!['name'] ?? '',
+                  ).toArabicName(context)
                   : AppLocalizations.of(context)!.leaguesTitle,
               style: const TextStyle(
                 fontSize: 24,
@@ -640,11 +659,7 @@ class LeaguesPageState extends State<LeaguesPage>
             children: [
               if (_searchController.text.isNotEmpty)
                 IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: secondaryTextColor,
-                    size: 20,
-                  ),
+                  icon: Icon(Icons.clear, color: secondaryTextColor, size: 20),
                   onPressed: () {
                     _debounce?.cancel();
                     setState(() {
@@ -656,7 +671,9 @@ class LeaguesPageState extends State<LeaguesPage>
                 ),
               IconButton(
                 icon: Icon(
-                  _showFavoritesOnly ? Icons.star_rounded : Icons.star_outline_rounded,
+                  _showFavoritesOnly
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
                   color: _showFavoritesOnly ? Colors.amber : secondaryTextColor,
                   size: 22,
                 ),
@@ -862,6 +879,8 @@ class LeaguesPageState extends State<LeaguesPage>
           ),
           child: TabBar(
             controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             labelColor: isDark ? Colors.black : Colors.white,
             unselectedLabelColor: isDark ? Colors.white70 : Colors.black54,
             indicatorSize: TabBarIndicatorSize.tab,
@@ -923,6 +942,21 @@ class LeaguesPageState extends State<LeaguesPage>
                   ],
                 ),
               ),
+              if (_isPremierLeague(_selectedLeague))
+                Tab(
+                  height: 48,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome_outlined,
+                        size: isLargeScreen ? 20 : 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)!.fantasyHub),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
@@ -965,6 +999,14 @@ class LeaguesPageState extends State<LeaguesPage>
                   _buildNewsTab(),
                   _buildStandingsTab(),
                   _buildTopPlayersTab(),
+                  if (_isPremierLeague(_selectedLeague))
+                    LeagueFantasyTab(
+                      leagueId:
+                          int.tryParse(
+                            _selectedLeague!['id']?.toString() ?? '1',
+                          ) ??
+                          1,
+                    ),
                 ],
               ),
             ),
@@ -1886,7 +1928,8 @@ class LeaguesPageState extends State<LeaguesPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (player['player_name']?.toString() ?? 'Unknown').toArabicName(context),
+                    (player['player_name']?.toString() ?? 'Unknown')
+                        .toArabicName(context),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: textColor,

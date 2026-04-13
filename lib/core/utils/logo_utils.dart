@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/constants.dart';
 
 Widget buildTeamLogo(String? url, {double size = 24}) {
-  if (url == null || url == 'N/A') {
+  if (url == null || url == 'N/A' || url.isEmpty) {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: Colors.white.withOpacity(0.05),

@@ -89,7 +89,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (imageUrl != null)
+                  if (imageUrl != null && imageUrl.isNotEmpty)
                     Hero(
                       tag: widget.heroTag ?? 'news_image_${_article['id']}',
                       child: Image.network(imageUrl, fit: BoxFit.cover),

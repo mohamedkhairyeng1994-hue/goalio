@@ -64,9 +64,9 @@ void showCreateLeagueDialog(BuildContext context, WidgetRef ref) {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.03),
+                      color: isDark ? Colors.black26 : Colors.black.withOpacity(0.03),
                       borderRadius: BorderRadius.circular(12.w),
-                      border: Border.all(color: GoalioColors.greenAccent.withValues(alpha: 0.3)),
+                      border: Border.all(color: GoalioColors.greenAccent.withOpacity(0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

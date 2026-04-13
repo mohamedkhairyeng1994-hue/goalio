@@ -87,18 +87,18 @@ class UnifiedChallengeCard extends ConsumerWidget {
         color: cardBg,
         borderRadius: BorderRadius.circular(32.w),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.04),
         ),
         boxShadow: [
           if (isDark)
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: Colors.black.withOpacity(0.4),
               blurRadius: 30,
               offset: const Offset(0, 15),
             )
           else
             BoxShadow(
-              color: const Color(0xFF64748B).withValues(alpha: 0.12),
+              color: const Color(0xFF64748B).withOpacity(0.12),
               blurRadius: 25,
               offset: const Offset(0, 12),
             ),
@@ -114,12 +114,12 @@ class UnifiedChallengeCard extends ConsumerWidget {
               gradient: LinearGradient(
                 colors: isDark
                     ? [
-                        GoalioColors.greenAccent.withValues(alpha: 0.15),
-                        GoalioColors.blueAccent.withValues(alpha: 0.15),
+                        GoalioColors.greenAccent.withOpacity(0.15),
+                        GoalioColors.blueAccent.withOpacity(0.15),
                       ]
                     : [
-                        GoalioColors.greenAccent.withValues(alpha: 0.08),
-                        GoalioColors.blueAccent.withValues(alpha: 0.08),
+                        GoalioColors.greenAccent.withOpacity(0.08),
+                        GoalioColors.blueAccent.withOpacity(0.08),
                       ],
               ),
               borderRadius: BorderRadius.only(
@@ -318,9 +318,9 @@ class UnifiedChallengeCard extends ConsumerWidget {
           height: 36.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
             border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
             ),
           ),
           child: Icon(
@@ -344,16 +344,16 @@ class UnifiedChallengeCard extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white,
+        color: isDark ? Colors.white.withOpacity(0.02) : Colors.white,
         borderRadius: BorderRadius.circular(22.w),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+          color: isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFE2E8F0),
           width: 0.8,
         ),
         boxShadow: [
           if (!isDark)
             BoxShadow(
-              color: const Color(0xFF64748B).withValues(alpha: 0.04),
+              color: const Color(0xFF64748B).withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -430,8 +430,8 @@ class UnifiedChallengeCard extends ConsumerWidget {
         boxShadow: [
           BoxShadow(
             color: isLive
-                ? Colors.red.withValues(alpha: 0.3)
-                : GoalioColors.greenAccent.withValues(alpha: 0.3),
+                ? Colors.red.withOpacity(0.3)
+                : GoalioColors.greenAccent.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -476,7 +476,7 @@ class UnifiedChallengeCard extends ConsumerWidget {
             Container(
               padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
                 shape: BoxShape.circle,
               ),
               child: Icon(

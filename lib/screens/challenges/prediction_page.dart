@@ -201,14 +201,14 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
             decoration: BoxDecoration(
               color:
                   isDark
-                      ? Colors.black.withValues(alpha: 0.2)
-                      : Colors.white.withValues(alpha: 0.5),
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.white.withOpacity(0.5),
               shape: BoxShape.circle,
               border: Border.all(
                 color:
                     isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.black.withValues(alpha: 0.05),
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.05),
               ),
             ),
             child: Icon(
@@ -241,14 +241,14 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                   decoration: BoxDecoration(
                     color:
                         isDark
-                            ? Colors.black.withValues(alpha: 0.2)
-                            : Colors.white.withValues(alpha: 0.5),
+                            ? Colors.black.withOpacity(0.2)
+                            : Colors.white.withOpacity(0.5),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color:
                           isDark
-                              ? Colors.white.withValues(alpha: 0.1)
-                              : Colors.black.withValues(alpha: 0.05),
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.black.withOpacity(0.05),
                     ),
                   ),
                   child: Icon(
@@ -290,10 +290,10 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                 height: 300.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: GoalioColors.greenAccent.withValues(alpha: 0.05),
+                  color: GoalioColors.greenAccent.withOpacity(0.05),
                   boxShadow: [
                     BoxShadow(
-                      color: GoalioColors.greenAccent.withValues(alpha: 0.08),
+                      color: GoalioColors.greenAccent.withOpacity(0.08),
                       blurRadius: 120,
                       spreadRadius: 40,
                     ),
@@ -310,10 +310,10 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                 height: 250.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: GoalioColors.blueAccent.withValues(alpha: 0.03),
+                  color: GoalioColors.blueAccent.withOpacity(0.03),
                   boxShadow: [
                     BoxShadow(
-                      color: GoalioColors.blueAccent.withValues(alpha: 0.05),
+                      color: GoalioColors.blueAccent.withOpacity(0.05),
                       blurRadius: 100,
                       spreadRadius: 40,
                     ),
@@ -394,12 +394,12 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
           colors:
               isDark
                   ? [
-                    const Color(0xFF070B14).withValues(alpha: 0.0),
-                    const Color(0xFF070B14).withValues(alpha: 0.95),
+                    const Color(0xFF070B14).withOpacity(0.0),
+                    const Color(0xFF070B14).withOpacity(0.95),
                   ]
                   : [
-                    const Color(0xFFE2E8F0).withValues(alpha: 0.0),
-                    const Color(0xFFE2E8F0).withValues(alpha: 0.95),
+                    const Color(0xFFE2E8F0).withOpacity(0.0),
+                    const Color(0xFFE2E8F0).withOpacity(0.95),
                   ],
         ),
       ),
@@ -423,7 +423,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: GoalioColors.greenAccent.withValues(alpha: 0.4),
+            color: GoalioColors.greenAccent.withOpacity(0.4),
             blurRadius: 24,
             offset: const Offset(0, 8), // Deeper floating shadow
           ),
@@ -654,11 +654,11 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.w),
         border: Border.all(
-          color: GoalioColors.greenAccent.withValues(alpha: 0.2),
+          color: GoalioColors.greenAccent.withOpacity(0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: GoalioColors.greenAccent.withValues(alpha: 0.06),
+            color: GoalioColors.greenAccent.withOpacity(0.06),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -696,7 +696,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
               child: Center(
                 child: Container(
                   width: 1.5,
-                  color: GoalioColors.greenAccent.withValues(alpha: 0.3),
+                  color: GoalioColors.greenAccent.withOpacity(0.3),
                 ),
               ),
             ),
@@ -731,14 +731,14 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                           height: 44.w,
                           padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.07),
+                            color: Colors.white.withOpacity(0.07),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: Colors.white.withOpacity(0.12),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.blue.withValues(alpha: 0.2),
+                                color: Colors.blue.withOpacity(0.2),
                                 blurRadius: 12,
                                 spreadRadius: 1,
                               ),
@@ -807,13 +807,13 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                             vertical: 3.h,
                           ),
                           decoration: BoxDecoration(
-                            color: GoalioColors.greenAccent.withValues(
-                              alpha: 0.1,
+                            color: GoalioColors.greenAccent.withOpacity(
+                              0.1,
                             ),
                             borderRadius: BorderRadius.circular(8.w),
                             border: Border.all(
-                              color: GoalioColors.greenAccent.withValues(
-                                alpha: 0.25,
+                              color: GoalioColors.greenAccent.withOpacity(
+                                0.25,
                               ),
                             ),
                           ),
@@ -847,14 +847,14 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                           height: 44.w,
                           padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.07),
+                            color: Colors.white.withOpacity(0.07),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: Colors.white.withOpacity(0.12),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.purple.withValues(alpha: 0.2),
+                                color: Colors.purple.withOpacity(0.2),
                                 blurRadius: 12,
                                 spreadRadius: 1,
                               ),
@@ -905,30 +905,30 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
 
     Color headerStart =
         isDark
-            ? GoalioColors.greenAccent.withValues(alpha: 0.15)
-            : GoalioColors.greenAccent.withValues(alpha: 0.08);
+            ? GoalioColors.greenAccent.withOpacity(0.15)
+            : GoalioColors.greenAccent.withOpacity(0.08);
     Color headerEnd =
         isDark
-            ? GoalioColors.blueAccent.withValues(alpha: 0.15)
-            : GoalioColors.blueAccent.withValues(alpha: 0.08);
+            ? GoalioColors.blueAccent.withOpacity(0.15)
+            : GoalioColors.blueAccent.withOpacity(0.08);
 
     if (widget.isReadOnly && isCorrect != null) {
       accentColor = isCorrect ? GoalioColors.greenAccent : Colors.redAccent;
       headerStart =
           isCorrect
               ? (isDark
-                  ? const Color(0xFF064E3B).withValues(alpha: 0.6)
+                  ? const Color(0xFF064E3B).withOpacity(0.6)
                   : const Color(0xFFD1FAE5))
               : (isDark
-                  ? const Color(0xFF7F1D1D).withValues(alpha: 0.6)
+                  ? const Color(0xFF7F1D1D).withOpacity(0.6)
                   : const Color(0xFFFEE2E2));
       headerEnd =
           isCorrect
               ? (isDark
-                  ? const Color(0xFF022C22).withValues(alpha: 0.8)
+                  ? const Color(0xFF022C22).withOpacity(0.8)
                   : const Color(0xFFA7F3D0))
               : (isDark
-                  ? const Color(0xFF450A0A).withValues(alpha: 0.8)
+                  ? const Color(0xFF450A0A).withOpacity(0.8)
                   : const Color(0xFFFECACA));
     }
 
@@ -937,10 +937,10 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16.w),
-        border: Border.all(color: accentColor.withValues(alpha: 0.18)),
+        border: Border.all(color: accentColor.withOpacity(0.18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.07),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.07),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -965,8 +965,8 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                   bottom: BorderSide(
                     color:
                         isDark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.black.withValues(alpha: 0.05),
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.black.withOpacity(0.05),
                   ),
                 ),
               ),
@@ -979,10 +979,10 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.12),
+                      color: accentColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(6.w),
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.2),
+                        color: accentColor.withOpacity(0.2),
                       ),
                     ),
                     child: Text(
@@ -1020,7 +1020,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                         style: TextStyle(
                           fontSize: 6.sp,
                           fontWeight: FontWeight.w900,
-                          color: accentColor.withValues(alpha: 0.6),
+                          color: accentColor.withOpacity(0.6),
                           letterSpacing: 1.5,
                         ),
                       ),
@@ -1090,15 +1090,15 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                         isSelected
                             ? GoalioColors.greenAccent
                             : (isDark
-                                ? Colors.white.withValues(alpha: 0.03)
+                                ? Colors.white.withOpacity(0.03)
                                 : Colors.white),
                     borderRadius: BorderRadius.circular(8.w),
                     boxShadow:
                         isSelected
                             ? [
                               BoxShadow(
-                                color: GoalioColors.greenAccent.withValues(
-                                  alpha: 0.4,
+                                color: GoalioColors.greenAccent.withOpacity(
+                                  0.4,
                                 ),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
@@ -1107,7 +1107,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                             : [
                               if (!isDark)
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
+                                  color: Colors.black.withOpacity(0.02),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 ),
@@ -1171,8 +1171,8 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.black.withOpacity(0.05),
           ),
         ),
         child: Row(
@@ -1363,20 +1363,20 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                                       color:
                                           isSelected
                                               ? GoalioColors.greenAccent
-                                                  .withValues(alpha: 0.1)
+                                                  .withOpacity(0.1)
                                               : Colors.transparent,
                                       borderRadius: BorderRadius.circular(12.w),
                                       border: Border.all(
                                         color:
                                             isSelected
                                                 ? GoalioColors.greenAccent
-                                                    .withValues(alpha: 0.3)
+                                                    .withOpacity(0.3)
                                                 : (isDark
-                                                    ? Colors.white.withValues(
-                                                      alpha: 0.05,
+                                                    ? Colors.white.withOpacity(
+                                                      0.05,
                                                     )
-                                                    : Colors.black.withValues(
-                                                      alpha: 0.03,
+                                                    : Colors.black.withOpacity(
+                                                      0.03,
                                                     )),
                                       ),
                                     ),
@@ -1479,8 +1479,8 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
             border: Border.all(
               color:
                   isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.05),
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.black.withOpacity(0.05),
               width: 1,
             ),
           ),
@@ -1544,7 +1544,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
               active
                   ? [
                     BoxShadow(
-                      color: GoalioColors.greenAccent.withValues(alpha: 0.3),
+                      color: GoalioColors.greenAccent.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1552,7 +1552,7 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
                   : [
                     if (!isDark)
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
+                        color: Colors.black.withOpacity(0.04),
                         blurRadius: 2,
                         offset: const Offset(0, 1),
                       ),
@@ -1590,8 +1590,8 @@ class _PredictionPageState extends ConsumerState<PredictionPage> {
         border: Border.all(
           color:
               isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.08),
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.08),
           width: 1.5,
         ),
       ),
