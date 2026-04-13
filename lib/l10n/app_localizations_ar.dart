@@ -1038,4 +1038,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get notificationsSubtitle =>
       'تفعيل أو تعطيل تلقي الإشعارات من التطبيق';
+
+  @override
+  String get fantasyHub => 'فانتازي';
+
+  @override
+  String get dreamTeam => 'الفريق المثالي';
+
+  @override
+  String get dreamTeamSubs => 'الاحتياط';
+
+  @override
+  String get dreamTeamRound => 'فريق الجولة';
 }

@@ -2023,6 +2023,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable or disable receiving notifications from the app'**
   String get notificationsSubtitle;
+
+  /// No description provided for @fantasyHub.
+  ///
+  /// In en, this message translates to:
+  /// **'FANTASY'**
+  String get fantasyHub;
+
+  /// No description provided for @dreamTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'DREAM TEAM'**
+  String get dreamTeam;
+
+  /// No description provided for @dreamTeamSubs.
+  ///
+  /// In en, this message translates to:
+  /// **'Substitutes'**
+  String get dreamTeamSubs;
+
+  /// No description provided for @dreamTeamRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round Team of the Week'**
+  String get dreamTeamRound;
 }
 
 class _AppLocalizationsDelegate

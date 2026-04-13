@@ -330,5 +330,9 @@
   "notifications": "الإشعارات",
   "noNotificationsYet": "لا توجد إشعارات حتى الآن",
   "mdSmall": "الجولة",
-  "totalSmall": "الإجمالي"
+  "totalSmall": "الإجمالي",
+  "fantasyHub": "فانتازي",
+  "dreamTeam": "الفريق المثالي",
+  "dreamTeamSubs": "الاحتياط",
+  "dreamTeamRound": "فريق الجولة"
 }

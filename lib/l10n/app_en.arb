@@ -524,5 +524,9 @@
   "pushNotifications": "Push Notifications",
   "notificationsSubtitle": "Enable or disable receiving notifications from the app",
   "mdSmall": "MD",
-  "totalSmall": "TOTAL"
+  "totalSmall": "TOTAL",
+  "fantasyHub": "FANTASY",
+  "dreamTeam": "DREAM TEAM",
+  "dreamTeamSubs": "Substitutes",
+  "dreamTeamRound": "Round Team of the Week"
 }

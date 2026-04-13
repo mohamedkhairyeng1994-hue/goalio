@@ -1042,4 +1042,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationsSubtitle =>
       'Enable or disable receiving notifications from the app';
+
+  @override
+  String get fantasyHub => 'FANTASY';
+
+  @override
+  String get dreamTeam => 'DREAM TEAM';
+
+  @override
+  String get dreamTeamSubs => 'Substitutes';
+
+  @override
+  String get dreamTeamRound => 'Round Team of the Week';
 }

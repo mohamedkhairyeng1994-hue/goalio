@@ -12,6 +12,7 @@ import '../../core/utils/number_utils.dart';
 import '../../core/utils/name_translator.dart';
 import '../../core/utils/messages.dart';
 import '../../l10n/app_localizations.dart';
+import 'fantasy_hub_tab.dart';
 
 class MatchDetailPage extends StatefulWidget {
   final Map<String, dynamic> match;
@@ -32,10 +33,18 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   bool _homeIsFavorite = false;
   bool _awayIsFavorite = false;
 
+  bool get _isPremierLeague {
+    final leagueId = widget.match['league_id'];
+    return leagueId == 1 || leagueId?.toString() == '1';
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(
+      length: _isPremierLeague ? 5 : 4,
+      vsync: this,
+    );
     _homeIsFavorite = widget.match['home_is_favorite'] ?? false;
     _awayIsFavorite = widget.match['away_is_favorite'] ?? false;
     _loadDetails(forceRefresh: true);
@@ -257,7 +266,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               8.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(25.w),
                             ),
                             child: TabBar(
@@ -277,9 +286,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                 borderRadius: BorderRadius.circular(25.w),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: GoalioColors.greenAccent.withOpacity(
-                                      0.3,
-                                    ),
+                                    color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                                     blurRadius: 8.w,
                                     offset: Offset(0, 2.h),
                                   ),
@@ -309,6 +316,24 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                   text: AppLocalizations.of(context)!.timeline,
                                 ),
                                 Tab(text: AppLocalizations.of(context)!.lineup),
+                                if (_isPremierLeague)
+                                  Tab(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.emoji_events_rounded,
+                                          size: 12.w,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.fantasyHub,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -360,6 +385,8 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   _buildStatisticsTab(innerContext),
                   _buildEventsTab(innerContext),
                   _buildLineupTab(innerContext),
+                  if (_isPremierLeague)
+                    _buildFantasyHubTab(innerContext),
                 ],
               );
             },
@@ -596,7 +623,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         color:
                             isLive
                                 ? Colors.redAccent
-                                : Colors.white.withOpacity(0.15),
+                                : Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12.w),
                       ),
                       child: Text(
@@ -1195,7 +1222,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           bottom: 0,
                           child: Container(
                             width: 2.w,
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2),
                           ),
                         ),
                         // Events Column
@@ -1211,8 +1238,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                   (e) => _buildTimelineEvent(
                                     e as Map<String, dynamic>,
                                   ),
-                                )
-                                .toList(),
+                                ),
                             _buildMatchStatusMarker(
                               AppLocalizations.of(context)!.kickOff,
                               Icons.timer_outlined,
@@ -1399,10 +1425,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16.w),
-                border: Border.all(color: iconColor.withOpacity(0.5)),
+                border: Border.all(color: iconColor.withValues(alpha: 0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -1461,9 +1487,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   Widget _buildTimelineKey() {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor.withOpacity(0.5),
+        color: Theme.of(context).cardColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12.w),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -2225,7 +2251,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20.w),
             ),
             child: Text(
@@ -2310,7 +2336,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             color:
                 i % 2 == 0
                     ? Theme.of(context).cardColor
-                    : Theme.of(context).cardColor.withOpacity(0.6),
+                    : Theme.of(context).cardColor.withValues(alpha: 0.6),
             borderRadius:
                 i == 0
                     ? BorderRadius.vertical(top: Radius.circular(10.w))
@@ -2326,7 +2352,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               Container(
                 width: 1,
                 height: 32.h,
-                color: Theme.of(context).dividerColor.withOpacity(0.2),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
               ),
               // Away player
               Expanded(child: _buildPlayerCell(away, align: TextAlign.right)),
@@ -2413,7 +2439,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             borderRadius: BorderRadius.circular(16.w),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -2511,7 +2537,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -2554,7 +2580,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(3.w),
               ),
               child: Text(
@@ -2579,9 +2605,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
       width: 24.w,
       height: 24.w,
       decoration: BoxDecoration(
-        color: GoalioColors.greenAccent.withOpacity(0.15),
+        color: GoalioColors.greenAccent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6.w),
-        border: Border.all(color: GoalioColors.greenAccent.withOpacity(0.4)),
+        border: Border.all(color: GoalioColors.greenAccent.withValues(alpha: 0.4)),
       ),
       child: Center(
         child: Text(
@@ -2593,6 +2619,30 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           ),
         ),
       ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  FANTASY HUB TAB
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Widget _buildFantasyHubTab(BuildContext context) {
+    final home = (_lineup['home'] as Map<String, dynamic>?) ?? {};
+    final away = (_lineup['away'] as Map<String, dynamic>?) ?? {};
+    final homeStarting = (home['starting'] as List<dynamic>?) ?? [];
+    final awayStarting = (away['starting'] as List<dynamic>?) ?? [];
+
+    if (homeStarting.isEmpty && awayStarting.isEmpty) {
+      return _buildNoDataWidget(
+        context: context,
+        icon: Icons.emoji_events_outlined,
+        message: AppLocalizations.of(context)!.matchInfoNotAvailable,
+      );
+    }
+
+    return FantasyHubTab(
+      matchId: (widget.match['id'] as num).toInt(),
+      match: widget.match,
     );
   }
 
@@ -2651,7 +2701,7 @@ class PitchPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withOpacity(0.4)
+          ..color = Colors.white.withValues(alpha: 0.4)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 
@@ -2661,7 +2711,7 @@ class PitchPainter extends CustomPainter {
     final stripeWidth = size.width / stripeCount;
     for (int i = 0; i < stripeCount; i++) {
       stripePaint.color =
-          i % 2 == 0 ? Colors.white.withOpacity(0.05) : Colors.transparent;
+          i % 2 == 0 ? Colors.white.withValues(alpha: 0.05) : Colors.transparent;
       canvas.drawRect(
         Rect.fromLTWH(i * stripeWidth, 0, stripeWidth, size.height),
         stripePaint,
