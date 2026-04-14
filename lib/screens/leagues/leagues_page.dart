@@ -149,13 +149,18 @@ class LeaguesPageState extends State<LeaguesPage>
       'Germany - Bundesliga',
       'France - Ligue 1',
       'Saudi Arabia - Saudi Pro League',
+      'Egypt - Premier League',
     ];
 
-    // Skip showing loaders, just trigger background scrapes
-    for (var league in mainLeagues) {
-      ApiService.scrapeStandingsForLeague(league).catchError((_) => false);
-      ApiService.scrapeNewsForLeague(league).catchError((_) => false);
-      ApiService.scrapeTopPlayersForLeague(league).catchError((_) => false);
+    // Skip showing loaders, just trigger background scrapes in a staggered way to avoid ANRs
+    for (var i = 0; i < mainLeagues.length; i++) {
+      final league = mainLeagues[i];
+      // Delay each batch of requests slightly
+      Future.delayed(Duration(milliseconds: i * 500), () {
+        ApiService.scrapeStandingsForLeague(league).catchError((_) => false);
+        ApiService.scrapeNewsForLeague(league).catchError((_) => false);
+        ApiService.scrapeTopPlayersForLeague(league).catchError((_) => false);
+      });
     }
 
     // Refresh general leagues/standings as well
@@ -371,6 +376,11 @@ class LeaguesPageState extends State<LeaguesPage>
         setState(() {
           _topPlayers = data;
           _isLoadingPlayers = false;
+          
+          // Auto-select first available stat if current one has no data
+          if (_topPlayers.isNotEmpty && (!_topPlayers.containsKey(_selectedPlayerStat) || _topPlayers[_selectedPlayerStat]!.isEmpty)) {
+            _selectedPlayerStat = _topPlayers.keys.first;
+          }
         });
       }
     } catch (e) {
@@ -501,6 +511,7 @@ class LeaguesPageState extends State<LeaguesPage>
       99, // Germany - Bundesliga
       98, // France - Ligue 1
       61, // Saudi Arabia - Saudi Pro League
+      80, // Egypt - Premier League
     ];
 
     final filtered =
@@ -800,6 +811,7 @@ class LeaguesPageState extends State<LeaguesPage>
         'Germany - Bundesliga',
         'France - Ligue 1',
         'Saudi Arabia - Saudi Pro League',
+        'Egypt - Premier League',
       ],
     );
   }
@@ -1637,59 +1649,86 @@ class LeaguesPageState extends State<LeaguesPage>
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.scorers,
-                'goals',
-                Icons.sports_soccer,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.assists.toUpperCase(),
-                'assists',
-                Icons.assistant_navigation,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.redCards,
-                'red_cards',
-                Icons.style,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.yellowCardsLabel,
-                'yellow_cards',
-                Icons.style,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.shotsOnTarget,
-                'shots_on_target',
-                Icons.sports_kabaddi,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.foulsCommitted,
-                'fouls_committed',
-                Icons.sports,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.foulsWon,
-                'fouls_won',
-                Icons.sports_handball,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.tackles,
-                'tackles',
-                Icons.directions_run,
-              ),
-              const SizedBox(width: 10),
-              _buildStatFilterChip(
-                AppLocalizations.of(context)!.offsides,
-                'offsides',
-                Icons.flag,
-              ),
+              if (_topPlayers.containsKey('goals') && _topPlayers['goals']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.scorers,
+                  'goals',
+                  Icons.sports_soccer,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('assists') && _topPlayers['assists']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.assists.toUpperCase(),
+                  'assists',
+                  Icons.assistant_navigation,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('rating') && _topPlayers['rating']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  'RATINGS',
+                  'rating',
+                  Icons.star_rounded,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('red_cards') && _topPlayers['red_cards']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.redCards,
+                  'red_cards',
+                  Icons.style,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('yellow_cards') && _topPlayers['yellow_cards']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.yellowCardsLabel,
+                  'yellow_cards',
+                  Icons.style,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('shots_on_target') && _topPlayers['shots_on_target']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.shotsOnTarget,
+                  'shots_on_target',
+                  Icons.sports_kabaddi,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('fouls_committed') && _topPlayers['fouls_committed']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.foulsCommitted,
+                  'fouls_committed',
+                  Icons.sports,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('fouls_won') && _topPlayers['fouls_won']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.foulsWon,
+                  'fouls_won',
+                  Icons.sports_handball,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('tackles') && _topPlayers['tackles']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.tackles,
+                  'tackles',
+                  Icons.directions_run,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (_topPlayers.containsKey('offsides') && _topPlayers['offsides']!.isNotEmpty) ...[
+                _buildStatFilterChip(
+                  AppLocalizations.of(context)!.offsides,
+                  'offsides',
+                  Icons.flag,
+                ),
+                const SizedBox(width: 10),
+              ],
             ],
           ),
         ),

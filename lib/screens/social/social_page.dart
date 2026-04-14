@@ -384,9 +384,15 @@ class SocialPageState extends State<SocialPage> {
   }
 
   Widget _buildPostCard(Map<String, dynamic> post, int index, bool isDark) {
-    final bool isEmbed = post['mediaType'] == 'embed';
+    final bool isEmbed = post['mediaType'] == 'embed' || (post['mediaType'] == 'video' && (post['embedHtml'] as String? ?? '').isNotEmpty);
     final bool hasMedia = (post['mediaType'] != 'text' && post['mediaUrl'] != null) || isEmbed;
     final bool isVideo = post['mediaType'] == 'video';
+
+    // Calculate dynamic video height based on 16:9 aspect ratio
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double horizontalPadding = 64.w; // 16w per margin + 16w per padding (both sides)
+    final double contentWidth = screenWidth - horizontalPadding;
+    final double videoHeight = contentWidth * 9 / 16;
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -422,12 +428,16 @@ class SocialPageState extends State<SocialPage> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          post['sourceName'],
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15.sp,
+                        Flexible(
+                          child: Text(
+                            post['sourceName'],
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15.sp,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (post['isVerified'] == true) ... [
@@ -469,7 +479,7 @@ class SocialPageState extends State<SocialPage> {
               borderRadius: BorderRadius.circular(16.w),
               child: _EmbeddedPostWidget(
                 htmlContent: post['embedHtml'] ?? '',
-                height: (post['embedHeight'] as num?)?.toDouble() ?? 300.0,
+                height: isVideo ? videoHeight : ((post['embedHeight'] as num?)?.toDouble() ?? 300.0),
               ),
             ),
             SizedBox(height: 16.h),
@@ -545,30 +555,33 @@ class SocialPageState extends State<SocialPage> {
           // 4. Action Bar (Like, Comment, Share)
           Divider(color: isDark ? Colors.white10 : Colors.black12, height: 1),
           SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildActionButton(
-                icon: post['isLiked'] ? Icons.favorite : Icons.favorite_border,
-                label: _formatCount(post['likesCount']),
-                color: post['isLiked'] ? Colors.redAccent : (isDark ? Colors.white60 : Colors.black54),
-                onTap: () => _toggleLike(index),
-              ),
-              _buildActionButton(
-                icon: Icons.chat_bubble_outline,
-                label: _formatCount(post['commentsCount']),
-                color: isDark ? Colors.white60 : Colors.black54,
-                onTap: () => _showCommentsSheet(context, isDark, post, index),
-              ),
-              Builder(
-                builder: (btnContext) => _buildActionButton(
-                  icon: Icons.share_outlined,
-                  label: 'Share',
-                  color: isDark ? Colors.white60 : Colors.black54,
-                  onTap: () => _sharePost(btnContext, post),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildActionButton(
+                  icon: post['isLiked'] ? Icons.favorite : Icons.favorite_border,
+                  label: _formatCount(post['likesCount']),
+                  color: post['isLiked'] ? Colors.redAccent : (isDark ? Colors.white60 : Colors.black54),
+                  onTap: () => _toggleLike(index),
                 ),
-              ),
-            ],
+                _buildActionButton(
+                  icon: Icons.chat_bubble_outline,
+                  label: _formatCount(post['commentsCount']),
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  onTap: () => _showCommentsSheet(context, isDark, post, index),
+                ),
+                Builder(
+                  builder: (btnContext) => _buildActionButton(
+                    icon: Icons.share_outlined,
+                    label: 'Share',
+                    color: isDark ? Colors.white60 : Colors.black54,
+                    onTap: () => _sharePost(btnContext, post),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -761,8 +774,20 @@ class _EmbeddedPostWidgetState extends State<_EmbeddedPostWidget> {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <style>
-          body { margin: 0; padding: 0; overflow: hidden; background-color: transparent; }
-          iframe, twitter-widget, .fb-post { max-width: 100% !important; border-radius: 12px; }
+          body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: transparent; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          iframe, ._scorebatEmbeddedPlayerW_ { 
+            width: 100% !important; 
+            height: 100vh !important;
+            border-radius: 12px; 
+          }
         </style>
       </head>
       <body>
