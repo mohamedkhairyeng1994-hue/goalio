@@ -224,11 +224,7 @@ class SocialPageState extends State<SocialPage> {
   // ── Share Post ──────────────────────────────────────────────
   void _sharePost(BuildContext context, Map<String, dynamic> post) {
     final box = context.findRenderObject() as RenderBox?;
-    final bool isAr = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
-    final String content = isAr && post['content_ar'] != null && post['content_ar'].toString().isNotEmpty
-        ? post['content_ar']
-        : (post['content'] ?? '');
-        
+    final content = post['content'] ?? '';
     final source = post['sourceName'] ?? 'Goalio';
     final mediaUrl = post['mediaUrl'];
     
@@ -392,11 +388,6 @@ class SocialPageState extends State<SocialPage> {
     final bool hasMedia = (post['mediaType'] != 'text' && post['mediaUrl'] != null) || isEmbed;
     final bool isVideo = post['mediaType'] == 'video';
 
-    final bool isAr = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
-    final String activeContent = isAr && post['content_ar'] != null && post['content_ar'].toString().isNotEmpty
-        ? post['content_ar']
-        : (post['content'] ?? '');
-
     // Calculate dynamic video height based on 16:9 aspect ratio
     final double screenWidth = MediaQuery.of(context).size.width;
     final double horizontalPadding = 64.w; // 16w per margin + 16w per padding (both sides)
@@ -471,9 +462,9 @@ class SocialPageState extends State<SocialPage> {
           SizedBox(height: 12.h),
 
           // 2. Content
-          if (activeContent.isNotEmpty)
+          if ((post['content'] as String? ?? '').isNotEmpty)
             _ExpandableText(
-              text: activeContent,
+              text: post['content'] ?? '',
               style: TextStyle(
                 color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
                 fontSize: 14.sp,
