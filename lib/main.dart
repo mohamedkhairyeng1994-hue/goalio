@@ -397,14 +397,28 @@ class MainPageState extends ConsumerState<MainPage> {
     super.dispose();
   }
 
+  Future<void> _syncTokenOnLanguageChange() async {
+    try {
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+        final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint("APNS token not available on iOS, skipping FCM token retrieval.");
+          return;
+        }
+      }
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        ApiService.updateFcmToken(token);
+      }
+    } catch (e) {
+      debugPrint("Failed to sync FCM token on language change: $e");
+    }
+  }
+
   void _onLanguageChanged() {
     if (mounted) {
       // Sync language change with backend for push notifications
-      FirebaseMessaging.instance.getToken().then((token) {
-        if (token != null) {
-          ApiService.updateFcmToken(token);
-        }
-      });
+      _syncTokenOnLanguageChange();
 
       // Refresh all screens that support it
       _homeKey.currentState?.resetState();
