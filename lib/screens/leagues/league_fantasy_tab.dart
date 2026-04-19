@@ -326,7 +326,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
               children: [
                 // Round Name (Clean style)
                 Text(
-                  _data['round_name']?.toString() ?? 'Gameweek 32',
+                  _data['round_name']?.toString() ?? 'Gameweek',
                   style: TextStyle(
                     color: textColor,
                     fontSize: 12.sp,

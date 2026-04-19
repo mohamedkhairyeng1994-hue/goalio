@@ -32,25 +32,31 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   Map<String, dynamic> _data = {};
 
   int _selectedTeam = 1; // 1=Home, 2=Away (Default to Home for tactical view)
-  bool _showBench = false;
+  bool _showBench = true;
   bool _isPitchView = true;
+  // 'predict' shows system-projected points, 'actual' shows real match points.
+  // Auto-flips to 'actual' once the match is live/finished (see _fetchFantasyData).
+  String _viewMode = 'predict';
 
   late AnimationController _pitchAnimCtrl;
 
-  // ── Palette ────────────────────────────────────────────────────────────────
-  static const Color _gold = Color(0xFFFFD700);
-  static const Color _purple = Color(0xFF6366F1);
-  static const Color _purpleLight = Color(0xFF818CF8);
-  static const Color _green = Color(0xFF34D399); // Brand Green
-  static const Color _blue = Color(0xFF3B82F6); // Brand Blue
-  static const Color _darkBg = Color(0xFF0F172A);
-  static const Color _card = Color(0xFF1E293B);
+  // ── Palette (aligned with rest of the app — greenAccent + blueAccent) ─────
+  static const Color _green = GoalioColors.greenAccent;
+  static const Color _blue = GoalioColors.blueAccent;
+
+  // Brand accent aliases — kept for backwards-compat with existing widgets so
+  // everything now flows through greenAccent / blueAccent / amber.
+  static const Color _gold = Color(0xFFF59E0B);       // amber highlight
+  static const Color _purple = GoalioColors.greenAccent;
+  static const Color _purpleLight = GoalioColors.greenAccent;
+  static const Color _darkBg = GoalioColors.background;
+  static const Color _card = GoalioColors.cardBackground;
   static const Color _cardBorder = Color(0xFF334155);
 
-  // Position colors (Premium shades)
+  // Position colors (subtle shades of brand accents)
   static const Color _gkColor = Color(0xFFF59E0B);
-  static const Color _defColor = Color(0xFF3B82F6);
-  static const Color _midColor = Color(0xFF10B981);
+  static const Color _defColor = GoalioColors.blueAccent;
+  static const Color _midColor = GoalioColors.greenAccent;
   static const Color _fwdColor = Color(0xFFEF4444);
 
   @override
@@ -88,9 +94,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         final decoded =
             json.decode(utf8.decode(response.bodyBytes))
                 as Map<String, dynamic>;
+        final isFinished = decoded['is_finished'] == true;
+        final isLive = decoded['is_live'] == true;
         setState(() {
           _data = decoded;
           _isLoading = false;
+          if (isFinished || isLive) _viewMode = 'actual';
         });
         return;
       }
@@ -111,11 +120,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   bool get _isFinished => _data['is_finished'] == true;
   bool get _isLive => _data['is_live'] == true;
 
-  Map<String, dynamic> get _summary =>
-      (_data['summary'] as Map<String, dynamic>?) ?? {};
-
   static const Color _neonGreen = Color(0xFF10B981);
-  static const Color _neonBlue = Color(0xFF3B82F6);
   static const Color _accentGold = Color(0xFFFFD700);
 
   Color _posColor(String group) {
@@ -140,14 +145,20 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     for (final group in ['starting', 'bench']) {
       for (final raw in (sideData[group] as List<dynamic>?) ?? []) {
         final p = raw as Map<String, dynamic>;
-        final name = p['name']?.toString() ?? '';
-        if (name.isEmpty) continue;
+        final rawName = p['name']?.toString() ?? '';
+        final number = p['number']?.toString() ?? '';
+        // Keep the slot even if the scraper couldn't resolve the name —
+        // otherwise the pitch silently drops a starter. Fall back to
+        // "#<shirt>" or "?" so all 11 starters still render.
+        final name = rawName.isNotEmpty
+            ? rawName
+            : (number.isNotEmpty ? '#$number' : '?');
         result.add(
           _FantasyPlayer(
             name: name,
             position: p['position']?.toString() ?? '',
             positionGroup: p['position_group']?.toString() ?? 'UNK',
-            number: p['number']?.toString() ?? '',
+            number: number,
             isHome: isHome,
             isStarting: group == 'starting',
             isCaptain: p['is_captain'] == true,
@@ -203,9 +214,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     final starters = filtered.where((p) => p.isStarting).toList();
     final bench = filtered.where((p) => !p.isStarting).toList();
 
-    // Sort by actual (if available) else suggested
+    // Sort by whichever mode is active.
     int Function(_FantasyPlayer, _FantasyPlayer) sorter;
-    if (_isFinished || _isLive) {
+    if (_viewMode == 'actual') {
       sorter = (a, b) => (b.actualPoints ?? 0).compareTo(a.actualPoints ?? 0);
     } else {
       sorter = (a, b) => b.suggestedPoints.compareTo(a.suggestedPoints);
@@ -214,7 +225,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     bench.sort(sorter);
 
     return Container(
-      color: isDark ? _darkBg : const Color(0xFFF8FAFC),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
           // ── Premium Sticky Header ───────────────────────────────────────────
@@ -233,7 +244,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                       children: [
                         _buildStatusRow(context),
                         SizedBox(height: 12.h),
-                        _buildStatQuickGrid(context, isDark),
+                        _buildPredictActualTabs(context, isDark),
                         SizedBox(height: 16.h),
                         _buildViewToggle(context, isDark),
                       ],
@@ -311,34 +322,26 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     bool isDark,
   ) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, MediaQuery.of(context).padding.top + 10.h, 16.w, 16.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark 
-            ? [const Color(0xFF1E1B4B), const Color(0xFF0F172A)]
-            : [const Color(0xFF6366F1), const Color(0xFF4F46E5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _headerTeam(context, home, hLogo, isLeft: true),
-              _headerDivider(context),
-              _headerTeam(context, away, aLogo, isLeft: false),
-            ],
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12.w),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _headerTeam(context, home, hLogo, isLeft: true),
+                _headerDivider(context),
+                _headerTeam(context, away, aLogo, isLeft: false),
+              ],
+            ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           _buildTeamSegmentedControl(context, home, away, isDark),
         ],
       ),
@@ -346,12 +349,16 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   }
 
   Widget _headerTeam(BuildContext context, String name, dynamic logo, {required bool isLeft}) {
+    final nameColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final subColor = Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6);
+    final sideAccent = isLeft ? _blue : _green;
+
     return Expanded(
       child: Row(
         mainAxisAlignment: isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
           if (!isLeft) const Spacer(),
-          if (!isLeft) 
+          if (!isLeft)
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -359,16 +366,19 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   ArabicNameExtension(name).toArabicName(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.w800),
+                  style: TextStyle(color: nameColor, fontSize: 12.sp, fontWeight: FontWeight.w700),
                 ),
-                Text('AWAY', style: TextStyle(color: Colors.white54, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                Text('AWAY', style: TextStyle(color: sideAccent, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
               ],
             ),
           SizedBox(width: 8.w),
           Container(
             padding: EdgeInsets.all(4.w),
-            decoration: BoxDecoration(color: Colors.white12, shape: BoxShape.circle),
-            child: buildTeamLogo(logo?.toString(), size: 32.w),
+            decoration: BoxDecoration(
+              color: sideAccent.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: buildTeamLogo(logo?.toString(), size: 30.w),
           ),
           SizedBox(width: 8.w),
           if (isLeft)
@@ -379,12 +389,14 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   ArabicNameExtension(name).toArabicName(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.w800),
+                  style: TextStyle(color: nameColor, fontSize: 12.sp, fontWeight: FontWeight.w700),
                 ),
-                Text('HOME', style: TextStyle(color: Colors.white54, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                Text('HOME', style: TextStyle(color: sideAccent, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
               ],
             ),
           if (isLeft) const Spacer(),
+          // silence unused-variable warning: subColor is reserved for future meta row
+          if (subColor == null) const SizedBox.shrink(),
         ],
       ),
     );
@@ -392,25 +404,29 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
   Widget _headerDivider(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.w),
-        border: Border.all(color: Colors.white24),
+        color: Theme.of(context).dividerColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(10.w),
       ),
       child: Text(
         'VS',
-        style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w900),
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodySmall?.color,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.0,
+        ),
       ),
     );
   }
 
   Widget _buildTeamSegmentedControl(BuildContext context, String home, String away, bool isDark) {
     return Container(
-      height: 38.h,
+      height: 36.h,
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(19.h),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18.h),
       ),
       child: Row(
         children: [
@@ -434,15 +450,20 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           margin: EdgeInsets.all(3.w),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? _green.withOpacity(0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(16.h),
+            border: isSelected
+                ? Border.all(color: _green.withOpacity(0.4))
+                : null,
           ),
           child: Text(
             displayLabel.length > 8 ? '${displayLabel.substring(0, 8)}…' : displayLabel,
             style: TextStyle(
-              color: isSelected ? const Color(0xFF1E1B4B) : Colors.white70,
+              color: isSelected
+                  ? _green
+                  : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
               fontSize: 10.sp,
-              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             ),
           ),
         ),
@@ -450,38 +471,81 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     );
   }
 
-  Widget _buildStatQuickGrid(BuildContext context, bool isDark) {
-    final homePts = (_summary['home_total_points'] as num?)?.toInt() ?? 0;
-    final awayPts = (_summary['away_total_points'] as num?)?.toInt() ?? 0;
-    
-    return Row(
-      children: [
-        _statBox(context, 'HOME PTS', homePts.toString(), _neonBlue, isDark),
-        SizedBox(width: 8.w),
-        _statBox(context, 'AWAY PTS', awayPts.toString(), _neonGreen, isDark),
-        SizedBox(width: 8.w),
-        _statBox(context, 'TOTAL', (homePts + awayPts).toString(), _accentGold, isDark),
-      ],
+  Widget _buildPredictActualTabs(BuildContext context, bool isDark) {
+    final actualAvailable = _isFinished || _isLive;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.w),
+      ),
+      child: Row(
+        children: [
+          _predictActualBtn(
+            context,
+            label: 'PREDICT',
+            icon: Icons.auto_awesome_rounded,
+            active: _viewMode == 'predict',
+            enabled: true,
+            color: _accentGold,
+            onTap: () => setState(() => _viewMode = 'predict'),
+          ),
+          _predictActualBtn(
+            context,
+            label: 'ACTUAL',
+            icon: Icons.scoreboard_rounded,
+            active: _viewMode == 'actual',
+            enabled: actualAvailable,
+            color: _neonGreen,
+            onTap: actualAvailable
+                ? () => setState(() => _viewMode = 'actual')
+                : null,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _statBox(BuildContext context, String label, String val, Color color, bool isDark) {
+  Widget _predictActualBtn(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required bool active,
+    required bool enabled,
+    required Color color,
+    required VoidCallback? onTap,
+  }) {
+    final baseColor = enabled ? color : Colors.grey;
     return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.h),
-        decoration: BoxDecoration(
-          color: isDark ? _card : Colors.white,
-          borderRadius: BorderRadius.circular(16.w),
-          border: Border.all(color: color.withOpacity(0.2)),
-          boxShadow: [
-            BoxShadow(color: color.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
-        ),
-        child: Column(
-          children: [
-            Text(label, style: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontSize: 8.sp, fontWeight: FontWeight.bold)),
-            Text(val.toArabicNumbers(context), style: TextStyle(color: color, fontSize: 16.sp, fontWeight: FontWeight.w900, fontFamily: 'RobotoCondensed')),
-          ],
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: active ? baseColor.withOpacity(0.12) : Colors.transparent,
+            borderRadius: BorderRadius.circular(16.w),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                enabled ? icon : Icons.lock_outline_rounded,
+                size: 14.w,
+                color: active ? baseColor : baseColor.withOpacity(0.6),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                label,
+                style: TextStyle(
+                  color: active ? baseColor : baseColor.withOpacity(0.6),
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -490,9 +554,8 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   Widget _buildViewToggle(BuildContext context, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? _card : Colors.white,
-        borderRadius: BorderRadius.circular(16.w),
-        border: Border.all(color: _purple.withOpacity(0.2)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.w),
       ),
       child: Row(
         children: [
@@ -570,10 +633,41 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   List<Widget> _buildPitchPlayers(BuildContext context, List<_FantasyPlayer> starters) {
     final widgets = <Widget>[];
     const groupOrder = ['GK', 'DEF', 'MID', 'FWD'];
-    
+
+    // Bucket starters by canonical position. UNK falls back to MID so the
+    // 11th player never disappears from the pitch.
+    final byGroup = <String, List<_FantasyPlayer>>{
+      'GK': [], 'DEF': [], 'MID': [], 'FWD': [],
+    };
+    for (final p in starters) {
+      final grp = groupOrder.contains(p.positionGroup) ? p.positionGroup : 'MID';
+      byGroup[grp]!.add(p);
+    }
+
+    // Keep the pitch visually balanced: DEF and MID must each hold at least
+    // 3 players. Borrow from whichever outfield row has the largest surplus,
+    // but never drop a donor row below its own minimum.
+    int minFor(String g) => (g == 'DEF' || g == 'MID') ? 3 : 0;
+    for (final target in const ['DEF', 'MID']) {
+      while (byGroup[target]!.length < 3) {
+        String? donor;
+        int maxSurplus = 0;
+        for (final g in const ['FWD', 'MID', 'DEF']) {
+          if (g == target) continue;
+          final surplus = byGroup[g]!.length - minFor(g);
+          if (surplus > maxSurplus) {
+            maxSurplus = surplus;
+            donor = g;
+          }
+        }
+        if (donor == null) break; // nothing left to borrow
+        byGroup[target]!.add(byGroup[donor]!.removeLast());
+      }
+    }
+
     for (int i = 0; i < groupOrder.length; i++) {
       final grp = groupOrder[i];
-      final inGrp = starters.where((p) => p.positionGroup == grp).toList();
+      final inGrp = byGroup[grp]!;
       if (inGrp.isEmpty) continue;
 
       // Vertical position (0 to 1)
@@ -851,37 +945,22 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     bool isBench = false,
   }) {
     final posColor = _posColor(player.positionGroup);
-    final showActual = (_isFinished || _isLive) && player.actualPoints != null;
+    final showActual = _viewMode == 'actual' && player.actualPoints != null;
     final actualPts = player.actualPoints ?? 0;
     final diff = actualPts - player.suggestedPoints;
     final teamColor = player.isHome ? _defColor : _midColor;
 
+    final cardColor = Theme.of(context).cardColor;
+    final highlight = showActual && actualPts >= 10;
+
     return Container(
-      margin: EdgeInsets.only(bottom: 14.h),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
-        color: isDark ? (isBench ? Color(0xFF1E293B).withOpacity(0.4) : Color(0xFF1E293B)) : Colors.white,
-        borderRadius: BorderRadius.circular(24.w),
-        border: Border.all(
-          color: showActual && actualPts >= 10
-              ? _gold.withOpacity(0.5)
-              : isDark
-                  ? _cardBorder.withOpacity(0.5)
-                  : Colors.grey.withOpacity(0.1),
-          width: showActual && actualPts >= 10 ? 2 : 1,
-        ),
-        boxShadow: [
-          if (showActual && actualPts >= 10)
-            BoxShadow(
-              color: _gold.withOpacity(0.15),
-              blurRadius: 20,
-              spreadRadius: 2,
-            ),
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: isBench ? cardColor.withOpacity(0.6) : cardColor,
+        borderRadius: BorderRadius.circular(12.w),
+        border: highlight
+            ? Border.all(color: _gold.withOpacity(0.5), width: 1.5)
+            : null,
       ),
       child: Stack(
         children: [
@@ -1186,12 +1265,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     required int diff,
   }) {
     if (showActual) {
-      final diffColor =
-          diff > 0
-              ? const Color(0xFF22C55E)
-              : diff < 0
+      final diffColor = diff > 0
+          ? _green
+          : diff < 0
               ? Colors.redAccent
               : Colors.grey;
+      final pillColor = actualPts >= 10 ? _gold : _green;
 
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1199,32 +1278,20 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 52.w,
-            height: 36.h,
+            width: 48.w,
+            height: 32.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: actualPts >= 10 
-                  ? [const Color(0xFFB8860B), _gold]
-                  : [const Color(0xFF4C1D95), const Color(0xFF7C3AED)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(14.w),
-              boxShadow: [
-                BoxShadow(
-                  color: (actualPts >= 10 ? _gold : _purple).withOpacity(0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: pillColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: pillColor.withOpacity(0.35)),
             ),
             child: Text(
               actualPts.toString().toArabicNumbers(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: actualPts >= 10 ? Colors.black87 : Colors.white,
-                fontSize: 17.sp,
+                color: pillColor,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -1237,9 +1304,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 diff > 0
                     ? Icons.trending_up_rounded
                     : diff < 0
-                    ? Icons.trending_down_rounded
-                    : Icons.remove,
-                size: 14.w,
+                        ? Icons.trending_down_rounded
+                        : Icons.remove,
+                size: 12.w,
                 color: diffColor,
               ),
               SizedBox(width: 2.w),
@@ -1247,8 +1314,8 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 diff.abs().toString().toArabicNumbers(context),
                 style: TextStyle(
                   color: diffColor,
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
@@ -1267,28 +1334,26 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           height: 32.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: _gold.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12.w),
-            border: Border.all(color: _gold.withOpacity(0.3)),
+            color: _blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10.w),
+            border: Border.all(color: _blue.withOpacity(0.3)),
           ),
           child: Text(
             player.suggestedPoints.toString().toArabicNumbers(context),
             style: TextStyle(
-              color: _gold,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w900,
+              color: _blue,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        SizedBox(height: 5.h),
+        SizedBox(height: 4.h),
         Text(
           'PROJ',
           style: TextStyle(
-            color: Theme.of(
-              context,
-            ).textTheme.bodySmall?.color?.withOpacity(0.4),
+            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
             fontSize: 8.sp,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
             letterSpacing: 1.0,
           ),
         ),

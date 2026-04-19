@@ -264,6 +264,7 @@ class HomePageState extends ConsumerState<HomePage> {
       'Germany - Bundesliga',
       'France - Ligue 1',
       'Saudi Arabia - Saudi Pro League',
+      'Egypt - Premier League',
     ];
 
     try {
