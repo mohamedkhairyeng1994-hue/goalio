@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -167,7 +168,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 p['actual_points'] != null
                     ? (p['actual_points'] as num).toInt()
                     : null,
-            events: List<String>.from(p['events'] ?? []),
+            events: List<dynamic>.from(p['events'] ?? []),
           ),
         );
       }
@@ -284,7 +285,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                         bench.length,
                         trailing: Icon(
                           _showBench ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                          color: _purpleLight,
+                          color: Colors.grey,
                           size: 18.w,
                         ),
                       ),
@@ -322,123 +323,108 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     bool isDark,
   ) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-      color: Theme.of(context).scaffoldBackgroundColor,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.w),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+      ),
+      margin: EdgeInsets.all(16.w),
       child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(12.w),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _headerTeam(context, home, hLogo, isLeft: true),
-                _headerDivider(context),
-                _headerTeam(context, away, aLogo, isLeft: false),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _headerTeamStandard(context, home, hLogo, isLeft: true),
+              _headerVS(context),
+              _headerTeamStandard(context, away, aLogo, isLeft: false),
+            ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 16.h),
           _buildTeamSegmentedControl(context, home, away, isDark),
         ],
       ),
     );
   }
 
-  Widget _headerTeam(BuildContext context, String name, dynamic logo, {required bool isLeft}) {
-    final nameColor = Theme.of(context).textTheme.bodyMedium?.color;
-    final subColor = Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6);
-    final sideAccent = isLeft ? _blue : _green;
-
+  Widget _headerTeamStandard(BuildContext context, String name, dynamic logo, {required bool isLeft}) {
     return Expanded(
-      child: Row(
-        mainAxisAlignment: isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+      child: Column(
         children: [
-          if (!isLeft) const Spacer(),
-          if (!isLeft)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  ArabicNameExtension(name).toArabicName(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: nameColor, fontSize: 12.sp, fontWeight: FontWeight.w700),
-                ),
-                Text('AWAY', style: TextStyle(color: sideAccent, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-              ],
+          buildTeamLogo(logo?.toString(), size: 36.w),
+          SizedBox(height: 6.h),
+          Text(
+            ArabicNameExtension(name).toArabicName(context),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12.sp,
             ),
-          SizedBox(width: 8.w),
-          Container(
-            padding: EdgeInsets.all(4.w),
-            decoration: BoxDecoration(
-              color: sideAccent.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: buildTeamLogo(logo?.toString(), size: 30.w),
           ),
-          SizedBox(width: 8.w),
-          if (isLeft)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ArabicNameExtension(name).toArabicName(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: nameColor, fontSize: 12.sp, fontWeight: FontWeight.w700),
-                ),
-                Text('HOME', style: TextStyle(color: sideAccent, fontSize: 8.sp, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-              ],
+          Text(
+            isLeft ? 'HOME' : 'AWAY',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 8.sp,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
-          if (isLeft) const Spacer(),
-          // silence unused-variable warning: subColor is reserved for future meta row
-          if (subColor == null) const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _headerDivider(BuildContext context) {
+  Widget _headerVS(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).dividerColor.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(10.w),
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20.w),
       ),
       child: Text(
         'VS',
         style: TextStyle(
-          color: Theme.of(context).textTheme.bodySmall?.color,
+          color: Colors.grey,
           fontSize: 10.sp,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.0,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
+  Widget _headerTeamModern(BuildContext context, String name, dynamic logo, {required bool isLeft, required bool isDark}) {
+    // This method is now replaced by _headerTeamStandard but kept for safety if referenced elsewhere temporarily
+    return _headerTeamStandard(context, name, logo, isLeft: isLeft);
+  }
+
+  Widget _headerVSCircle(BuildContext context, bool isDark) {
+    // Replaced by _headerVS
+    return _headerVS(context);
+  }
+
   Widget _buildTeamSegmentedControl(BuildContext context, String home, String away, bool isDark) {
     return Container(
-      height: 36.h,
+      height: 40.h,
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18.h),
+        color: Theme.of(context).dividerColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10.h),
       ),
       child: Row(
         children: [
-          _teamTabItem(context, 'ALL', 0),
-          _teamTabItem(context, home, 1),
-          _teamTabItem(context, away, 2),
+          _teamTabItem(context, 'ALL', 0, isDark),
+          _teamTabItem(context, home, 1, isDark),
+          _teamTabItem(context, away, 2, isDark),
         ],
       ),
     );
   }
 
-  Widget _teamTabItem(BuildContext context, String label, int index) {
+  Widget _teamTabItem(BuildContext context, String label, int index, bool isDark) {
     final isSelected = _selectedTeam == index;
     final displayLabel = label == 'ALL' ? 'الكل' : ArabicNameExtension(label).toArabicName(context);
     
@@ -446,24 +432,20 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       child: GestureDetector(
         onTap: () => setState(() => _selectedTeam = index),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          margin: EdgeInsets.all(3.w),
+          duration: const Duration(milliseconds: 200),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? _green.withOpacity(0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16.h),
-            border: isSelected
-                ? Border.all(color: _green.withOpacity(0.4))
-                : null,
+            color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.h),
           ),
           child: Text(
-            displayLabel.length > 8 ? '${displayLabel.substring(0, 8)}…' : displayLabel,
+            displayLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: isSelected
-                  ? _green
-                  : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
-              fontSize: 10.sp,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              color: isSelected ? Colors.white : Colors.grey,
+              fontSize: 11.sp,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             ),
           ),
         ),
@@ -475,28 +457,27 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     final actualAvailable = _isFinished || _isLive;
 
     return Container(
+      height: 45.h,
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12.w),
+        borderRadius: BorderRadius.circular(10.w),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
       ),
       child: Row(
         children: [
           _predictActualBtn(
             context,
             label: 'PREDICT',
-            icon: Icons.auto_awesome_rounded,
             active: _viewMode == 'predict',
             enabled: true,
-            color: _accentGold,
             onTap: () => setState(() => _viewMode = 'predict'),
           ),
           _predictActualBtn(
             context,
             label: 'ACTUAL',
-            icon: Icons.scoreboard_rounded,
             active: _viewMode == 'actual',
             enabled: actualAvailable,
-            color: _neonGreen,
             onTap: actualAvailable
                 ? () => setState(() => _viewMode = 'actual')
                 : null,
@@ -509,42 +490,26 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   Widget _predictActualBtn(
     BuildContext context, {
     required String label,
-    required IconData icon,
     required bool active,
     required bool enabled,
-    required Color color,
     required VoidCallback? onTap,
   }) {
-    final baseColor = enabled ? color : Colors.grey;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: EdgeInsets.symmetric(vertical: 10.h),
+        child: Container(
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: active ? baseColor.withOpacity(0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16.w),
+            color: active ? Theme.of(context).primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.w),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                enabled ? icon : Icons.lock_outline_rounded,
-                size: 14.w,
-                color: active ? baseColor : baseColor.withOpacity(0.6),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: active ? baseColor : baseColor.withOpacity(0.6),
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active ? Colors.white : (enabled ? Colors.grey : Colors.grey.withOpacity(0.3)),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -552,17 +517,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
   }
 
   Widget _buildViewToggle(BuildContext context, bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12.w),
-      ),
-      child: Row(
-        children: [
-          _toggleBtn(context, 'TACTICAL', Icons.grid_view_rounded, _isPitchView, true),
-          _toggleBtn(context, 'LIST VIEW', Icons.format_list_bulleted_rounded, !_isPitchView, false),
-        ],
-      ),
+    return Row(
+      children: [
+        _toggleBtn(context, 'TACTICAL', Icons.grid_view_rounded, _isPitchView, true),
+        SizedBox(width: 12.w),
+        _toggleBtn(context, 'LIST VIEW', Icons.format_list_bulleted_rounded, !_isPitchView, false),
+      ],
     );
   }
 
@@ -570,19 +530,28 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _isPitchView = isPitch),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+        child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: active ? _purple.withOpacity(0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16.w),
+            color: active ? Theme.of(context).primaryColor.withOpacity(0.1) : Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(10.w),
+            border: Border.all(
+              color: active ? Theme.of(context).primaryColor : Theme.of(context).dividerColor.withOpacity(0.5),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 14.w, color: active ? _purpleLight : Colors.grey),
+              Icon(icon, size: 16.sp, color: active ? Theme.of(context).primaryColor : Colors.grey),
               SizedBox(width: 8.w),
-              Text(label, style: TextStyle(color: active ? _purpleLight : Colors.grey, fontSize: 10.sp, fontWeight: FontWeight.w800)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: active ? Theme.of(context).primaryColor : Colors.grey,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -596,12 +565,17 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     final starters = players.where((p) => p.isStarting).toList();
     
     return Container(
-      height: 520.h,
+      height: 540.h,
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24.w),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.5) : const Color(0xFF10B981).withOpacity(0.3), 
+            blurRadius: 30, 
+            offset: const Offset(0, 15)
+          ),
         ],
       ),
       child: ClipRRect(
@@ -618,7 +592,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.4), Colors.transparent, Colors.black.withOpacity(0.4)],
+                  colors: [Colors.black.withOpacity(0.2), Colors.transparent, Colors.black.withOpacity(0.2)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -690,6 +664,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
             x: x,
             y: y,
             posColor: _posColor(grp),
+            viewMode: _viewMode,
             onTap: () => _showPlayerDetails(context, inGrp[k]),
           ),
         );
@@ -729,7 +704,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Divider(
-                    color: _posColor(pos).withOpacity(0.15),
+                    color: Theme.of(context).dividerColor,
                     thickness: 1,
                   ),
                 ),
@@ -780,9 +755,8 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10.w),
-        border: Border.all(color: color.withOpacity(0.2)),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6.w),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -817,77 +791,69 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       statusSub = 'Goals · Assists · Clean Sheets · Cards';
       isLive = false;
     } else if (_isLive) {
-      statusColor = Colors.redAccent;
+      statusColor = const Color(0xFFEF4444);
       statusLabel = 'LIVE FANTASY';
       statusSub = 'Updating as match progresses';
       isLive = true;
     } else {
-      statusColor = _purpleLight;
+      statusColor = Theme.of(context).primaryColor;
       statusLabel = 'PROJECTED POINTS';
       statusSub = 'Pre-match position-based estimate';
       isLive = false;
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20.w),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: statusColor.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(20.w),
-          border: Border.all(color: statusColor.withOpacity(0.15), width: 1.5),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.w),
+        border: Border.all(
+          color: statusColor.withOpacity(0.3),
+          width: 1,
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.12),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: statusColor.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: isLive
-                  ? _LiveDot(color: statusColor)
-                  : Icon(
-                      Icons.info_outline_rounded,
-                      size: 16.w,
-                      color: statusColor,
-                    ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    statusLabel,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                    ),
+            child: isLive
+                ? _LiveDot(color: statusColor)
+                : Icon(
+                    Icons.info_outline_rounded,
+                    size: 16.sp,
+                    color: statusColor,
                   ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    statusSub,
-                    style: TextStyle(
-                      color: isDark ? Colors.white60 : Colors.black54,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  statusLabel,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  statusSub,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                    fontSize: 9.sp,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -902,12 +868,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 8.h),
       child: Row(
         children: [
-          Icon(icon, size: 13.w, color: _purpleLight),
+          Icon(icon, size: 13.w, color: Colors.grey),
           SizedBox(width: 6.w),
           Text(
             title,
             style: TextStyle(
-              color: _purpleLight,
+              color: Colors.grey,
               fontSize: 10.sp,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.5,
@@ -917,13 +883,13 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
             decoration: BoxDecoration(
-              color: _purple.withOpacity(0.15),
+              color: Theme.of(context).dividerColor,
               borderRadius: BorderRadius.circular(6.w),
             ),
             child: Text(
               count.toString(),
               style: TextStyle(
-                color: _purpleLight,
+                color: Theme.of(context).textTheme.bodySmall?.color,
                 fontSize: 9.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -938,229 +904,141 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
   // ── Player card ────────────────────────────────────────────────────────────
 
-  Widget _buildPlayerCard(
-    BuildContext context,
-    _FantasyPlayer player,
-    bool isDark, {
-    bool isBench = false,
-  }) {
-    final posColor = _posColor(player.positionGroup);
-    final showActual = _viewMode == 'actual' && player.actualPoints != null;
-    final actualPts = player.actualPoints ?? 0;
+  Widget _buildPlayerCard(BuildContext context, _FantasyPlayer player, bool isDark, {bool isBench = false}) {
+    final showActual = _viewMode == 'actual';
+    final actualPts = player.calculateFantasyPoints();
     final diff = actualPts - player.suggestedPoints;
-    final teamColor = player.isHome ? _defColor : _midColor;
 
-    final cardColor = Theme.of(context).cardColor;
-    final highlight = showActual && actualPts >= 10;
+
+    final posColor = _posColor(player.positionGroup);
+    final teamColor = player.isHome ? Theme.of(context).primaryColor : const Color(0xFF22C55E);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: isBench ? cardColor.withOpacity(0.6) : cardColor,
-        borderRadius: BorderRadius.circular(12.w),
-        border: highlight
-            ? Border.all(color: _gold.withOpacity(0.5), width: 1.5)
-            : null,
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(10.w),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.4),
+          width: 1,
+        ),
       ),
-      child: Stack(
+      child: Row(
         children: [
-          // Corner indicator for Home/Away
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Container(
-              width: 24.w,
-              height: 24.w,
-              decoration: BoxDecoration(
-                color: teamColor.withOpacity(0.1),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(18.w),
-                  bottomRight: Radius.circular(12.w),
-                ),
-              ),
-              child: Center(
-                child: Container(
-                  width: 5.w,
-                  height: 5.w,
-                  decoration: BoxDecoration(
-                    color: teamColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: teamColor.withOpacity(0.4),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Jersey Badge
+          _jerseyBadgeSimplified(player.number, posColor),
+          SizedBox(width: 12.w),
+          
+          // Name and Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Position Icon & Number ──────────────────────────────────
-                Container(
-                  width: 52.w,
-                  decoration: BoxDecoration(
-                    color: posColor.withOpacity(0.04),
-                    borderRadius: BorderRadius.horizontal(
-                      left: Radius.circular(18.w),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        player.number.isEmpty
-                            ? '–'
-                            : player.number.toArabicNumbers(context),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        ArabicNameExtension(player.name).toArabicName(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isBench ? posColor.withOpacity(0.5) : posColor,
-                          fontSize: 15.sp,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'RobotoCondensed',
+                          fontSize: 13.sp,
                         ),
                       ),
-                      Text(
-                        player.position,
-                        style: TextStyle(
-                          color: posColor.withOpacity(0.6),
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.w900,
+                    ),
+                    if (player.isCaptain) ...[
+                      SizedBox(width: 4.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFACC15),
+                          borderRadius: BorderRadius.circular(4.w),
                         ),
+                        child: Text('C', style: TextStyle(color: Colors.black, fontSize: 8.sp, fontWeight: FontWeight.bold)),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-
-                // ── Main content ───────────────────────────────────────────
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(12.w, 14.h, 4.w, 14.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                ArabicNameExtension(
-                                  player.name,
-                                ).toArabicName(context),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color:
-                                      isBench
-                                          ? Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.color
-                                              ?.withOpacity(0.6)
-                                          : Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium?.color,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13.sp,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                            ),
-                            if (player.isCaptain) ...[
-                              SizedBox(width: 8.w),
-                              _captainBadge(),
-                            ],
-                          ],
-                        ),
-                        SizedBox(height: 6.h),
-                        Wrap(
-                          spacing: 4.w,
-                          runSpacing: 4.h,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            _posBadge(player.positionGroup, posColor),
-                            _teamDot(teamColor, player.isHome),
-                            ...player.events.take(5).map(_eventChip),
-                          ],
-                        ),
-                      ],
+                SizedBox(height: 2.h),
+                Row(
+                  children: [
+                    Text(
+                      player.position,
+                      style: TextStyle(color: Colors.grey, fontSize: 9.sp, fontWeight: FontWeight.w500),
                     ),
-                  ),
-                ),
-
-                // ── Points chip ────────────────────────────────────────────
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 8.h,
-                  ),
-                  child: _pointsColumn(
-                    context,
-                    player: player,
-                    showActual: showActual,
-                    actualPts: actualPts,
-                    diff: diff,
-                  ),
+                    SizedBox(width: 6.w),
+                    Container(width: 4.w, height: 4.w, decoration: BoxDecoration(color: teamColor.withOpacity(0.5), shape: BoxShape.circle)),
+                    SizedBox(width: 6.w),
+                    ...player.events.take(3).map((e) => Padding(
+                      padding: EdgeInsets.only(right: 4.w),
+                      child: _eventChip(e, isDark),
+                    )),
+                  ],
                 ),
               ],
             ),
           ),
+
+          // Points Column
+          _pointsColumn(
+            context,
+            player: player,
+            showActual: showActual,
+            actualPts: actualPts,
+            diff: diff,
+          ),
         ],
       ),
     );
   }
 
-  Widget _captainBadge() {
+  Widget _jerseyBadgeSimplified(String number, Color color) {
     return Container(
-      width: 18.w,
-      height: 18.w,
+      width: 32.w,
+      height: 32.w,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_gold, Color(0xFFB8860B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: color.withOpacity(0.1),
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: _gold.withOpacity(0.3),
-            blurRadius: 4,
-          ),
-        ],
+        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
       ),
       child: Center(
         child: Text(
-          'C',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 9.sp,
-            fontWeight: FontWeight.w900,
-          ),
+          number.isEmpty ? '–' : number.toArabicNumbers(context),
+          style: TextStyle(color: color, fontSize: 13.sp, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  Widget _posBadge(String group, Color color) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(5.w),
-      ),
-      child: Text(
-        group == 'UNK' ? '?' : group,
-        style: TextStyle(
-          color: color,
-          fontSize: 8.sp,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.3,
+
+
+  Widget _pointsColumn(
+    BuildContext context, {
+    required _FantasyPlayer player,
+    required bool showActual,
+    required int actualPts,
+    required int diff,
+  }) {
+    final points = showActual ? actualPts : player.suggestedPoints;
+    final color = showActual ? (diff >= 0 ? _green : Colors.redAccent) : Theme.of(context).primaryColor;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          points.toString().toArabicNumbers(context),
+          style: TextStyle(color: color, fontSize: 16.sp, fontWeight: FontWeight.w900),
         ),
-      ),
+        Text(
+          showActual ? 'PTS' : 'PROJ',
+          style: TextStyle(color: Colors.grey, fontSize: 8.sp, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 
@@ -1186,178 +1064,76 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     );
   }
 
-  Widget _eventChip(String type) {
-    String label;
-    Color color;
-    switch (type) {
-      case 'goal':
-      case 'penalty_goal':
-        label = '⚽';
-        color = const Color(0xFF22C55E);
-        break;
-      case 'own_goal':
-        label = '⚽';
-        color = Colors.redAccent;
-        break;
-      case 'assist':
-        label = '🅰️';
-        color = _defColor;
-        break;
-      case 'yellow_card':
-        label = '🟨';
-        color = Colors.amber;
-        break;
-      case 'yellow_red':
-        label = '🟧';
-        color = Colors.orange;
-        break;
-      case 'red_card':
-        label = '🟥';
-        color = Colors.redAccent;
-        break;
-      case 'penalty_missed':
-        label = '✗';
-        color = Colors.redAccent;
-        break;
-      case 'sub_on':
-        label = '↑';
-        color = const Color(0xFF22C55E);
-        break;
-      case 'sub_off':
-        label = '↓';
-        color = Colors.redAccent;
-        break;
-      default:
-        return const SizedBox.shrink();
+  Widget _eventChip(dynamic event, bool isDark) {
+    String t;
+    String? detail;
+    String? minute;
+
+    if (event is String) {
+      t = event;
+    } else if (event is Map) {
+      t = event['type']?.toString() ?? '';
+      detail = event['detail']?.toString();
+      minute = event['minute']?.toString();
+    } else {
+      return const SizedBox.shrink();
     }
 
-    final isEmoji = label.runes.first > 127;
+    IconData? icon;
+    Color color = Colors.grey;
+    String? emoji;
+
+    if (t == 'goal' || t == 'G') {
+      icon = Icons.sports_soccer_rounded;
+      color = const Color(0xFF10B981);
+    } else if (t == 'penalty_goal') {
+      icon = Icons.sports_score_rounded;
+      color = const Color(0xFF10B981);
+    } else if (t == 'own_goal') {
+      icon = Icons.sports_soccer_rounded;
+      color = const Color(0xFFEF4444);
+    } else if (t == 'yellow_card' || t == 'YC') {
+      icon = Icons.square_rounded;
+      color = const Color(0xFFFACC15);
+    } else if (t == 'red_card' || t == 'RC') {
+      icon = Icons.square_rounded;
+      color = const Color(0xFFEF4444);
+    } else if (t == 'yellow_red') {
+      icon = Icons.amp_stories_rounded;
+      color = const Color(0xFFFACC15);
+    } else if (t == 'clean_sheet') {
+      emoji = '🛡️';
+    } else if (t == 'assist') {
+      emoji = '👟';
+    } else {
+      icon = Icons.circle;
+      color = isDark ? Colors.white24 : Colors.black12;
+    }
+
+    final isEmoji = emoji != null;
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isEmoji ? 2.w : 5.w,
-        vertical: 1.h,
+      padding: isEmoji ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: isEmoji ? null : BoxDecoration(
+        color: color.withOpacity(isDark ? 0.15 : 0.1),
+        borderRadius: BorderRadius.circular(6.w),
       ),
-      decoration:
-          isEmoji
-              ? null
-              : BoxDecoration(
-                color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(4.w),
-              ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isEmoji ? null : color,
-          fontSize: isEmoji ? 10.sp : 9.sp,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  // ── Points column ──────────────────────────────────────────────────────────
-
-  Widget _pointsColumn(
-    BuildContext context, {
-    required _FantasyPlayer player,
-    required bool showActual,
-    required int actualPts,
-    required int diff,
-  }) {
-    if (showActual) {
-      final diffColor = diff > 0
-          ? _green
-          : diff < 0
-              ? Colors.redAccent
-              : Colors.grey;
-      final pillColor = actualPts >= 10 ? _gold : _green;
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 48.w,
-            height: 32.h,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: pillColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10.w),
-              border: Border.all(color: pillColor.withOpacity(0.35)),
+          if (icon != null) ...[
+            Icon(icon, size: 8.w, color: color),
+            SizedBox(width: 2.w),
+          ],
+          Text(
+            isEmoji ? emoji! : (minute ?? detail ?? t.toUpperCase()),
+            style: TextStyle(
+              color: isEmoji ? null : color,
+              fontSize: 8.sp,
+              fontWeight: FontWeight.w900,
             ),
-            child: Text(
-              actualPts.toString().toArabicNumbers(context),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: pillColor,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                diff > 0
-                    ? Icons.trending_up_rounded
-                    : diff < 0
-                        ? Icons.trending_down_rounded
-                        : Icons.remove,
-                size: 12.w,
-                color: diffColor,
-              ),
-              SizedBox(width: 2.w),
-              Text(
-                diff.abs().toString().toArabicNumbers(context),
-                style: TextStyle(
-                  color: diffColor,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
           ),
         ],
-      );
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 48.w,
-          height: 32.h,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: _blue.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10.w),
-            border: Border.all(color: _blue.withOpacity(0.3)),
-          ),
-          child: Text(
-            player.suggestedPoints.toString().toArabicNumbers(context),
-            style: TextStyle(
-              color: _blue,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          'PROJ',
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
-            fontSize: 8.sp,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.0,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -1374,7 +1150,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         ),
         const SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(child: CircularProgressIndicator(color: _purple)),
+          child: Center(child: CircularProgressIndicator()),
         ),
       ],
     );
@@ -1400,7 +1176,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   Icon(
                     Icons.emoji_events_outlined,
                     size: 64.w,
-                    color: _purple.withOpacity(0.35),
+                    color: Colors.grey.withOpacity(0.3),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -1415,8 +1191,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   SizedBox(height: 24.h),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _purple,
-                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.w),
                       ),
@@ -1458,19 +1232,13 @@ class _PitchPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: isDark 
-          ? [const Color(0xFF064E3B), const Color(0xFF065F46), const Color(0xFF047857)]
-          : [const Color(0xFF10B981), const Color(0xFF059669), const Color(0xFF047857)],
-      ).createShader(Offset.zero & size);
+      ..color = isDark ? const Color(0xFF064E3B) : GoalioColors.greenAccent;
 
     canvas.drawRect(Offset.zero & size, paint);
 
     // Lines
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..color = Colors.white.withOpacity(0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -1503,6 +1271,7 @@ class _PitchPlayerIcon extends StatelessWidget {
   final _FantasyPlayer player;
   final double x, y;
   final Color posColor;
+  final String viewMode;
   final VoidCallback onTap;
 
   const _PitchPlayerIcon({
@@ -1510,13 +1279,12 @@ class _PitchPlayerIcon extends StatelessWidget {
     required this.x,
     required this.y,
     required this.posColor,
+    required this.viewMode,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hasHighPoints = (player.actualPoints ?? 0) >= 8;
-    
     return Align(
       alignment: Alignment(x * 2 - 1, y * 2 - 1),
       child: GestureDetector(
@@ -1524,42 +1292,42 @@ class _PitchPlayerIcon extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                if (hasHighPoints)
-                  _GlowEffect(color: Colors.amber),
-                Container(
-                  width: 38.w,
-                  height: 38.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: posColor, width: 2.5),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
-                    ],
-                  ),
-                  child: Center(
+            // Jersey Icon
+            Container(
+              width: 38.w,
+              height: 38.w,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: posColor, width: 2.5),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                   Center(
                     child: Text(
                       player.number.isEmpty ? '?' : player.number.toArabicNumbers(context),
-                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 13.sp, fontFamily: 'RobotoCondensed'),
+                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13.sp),
                     ),
                   ),
-                ),
-                if (player.isCaptain)
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(2.w),
-                      decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle),
-                      child: Text('C', style: TextStyle(color: Colors.black, fontSize: 8.sp, fontWeight: FontWeight.w900)),
+                  if (player.isCaptain)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: EdgeInsets.all(1.w),
+                        decoration: const BoxDecoration(color: Color(0xFFFACC15), shape: BoxShape.circle),
+                        child: Text('C', style: TextStyle(color: Colors.black, fontSize: 6.sp, fontWeight: FontWeight.bold)),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             SizedBox(height: 4.h),
+            // Player Name Label
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
@@ -1572,49 +1340,21 @@ class _PitchPlayerIcon extends StatelessWidget {
                 style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.bold),
               ),
             ),
-            if (player.actualPoints != null)
+            // Points Tag
+            if (viewMode == 'actual' || player.actualPoints != null)
               Container(
                 margin: EdgeInsets.only(top: 2.h),
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
-                decoration: BoxDecoration(color: posColor, borderRadius: BorderRadius.circular(4.w)),
+                decoration: BoxDecoration(
+                  color: posColor,
+                  borderRadius: BorderRadius.circular(4.w),
+                ),
                 child: Text(
-                  player.actualPoints.toString().toArabicNumbers(context),
-                  style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.w900),
+                  (player.actualPoints ?? 0).toString().toArabicNumbers(context),
+                  style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold),
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlowEffect extends StatefulWidget {
-  final Color color;
-  const _GlowEffect({required this.color});
-
-  @override
-  State<_GlowEffect> createState() => _GlowEffectState();
-}
-
-class _GlowEffectState extends State<_GlowEffect> with SingleTickerProviderStateMixin {
-  late AnimationController _c;
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
-  }
-  @override
-  void dispose() { _c.dispose(); super.dispose(); }
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (_, __) => Container(
-        width: 48.w, height: 48.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: widget.color.withOpacity(0.4 * _c.value), blurRadius: 15, spreadRadius: 5)],
         ),
       ),
     );
@@ -1667,7 +1407,7 @@ class _PlayerDetailsDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _statCircle(context, 'PROJ', player.suggestedPoints.toString(), Colors.grey),
-                _statCircle(context, 'ACTUAL', (player.actualPoints ?? 0).toString(), const Color(0xFF6366F1), isLarge: true),
+                _statCircle(context, 'ACTUAL', (player.actualPoints ?? 0).toString(), const Color(0xFF6366F1)),
               ],
             ),
             if (player.events.isNotEmpty) ...[
@@ -1683,22 +1423,17 @@ class _PlayerDetailsDialog extends StatelessWidget {
     );
   }
 
-  Widget _statCircle(BuildContext context, String label, String val, Color color, {bool isLarge = false}) {
+  Widget _statCircle(BuildContext context, String label, String val, Color color) {
     return Column(
       children: [
-        Container(
-          width: isLarge ? 80.w : 60.w,
-          height: isLarge ? 80.w : 60.w,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.3), width: 2),
-          ),
-          child: Text(val.toArabicNumbers(context), style: TextStyle(color: color, fontSize: isLarge ? 28.sp : 20.sp, fontWeight: FontWeight.w900)),
+        Text(
+          val.toArabicNumbers(context),
+          style: TextStyle(color: color, fontSize: 24.sp, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8.h),
-        Text(label, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: color)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
       ],
     );
   }
@@ -1706,8 +1441,14 @@ class _PlayerDetailsDialog extends StatelessWidget {
   Widget _eventTag(String type) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(20)),
-      child: Text(type.replaceAll('_', ' ').toUpperCase(), style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6.w),
+      ),
+      child: Text(
+        type.replaceAll('_', ' ').toUpperCase(),
+        style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.grey),
+      ),
     );
   }
 }
@@ -1721,7 +1462,7 @@ class _FantasyPlayer {
   final bool isHome, isStarting, isCaptain;
   final int suggestedPoints;
   final int? actualPoints;
-  final List<String> events;
+  final List<dynamic> events;
 
   const _FantasyPlayer({
     required this.name, required this.position, required this.positionGroup,
@@ -1729,6 +1470,8 @@ class _FantasyPlayer {
     required this.isCaptain, required this.suggestedPoints, this.actualPoints,
     required this.events,
   });
+
+  int calculateFantasyPoints() => actualPoints ?? 0;
 }
 
 class _LiveDot extends StatefulWidget {
