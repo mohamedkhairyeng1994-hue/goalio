@@ -20,6 +20,7 @@ import 'l10n/app_localizations.dart';
 
 // Screens
 import 'screens/news/news_page.dart';
+import 'screens/news/news_detail_page.dart';
 import 'screens/home/home_page.dart';
 import 'screens/auth/login_page.dart';
 import 'screens/fixtures/fixtures_page.dart';
@@ -388,6 +389,22 @@ class MainPageState extends ConsumerState<MainPage> {
           }
         });
       }
+    } else if (type == 'league_news') {
+      final newsIdStr = data['news_id'];
+      if (newsIdStr == null) return;
+
+      final newsId = int.tryParse(newsIdStr.toString());
+      if (newsId == null) return;
+
+      ApiService.getNewsDetail(newsId).then((article) {
+        if (article != null && navigatorKey.currentState != null) {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => NewsDetailPage(article: Map<String, dynamic>.from(article)),
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -482,7 +499,7 @@ class MainPageState extends ConsumerState<MainPage> {
 
       // 1.5 Initialize Local Notifications (use monochrome notification icon, not the full-color launcher)
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@drawable/ic_notification');
+          AndroidInitializationSettings('@mipmap/launcher_icon');
       const InitializationSettings initializationSettings =
           InitializationSettings(android: initializationSettingsAndroid);
       await flutterLocalNotificationsPlugin.initialize(
@@ -549,8 +566,7 @@ class MainPageState extends ConsumerState<MainPage> {
                   priority: Priority.high,
                   playSound: true,
                   enableVibration: true,
-                  icon: 'ic_notification',
-                  color: const Color(0xFF00E676),
+                  icon: '@mipmap/launcher_icon',
                 ),
                 iOS: const DarwinNotificationDetails(
                   presentAlert: true,
