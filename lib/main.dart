@@ -458,12 +458,17 @@ class MainPageState extends ConsumerState<MainPage> {
         sound: true,
       );
 
-      // 1. Create a Notification Channel for Android (Required for API 26+)
+      // 1. Create a Notification Channel for Android (Required for API 26+).
+      // NOTE: channel settings (sound, importance) are immutable once created on a device,
+      // so we use a versioned id ("_v2") to force-recreate with sound enabled when the
+      // previous channel was installed without it.
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
-        'matchday_notifications', // Matches the 'channel_id' in your Laravel code
-        'Matchday Notifications',
-        description: 'This channel is used for matchday reminders.',
+        'goalio_notifications_v2', // Must match the 'channel_id' in the Laravel backend
+        'Goalio Notifications',
+        description: 'Match reminders, live events, and campaign alerts.',
         importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
       );
 
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -475,9 +480,9 @@ class MainPageState extends ConsumerState<MainPage> {
           >()
           ?.createNotificationChannel(channel);
 
-      // 1.5 Initialize Local Notifications
+      // 1.5 Initialize Local Notifications (use monochrome notification icon, not the full-color launcher)
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@drawable/ic_notification');
       const InitializationSettings initializationSettings =
           InitializationSettings(android: initializationSettingsAndroid);
       await flutterLocalNotificationsPlugin.initialize(
@@ -542,7 +547,10 @@ class MainPageState extends ConsumerState<MainPage> {
                   channelDescription: channel.description,
                   importance: Importance.max,
                   priority: Priority.high,
-                  icon: '@mipmap/ic_launcher',
+                  playSound: true,
+                  enableVibration: true,
+                  icon: 'ic_notification',
+                  color: const Color(0xFF00E676),
                 ),
                 iOS: const DarwinNotificationDetails(
                   presentAlert: true,
