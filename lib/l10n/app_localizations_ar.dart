@@ -1050,4 +1050,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dreamTeamRound => 'فريق الجولة';
+
+  @override
+  String get updateAvailableTitle => 'تحديث متوفر';
+
+  @override
+  String get updateAvailableMessage =>
+      'يتوفر إصدار جديد من Goalio. يرجى التحديث للاستمتاع بأحدث المزايا والتحسينات.';
+
+  @override
+  String get updateNow => 'تحديث الآن';
+
+  @override
+  String get later => 'لاحقاً';
 }

@@ -33,6 +33,7 @@ import 'screens/favorites/favorite_teams_page.dart';
 import 'screens/fixtures/match_detail_page.dart';
 import 'screens/social/social_page.dart';
 import 'core/utils/ad_manager.dart';
+import 'core/utils/app_update_checker.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -315,6 +316,11 @@ class MainPageState extends ConsumerState<MainPage> {
 
     // Pre-load interstitial ad so it's ready for tab switching
     AdManager.loadInterstitial();
+
+    // One-time-per-session update prompt (only shows if backend's min_app_version > installed version)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) AppUpdateChecker.checkAndPrompt(context);
+    });
   }
 
   Future<void> _handleInitialNotification() async {

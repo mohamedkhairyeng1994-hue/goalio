@@ -528,5 +528,9 @@
   "fantasyHub": "FANTASY",
   "dreamTeam": "DREAM TEAM",
   "dreamTeamSubs": "Substitutes",
-  "dreamTeamRound": "Round Team of the Week"
+  "dreamTeamRound": "Round Team of the Week",
+  "updateAvailableTitle": "Update Available",
+  "updateAvailableMessage": "A new version of Goalio is available. Please update to continue enjoying the latest features and improvements.",
+  "updateNow": "Update Now",
+  "later": "Later"
 }

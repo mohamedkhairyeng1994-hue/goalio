@@ -334,5 +334,9 @@
   "fantasyHub": "فانتازي",
   "dreamTeam": "الفريق المثالي",
   "dreamTeamSubs": "الاحتياط",
-  "dreamTeamRound": "فريق الجولة"
+  "dreamTeamRound": "فريق الجولة",
+  "updateAvailableTitle": "تحديث متوفر",
+  "updateAvailableMessage": "يتوفر إصدار جديد من Goalio. يرجى التحديث للاستمتاع بأحدث المزايا والتحسينات.",
+  "updateNow": "تحديث الآن",
+  "later": "لاحقاً"
 }

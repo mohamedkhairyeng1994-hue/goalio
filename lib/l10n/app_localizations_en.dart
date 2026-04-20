@@ -1054,4 +1054,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dreamTeamRound => 'Round Team of the Week';
+
+  @override
+  String get updateAvailableTitle => 'Update Available';
+
+  @override
+  String get updateAvailableMessage =>
+      'A new version of Goalio is available. Please update to continue enjoying the latest features and improvements.';
+
+  @override
+  String get updateNow => 'Update Now';
+
+  @override
+  String get later => 'Later';
 }
