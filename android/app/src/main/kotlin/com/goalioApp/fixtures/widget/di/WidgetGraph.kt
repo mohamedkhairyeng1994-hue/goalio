@@ -4,6 +4,7 @@ import android.content.Context
 import com.goalioApp.fixtures.widget.data.local.MatchDatabase
 import com.goalioApp.fixtures.widget.data.remote.MatchApi
 import com.goalioApp.fixtures.widget.data.repository.MatchRepository
+import com.goalioApp.fixtures.widget.util.AuthTokenReader
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
@@ -22,9 +23,22 @@ object WidgetGraph {
     }
 
     private fun build(context: Context): MatchRepository {
+        val appContext = context.applicationContext
         val client = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val token = AuthTokenReader.read(appContext)
+                val request = if (token != null) {
+                    chain.request().newBuilder()
+                        .header("Authorization", "Bearer $token")
+                        .header("Accept", "application/json")
+                        .build()
+                } else {
+                    chain.request()
+                }
+                chain.proceed(request)
+            }
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             })

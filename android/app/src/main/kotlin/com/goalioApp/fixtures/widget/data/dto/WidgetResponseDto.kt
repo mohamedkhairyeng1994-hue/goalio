@@ -5,8 +5,10 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class WidgetResponseDto(
+    @Json(name = "yesterday") val yesterday: List<MatchDto> = emptyList(),
     @Json(name = "today") val today: List<MatchDto> = emptyList(),
     @Json(name = "tomorrow") val tomorrow: List<MatchDto> = emptyList(),
+    @Json(name = "has_favorites") val hasFavorites: Boolean = false,
 )
 
 @JsonClass(generateAdapter = true)
@@ -17,4 +19,7 @@ data class MatchDto(
     @Json(name = "time") val time: String,
     @Json(name = "home_logo") val homeLogo: String,
     @Json(name = "away_logo") val awayLogo: String,
+    @Json(name = "home_score") val homeScore: String? = null,
+    @Json(name = "away_score") val awayScore: String? = null,
+    @Json(name = "status") val status: String? = null,
 )

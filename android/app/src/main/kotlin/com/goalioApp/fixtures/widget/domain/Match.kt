@@ -8,6 +8,9 @@ data class Match(
     val awayLogo: String,
     val time: String,
     val bucket: Bucket,
+    val homeScore: String? = null,
+    val awayScore: String? = null,
+    val status: String? = null,
 ) {
-    enum class Bucket { TODAY, TOMORROW }
+    enum class Bucket { YESTERDAY, TODAY, TOMORROW }
 }

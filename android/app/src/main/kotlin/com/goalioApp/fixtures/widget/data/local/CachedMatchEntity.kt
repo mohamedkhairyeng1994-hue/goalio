@@ -13,4 +13,7 @@ data class CachedMatchEntity(
     val time: String,
     val bucket: String,
     val fetchedAt: Long,
+    val homeScore: String? = null,
+    val awayScore: String? = null,
+    val status: String? = null,
 )

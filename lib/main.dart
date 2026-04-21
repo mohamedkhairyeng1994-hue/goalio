@@ -54,7 +54,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<MainPageState> mainPageKey = GlobalKey<MainPageState>();
+
+// Lets other screens (e.g. the notifications page) ask the currently-mounted
+// MainPage to switch tabs without needing a GlobalKey. MainPage registers its
+// handler in initState and clears it in dispose.
+void Function(int index)? mainPageTabSwitcher;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -202,8 +206,9 @@ class Initializer extends StatefulWidget {
 
       if (context.mounted) {
         if (teamsCount > 0 && leaguesCount > 0) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => MainPage(key: mainPageKey)),
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const Initializer()),
+            (_) => false,
           );
         } else {
           Navigator.of(context).pushReplacement(
@@ -214,10 +219,10 @@ class Initializer extends StatefulWidget {
         }
       }
     } else {
-      // Fallback if profile fetch fails
       if (context.mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainPage(key: mainPageKey)),
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const Initializer()),
+          (_) => false,
         );
       }
     }
@@ -273,7 +278,7 @@ class _InitializerState extends State<Initializer> {
 
     if (_isLoggedIn) {
       if (_hasFavorites) {
-        return MainPage(key: mainPageKey);
+        return const MainPage();
       } else {
         return const FavoriteTeamsPage(isOnboarding: true);
       }
@@ -308,6 +313,7 @@ class MainPageState extends ConsumerState<MainPage> {
   @override
   void initState() {
     super.initState();
+    mainPageTabSwitcher = onDestinationSelected;
     _setupFirebaseMessaging();
     LanguageManager().addListener(_onLanguageChanged);
 
@@ -321,6 +327,15 @@ class MainPageState extends ConsumerState<MainPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) AppUpdateChecker.checkAndPrompt(context);
     });
+  }
+
+  @override
+  void dispose() {
+    if (identical(mainPageTabSwitcher, onDestinationSelected)) {
+      mainPageTabSwitcher = null;
+    }
+    LanguageManager().removeListener(_onLanguageChanged);
+    super.dispose();
   }
 
   Future<void> _handleInitialNotification() async {
@@ -414,12 +429,6 @@ class MainPageState extends ConsumerState<MainPage> {
     }
   }
 
-  @override
-  void dispose() {
-    LanguageManager().removeListener(_onLanguageChanged);
-    super.dispose();
-  }
-
   Future<void> _syncTokenOnLanguageChange() async {
     try {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
@@ -505,7 +514,7 @@ class MainPageState extends ConsumerState<MainPage> {
 
       // 1.5 Initialize Local Notifications (use monochrome notification icon, not the full-color launcher)
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/launcher_icon');
+          AndroidInitializationSettings('@drawable/notification_logo');
       const InitializationSettings initializationSettings =
           InitializationSettings(android: initializationSettingsAndroid);
       await flutterLocalNotificationsPlugin.initialize(
@@ -572,7 +581,7 @@ class MainPageState extends ConsumerState<MainPage> {
                   priority: Priority.high,
                   playSound: true,
                   enableVibration: true,
-                  icon: '@mipmap/launcher_icon',
+                  icon: '@drawable/notification_logo',
                 ),
                 iOS: const DarwinNotificationDetails(
                   presentAlert: true,

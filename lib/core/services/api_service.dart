@@ -431,13 +431,27 @@ class ApiService {
 
       _checkAuth(response);
       if (response.statusCode == 200) {
-        return _parseList(jsonDecode(response.body));
+        final list = _parseList(jsonDecode(response.body));
+        await _mirrorFavoritesToPrefs(list);
+        return list;
       }
       return [];
     } catch (e) {
       debugPrint("Error fetching favorites: $e");
       return [];
     }
+  }
+
+  // Mirrors favorite team names into SharedPreferences so the Android home-screen
+  // widget can read them (the widget has no auth token, so it can't hit the API).
+  static Future<void> _mirrorFavoritesToPrefs(List<dynamic> teams) async {
+    final names = teams
+        .map((t) => (t is Map ? (t['name'] ?? t['team_name']) : null)?.toString().trim() ?? '')
+        .where((n) => n.isNotEmpty)
+        .toSet()
+        .toList();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favorite_teams', names);
   }
 
   static Future<List<dynamic>> getStandings({
@@ -1110,7 +1124,11 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 120));
 
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        await _mirrorFavoritesToPrefs(teams);
+        return true;
+      }
+      return false;
     } catch (e) {
       debugPrint("Error saving favorites: $e");
       return false;

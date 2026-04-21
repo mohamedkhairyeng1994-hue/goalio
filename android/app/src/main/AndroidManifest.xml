@@ -11,10 +11,12 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4262739856695834~2312690413"/>
-        <!-- FCM default notification rendering (small icon + channel) -->
+        <!-- FCM default notification rendering (small icon + channel). Use the
+             white-on-transparent notification_logo drawable — a launcher icon
+             would render as a solid white square in the status bar. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/launcher_icon" />
+            android:resource="@drawable/notification_logo" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="goalio_notifications_v2" />

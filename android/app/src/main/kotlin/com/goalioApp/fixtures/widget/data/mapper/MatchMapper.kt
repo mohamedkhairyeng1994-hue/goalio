@@ -12,6 +12,9 @@ fun MatchDto.toDomain(bucket: Match.Bucket): Match = Match(
     awayLogo = awayLogo,
     time = time,
     bucket = bucket,
+    homeScore = homeScore,
+    awayScore = awayScore,
+    status = status,
 )
 
 fun Match.toEntity(fetchedAt: Long) = CachedMatchEntity(
@@ -23,6 +26,9 @@ fun Match.toEntity(fetchedAt: Long) = CachedMatchEntity(
     time = time,
     bucket = bucket.name,
     fetchedAt = fetchedAt,
+    homeScore = homeScore,
+    awayScore = awayScore,
+    status = status,
 )
 
 fun CachedMatchEntity.toDomain() = Match(
@@ -33,4 +39,7 @@ fun CachedMatchEntity.toDomain() = Match(
     awayLogo = awayLogo,
     time = time,
     bucket = Match.Bucket.valueOf(bucket),
+    homeScore = homeScore,
+    awayScore = awayScore,
+    status = status,
 )

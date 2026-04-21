@@ -18,4 +18,5 @@ object WidgetTheme {
     val TEXT_PRIMARY     = Color(0xFFFFFFFF)
     val TEXT_SECONDARY   = Color(0xFF94A3B8)
     val DIVIDER          = Color(0x1AFFFFFF)
+    val LIVE             = Color(0xFFEF4444) // red — live match indicator
 }

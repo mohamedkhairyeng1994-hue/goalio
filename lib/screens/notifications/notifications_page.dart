@@ -325,7 +325,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
       // Close notifications page and go to Challenge tab
       Navigator.popUntil(context, (route) => route.isFirst);
-      mainPageKey.currentState?.onDestinationSelected(3);
+      mainPageTabSwitcher?.call(3);
     } else if (type == 'match_status' ||
         type == 'match_event' ||
         type == 'match_reminder') {

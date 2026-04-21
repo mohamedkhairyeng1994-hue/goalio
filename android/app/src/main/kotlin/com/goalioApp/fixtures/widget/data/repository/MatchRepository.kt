@@ -12,14 +12,17 @@ class MatchRepository(
     private val api: MatchApi,
     private val dao: MatchDao,
 ) {
-    suspend fun refresh(): Result<List<Match>> = withContext(Dispatchers.IO) {
+    data class Snapshot(val matches: List<Match>, val hasFavorites: Boolean)
+
+    suspend fun refresh(forceScrape: Boolean = false): Result<Snapshot> = withContext(Dispatchers.IO) {
         runCatching {
-            val resp = api.getWidgetMatches()
-            val domain = resp.today.map { it.toDomain(Match.Bucket.TODAY) } +
+            val resp = api.getWidgetMatches(refresh = if (forceScrape) 1 else null)
+            val domain = resp.yesterday.map { it.toDomain(Match.Bucket.YESTERDAY) } +
+                    resp.today.map { it.toDomain(Match.Bucket.TODAY) } +
                     resp.tomorrow.map { it.toDomain(Match.Bucket.TOMORROW) }
             val now = System.currentTimeMillis()
             dao.replaceAll(domain.map { it.toEntity(now) })
-            domain
+            Snapshot(domain, resp.hasFavorites)
         }
     }
 
