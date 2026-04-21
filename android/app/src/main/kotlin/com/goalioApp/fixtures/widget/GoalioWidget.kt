@@ -17,7 +17,6 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
@@ -72,20 +71,13 @@ class GoalioWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repo = WidgetGraph.repository(context)
-        val prefs = runCatching {
-            getAppWidgetState(context, PreferencesGlanceStateDefinition, id)
-        }.getOrNull()
-        val page: Int = prefs?.get(PageKeys.PAGE) ?: 0
-        val refreshing: Boolean = prefs?.get(PageKeys.REFRESHING) ?: false
+        val page: Int = runCatching {
+            getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[PageKeys.PAGE] ?: 0
+        }.getOrDefault(0)
 
         val cached = runCatching { repo.cached() }.getOrDefault(emptyList())
 
-        // When the user tapped Refresh, the worker is already hitting the API.
-        // Skip our own fetch here and just render the existing cache under the
-        // spinner — the worker will trigger another update once fresh data lands.
-        val state: WidgetUiState = if (refreshing) {
-            if (cached.isNotEmpty()) WidgetUiState.Content(cached) else WidgetUiState.Loading
-        } else runCatching {
+        val state: WidgetUiState = runCatching {
             repo.refresh().fold(
                 onSuccess = { snapshot ->
                     if (!snapshot.hasFavorites) WidgetUiState.NoFavorites
@@ -104,13 +96,11 @@ class GoalioWidget : GlanceAppWidget() {
         }
 
         val matches = (state as? WidgetUiState.Content)?.matches.orEmpty()
-        android.util.Log.i(TAG, "rendering with ${matches.size} matches, preloading logos")
         val logos = runCatching { preloadLogos(context, matches) }
             .onFailure { android.util.Log.e(TAG, "preloadLogos crashed", it) }
             .getOrDefault(emptyMap())
-        android.util.Log.i(TAG, "preload complete: ${logos.size}/${matches.size * 2} logos loaded")
 
-        provideContent { Root(state, logos, page, refreshing) }
+        provideContent { Root(state, logos, page) }
     }
 
     companion object { private const val TAG = "GoalioWidget" }
@@ -128,7 +118,7 @@ class GoalioWidget : GlanceAppWidget() {
 /* ------------------------------ Composables ------------------------------ */
 
 @Composable
-private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int, refreshing: Boolean) {
+private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int) {
     val openAppIntent = Intent(Intent.ACTION_VIEW, Uri.parse("goalio://home")).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
@@ -141,7 +131,7 @@ private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int, re
             .padding(horizontal = 14.dp, vertical = 12.dp)
             .clickable(actionStartActivity(openAppIntent))
     ) {
-        Header(refreshing)
+        Header()
         Spacer(GlanceModifier.height(12.dp))
 
         when (state) {
@@ -176,28 +166,21 @@ private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int, re
 }
 
 @Composable
-private fun Header(refreshing: Boolean) {
+private fun Header() {
     val titleStyle = TextStyle(
         color = ColorProvider(WidgetTheme.TEXT_PRIMARY),
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
     )
     val refreshAffordance: @Composable () -> Unit = {
-        if (refreshing) {
-            CircularProgressIndicator(
-                color = ColorProvider(WidgetTheme.ACCENT),
-                modifier = GlanceModifier.size(22.dp),
-            )
-        } else {
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_refresh),
-                contentDescription = "Refresh",
-                colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT)),
-                modifier = GlanceModifier
-                    .size(22.dp)
-                    .clickable(actionRunCallback<RefreshAction>()),
-            )
-        }
+        Image(
+            provider = ImageProvider(R.drawable.ic_widget_refresh),
+            contentDescription = "Refresh",
+            colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT)),
+            modifier = GlanceModifier
+                .size(22.dp)
+                .clickable(actionRunCallback<RefreshAction>()),
+        )
     }
 
     Row(
