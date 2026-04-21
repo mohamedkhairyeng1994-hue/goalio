@@ -30,7 +30,9 @@ class AppUpdateChecker {
     if (minVersion == null || minVersion.isEmpty) return;
 
     final packageInfo = await PackageInfo.fromPlatform();
-    final currentVersion = packageInfo.version;
+    final currentVersion = packageInfo.buildNumber.isNotEmpty
+        ? '${packageInfo.version}+${packageInfo.buildNumber}'
+        : packageInfo.version;
 
     if (!_isOlder(currentVersion, minVersion)) return;
     if (!context.mounted) return;
