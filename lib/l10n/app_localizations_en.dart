@@ -1067,4 +1067,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get later => 'Later';
+
+  @override
+  String get notificationManager => 'Notification Manager';
+
+  @override
+  String get notificationManagerSubtitle =>
+      'Customize which alerts you receive';
+
+  @override
+  String get matchEvents => 'Match Events';
+
+  @override
+  String get matchEventsSubtitle =>
+      'Pick which in-match alerts you want to receive for the matches you follow.';
+
+  @override
+  String get newsAlerts => 'News Alerts';
+
+  @override
+  String get newsAlertsSubtitle =>
+      'How often should we push fresh news from your favorite leagues?';
+
+  @override
+  String get eventGoal => 'Goals';
+
+  @override
+  String get eventAssist => 'Assists';
+
+  @override
+  String get eventYellowCard => 'Yellow cards';
+
+  @override
+  String get eventRedCard => 'Red cards';
+
+  @override
+  String get eventSubstitution => 'Substitutions';
+
+  @override
+  String get eventVar => 'VAR reviews';
+
+  @override
+  String get eventPenalty => 'Penalties (scored & missed)';
+
+  @override
+  String get eventMatchStart => 'Match start';
+
+  @override
+  String get eventMatchEnd => 'Match end';
+
+  @override
+  String get eventHalfTime => 'Half time';
+
+  @override
+  String get eventPreMatch => 'Pre-match reminder (10 min before)';
+
+  @override
+  String get newsEnabled => 'Enable news notifications';
+
+  @override
+  String get newsFrequency => 'Frequency';
+
+  @override
+  String get freqEveryMinute => 'Every 1 minute';
+
+  @override
+  String get freqEvery5Minutes => 'Every 5 minutes';
+
+  @override
+  String get freqEvery15Minutes => 'Every 15 minutes';
+
+  @override
+  String get freqEvery30Minutes => 'Every 30 minutes';
+
+  @override
+  String get freqEveryHour => 'Every 1 hour';
+
+  @override
+  String get freqEvery2Hours => 'Every 2 hours';
+
+  @override
+  String get freqEvery4Hours => 'Every 4 hours';
+
+  @override
+  String get freqEvery8Hours => 'Every 8 hours';
+
+  @override
+  String get freqEvery12Hours => 'Every 12 hours';
+
+  @override
+  String get freqEveryDay => 'Once a day';
+
+  @override
+  String get preferencesSaved => 'Preferences saved';
+
+  @override
+  String get preferencesSaveFailed =>
+      'Couldn\'t save your preferences. Try again.';
+
+  @override
+  String get save => 'Save';
 }

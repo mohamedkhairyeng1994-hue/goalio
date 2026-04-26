@@ -8,6 +8,7 @@ import '../../screens/favorites/manage_leagues_page.dart';
 import '../../screens/settings/privacy_policy_page.dart';
 import '../../screens/settings/terms_of_service_page.dart';
 import '../../screens/settings/feedback_page.dart';
+import '../../screens/settings/notification_manager_page.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/localization/language_manager.dart';
 import '../../l10n/app_localizations.dart';
@@ -136,6 +137,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                   activeColor: GoalioColors.greenAccent,
                 ),
+              ),
+              _buildSettingTile(
+                context,
+                icon: Icons.tune_outlined,
+                title: AppLocalizations.of(context)!.notificationManager,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationManagerPage(),
+                    ),
+                  );
+                },
               ),
               SizedBox(height: 24.h),
               _buildSectionHeader(context, AppLocalizations.of(context)!.about),

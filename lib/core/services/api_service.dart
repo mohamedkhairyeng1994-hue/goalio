@@ -1495,6 +1495,53 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>?> getNotificationPreferences() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/notifications/preferences'),
+            headers: await reqHeaders,
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['data'] is Map) {
+          return Map<String, dynamic>.from(body['data'] as Map);
+        }
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error fetching notification preferences: $e");
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> updateNotificationPreferences(
+    Map<String, dynamic> prefs,
+  ) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/notifications/preferences'),
+            headers: await reqHeaders,
+            body: jsonEncode(prefs),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['data'] is Map) {
+          return Map<String, dynamic>.from(body['data'] as Map);
+        }
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error updating notification preferences: $e");
+      return null;
+    }
+  }
+
   static Future<void> markNotificationAsReceived(String messageId) async {
     try {
       final response = await http

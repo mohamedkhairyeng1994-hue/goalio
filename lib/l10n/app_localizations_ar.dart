@@ -1063,4 +1063,101 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get later => 'لاحقاً';
+
+  @override
+  String get notificationManager => 'إدارة الإشعارات';
+
+  @override
+  String get notificationManagerSubtitle => 'خصص التنبيهات التي تصلك';
+
+  @override
+  String get matchEvents => 'أحداث المباراة';
+
+  @override
+  String get matchEventsSubtitle =>
+      'اختر الأحداث التي تريد تنبيهك بها أثناء مباريات فرقك المفضلة.';
+
+  @override
+  String get newsAlerts => 'إشعارات الأخبار';
+
+  @override
+  String get newsAlertsSubtitle => 'كم مرة تريد استلام أخبار دورياتك المفضلة؟';
+
+  @override
+  String get eventGoal => 'الأهداف';
+
+  @override
+  String get eventAssist => 'صناعة الأهداف';
+
+  @override
+  String get eventYellowCard => 'البطاقات الصفراء';
+
+  @override
+  String get eventRedCard => 'البطاقات الحمراء';
+
+  @override
+  String get eventSubstitution => 'التبديلات';
+
+  @override
+  String get eventVar => 'مراجعات الفيديو';
+
+  @override
+  String get eventPenalty => 'ركلات الجزاء (مسجلة وضائعة)';
+
+  @override
+  String get eventMatchStart => 'بداية المباراة';
+
+  @override
+  String get eventMatchEnd => 'نهاية المباراة';
+
+  @override
+  String get eventHalfTime => 'بين الشوطين';
+
+  @override
+  String get eventPreMatch => 'تذكير قبل المباراة (10 دقائق)';
+
+  @override
+  String get newsEnabled => 'تفعيل إشعارات الأخبار';
+
+  @override
+  String get newsFrequency => 'التكرار';
+
+  @override
+  String get freqEveryMinute => 'كل دقيقة';
+
+  @override
+  String get freqEvery5Minutes => 'كل 5 دقائق';
+
+  @override
+  String get freqEvery15Minutes => 'كل 15 دقيقة';
+
+  @override
+  String get freqEvery30Minutes => 'كل 30 دقيقة';
+
+  @override
+  String get freqEveryHour => 'كل ساعة';
+
+  @override
+  String get freqEvery2Hours => 'كل ساعتين';
+
+  @override
+  String get freqEvery4Hours => 'كل 4 ساعات';
+
+  @override
+  String get freqEvery8Hours => 'كل 8 ساعات';
+
+  @override
+  String get freqEvery12Hours => 'كل 12 ساعة';
+
+  @override
+  String get freqEveryDay => 'مرة في اليوم';
+
+  @override
+  String get preferencesSaved => 'تم حفظ التفضيلات';
+
+  @override
+  String get preferencesSaveFailed => 'تعذّر حفظ التفضيلات. حاول مرة أخرى.';
+
+  @override
+  String get save => 'حفظ';
 }

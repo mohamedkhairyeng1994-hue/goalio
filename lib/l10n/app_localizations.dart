@@ -2071,6 +2071,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later'**
   String get later;
+
+  /// No description provided for @notificationManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Manager'**
+  String get notificationManager;
+
+  /// No description provided for @notificationManagerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize which alerts you receive'**
+  String get notificationManagerSubtitle;
+
+  /// No description provided for @matchEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Events'**
+  String get matchEvents;
+
+  /// No description provided for @matchEventsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick which in-match alerts you want to receive for the matches you follow.'**
+  String get matchEventsSubtitle;
+
+  /// No description provided for @newsAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'News Alerts'**
+  String get newsAlerts;
+
+  /// No description provided for @newsAlertsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How often should we push fresh news from your favorite leagues?'**
+  String get newsAlertsSubtitle;
+
+  /// No description provided for @eventGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get eventGoal;
+
+  /// No description provided for @eventAssist.
+  ///
+  /// In en, this message translates to:
+  /// **'Assists'**
+  String get eventAssist;
+
+  /// No description provided for @eventYellowCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow cards'**
+  String get eventYellowCard;
+
+  /// No description provided for @eventRedCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Red cards'**
+  String get eventRedCard;
+
+  /// No description provided for @eventSubstitution.
+  ///
+  /// In en, this message translates to:
+  /// **'Substitutions'**
+  String get eventSubstitution;
+
+  /// No description provided for @eventVar.
+  ///
+  /// In en, this message translates to:
+  /// **'VAR reviews'**
+  String get eventVar;
+
+  /// No description provided for @eventPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties (scored & missed)'**
+  String get eventPenalty;
+
+  /// No description provided for @eventMatchStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Match start'**
+  String get eventMatchStart;
+
+  /// No description provided for @eventMatchEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Match end'**
+  String get eventMatchEnd;
+
+  /// No description provided for @eventHalfTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Half time'**
+  String get eventHalfTime;
+
+  /// No description provided for @eventPreMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-match reminder (10 min before)'**
+  String get eventPreMatch;
+
+  /// No description provided for @newsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable news notifications'**
+  String get newsEnabled;
+
+  /// No description provided for @newsFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get newsFrequency;
+
+  /// No description provided for @freqEveryMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 1 minute'**
+  String get freqEveryMinute;
+
+  /// No description provided for @freqEvery5Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 5 minutes'**
+  String get freqEvery5Minutes;
+
+  /// No description provided for @freqEvery15Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 15 minutes'**
+  String get freqEvery15Minutes;
+
+  /// No description provided for @freqEvery30Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 30 minutes'**
+  String get freqEvery30Minutes;
+
+  /// No description provided for @freqEveryHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 1 hour'**
+  String get freqEveryHour;
+
+  /// No description provided for @freqEvery2Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 2 hours'**
+  String get freqEvery2Hours;
+
+  /// No description provided for @freqEvery4Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 4 hours'**
+  String get freqEvery4Hours;
+
+  /// No description provided for @freqEvery8Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 8 hours'**
+  String get freqEvery8Hours;
+
+  /// No description provided for @freqEvery12Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 12 hours'**
+  String get freqEvery12Hours;
+
+  /// No description provided for @freqEveryDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a day'**
+  String get freqEveryDay;
+
+  /// No description provided for @preferencesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences saved'**
+  String get preferencesSaved;
+
+  /// No description provided for @preferencesSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your preferences. Try again.'**
+  String get preferencesSaveFailed;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 }
 
 class _AppLocalizationsDelegate
