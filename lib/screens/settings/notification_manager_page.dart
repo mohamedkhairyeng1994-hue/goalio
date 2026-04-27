@@ -15,7 +15,6 @@ class NotificationManagerPage extends StatefulWidget {
 
 class _NotificationManagerPageState extends State<NotificationManagerPage> {
   static const List<int> _frequencyOptions = [
-    1,
     5,
     15,
     30,
@@ -110,8 +109,6 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
 
   String _frequencyLabel(int minutes, AppLocalizations loc) {
     switch (minutes) {
-      case 1:
-        return loc.freqEveryMinute;
       case 5:
         return loc.freqEvery5Minutes;
       case 15:
@@ -153,155 +150,163 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
         ),
         centerTitle: true,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-              children: [
-                _sectionHeader(loc.matchEvents, loc.matchEventsSubtitle),
-                _eventTile(loc.eventGoal, 'notify_goal', Icons.sports_soccer),
-                _eventTile(
-                  loc.eventAssist,
-                  'notify_assist',
-                  Icons.handshake_outlined,
-                ),
-                _eventTile(
-                  loc.eventYellowCard,
-                  'notify_yellow_card',
-                  Icons.square_rounded,
-                  iconColor: Colors.amber,
-                ),
-                _eventTile(
-                  loc.eventRedCard,
-                  'notify_red_card',
-                  Icons.square_rounded,
-                  iconColor: Colors.redAccent,
-                ),
-                _eventTile(
-                  loc.eventPenalty,
-                  'notify_penalty',
-                  Icons.gps_fixed,
-                ),
-                _eventTile(loc.eventVar, 'notify_var', Icons.tv_outlined),
-                _eventTile(
-                  loc.eventSubstitution,
-                  'notify_substitution',
-                  Icons.swap_horiz,
-                ),
-                _eventTile(
-                  loc.eventMatchStart,
-                  'notify_match_start',
-                  Icons.play_circle_outline,
-                ),
-                _eventTile(
-                  loc.eventHalfTime,
-                  'notify_half_time',
-                  Icons.timer_outlined,
-                ),
-                _eventTile(
-                  loc.eventMatchEnd,
-                  'notify_match_end',
-                  Icons.flag_outlined,
-                ),
-                _eventTile(
-                  loc.eventPreMatch,
-                  'notify_pre_match',
-                  Icons.notifications_outlined,
-                ),
-
-                SizedBox(height: 24.h),
-                _sectionHeader(loc.newsAlerts, loc.newsAlertsSubtitle),
-                _card(
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        value: _newsEnabled,
-                        onChanged: (v) => setState(() => _newsEnabled = v),
-                        activeColor: GoalioColors.greenAccent,
-                        secondary: Icon(
-                          Icons.article_outlined,
-                          color: GoalioColors.blueAccent,
-                        ),
-                        title: Text(loc.newsEnabled),
-                      ),
-                      Divider(
-                        height: 1,
-                        color: Theme.of(context).dividerColor.withOpacity(0.2),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.schedule,
-                              color: GoalioColors.blueAccent,
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(child: Text(loc.newsFrequency)),
-                            DropdownButton<int>(
-                              value: _newsFrequencyMinutes,
-                              underline: const SizedBox(),
-                              onChanged: _newsEnabled
-                                  ? (v) {
-                                      if (v == null) return;
-                                      setState(
-                                        () => _newsFrequencyMinutes = v,
-                                      );
-                                    }
-                                  : null,
-                              items: _frequencyOptions
-                                  .map(
-                                    (m) => DropdownMenuItem<int>(
-                                      value: m,
-                                      child: Text(_frequencyLabel(m, loc)),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+                children: [
+                  _sectionHeader(loc.matchEvents, loc.matchEventsSubtitle),
+                  _eventTile(loc.eventGoal, 'notify_goal', Icons.sports_soccer),
+                  _eventTile(
+                    loc.eventAssist,
+                    'notify_assist',
+                    Icons.handshake_outlined,
                   ),
-                ),
+                  _eventTile(
+                    loc.eventYellowCard,
+                    'notify_yellow_card',
+                    Icons.square_rounded,
+                    iconColor: Colors.amber,
+                  ),
+                  _eventTile(
+                    loc.eventRedCard,
+                    'notify_red_card',
+                    Icons.square_rounded,
+                    iconColor: Colors.redAccent,
+                  ),
+                  _eventTile(
+                    loc.eventPenalty,
+                    'notify_penalty',
+                    Icons.gps_fixed,
+                  ),
+                  _eventTile(loc.eventVar, 'notify_var', Icons.tv_outlined),
+                  _eventTile(
+                    loc.eventSubstitution,
+                    'notify_substitution',
+                    Icons.swap_horiz,
+                  ),
+                  _eventTile(
+                    loc.eventMatchStart,
+                    'notify_match_start',
+                    Icons.play_circle_outline,
+                  ),
+                  _eventTile(
+                    loc.eventHalfTime,
+                    'notify_half_time',
+                    Icons.timer_outlined,
+                  ),
+                  _eventTile(
+                    loc.eventMatchEnd,
+                    'notify_match_end',
+                    Icons.flag_outlined,
+                  ),
+                  _eventTile(
+                    loc.eventPreMatch,
+                    'notify_pre_match',
+                    Icons.notifications_outlined,
+                  ),
 
-                SizedBox(height: 32.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: GoalioColors.greenAccent,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.w),
-                      ),
-                    ),
-                    onPressed: _saving ? null : _save,
-                    child: _saving
-                        ? SizedBox(
-                            height: 20.h,
-                            width: 20.h,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            loc.save,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
-                            ),
+                  SizedBox(height: 24.h),
+                  _sectionHeader(loc.newsAlerts, loc.newsAlertsSubtitle),
+                  _card(
+                    child: Column(
+                      children: [
+                        SwitchListTile(
+                          value: _newsEnabled,
+                          onChanged: (v) => setState(() => _newsEnabled = v),
+                          activeColor: GoalioColors.greenAccent,
+                          secondary: Icon(
+                            Icons.article_outlined,
+                            color: GoalioColors.blueAccent,
                           ),
+                          title: Text(loc.newsEnabled),
+                        ),
+                        Divider(
+                          height: 1,
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.2),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                color: GoalioColors.blueAccent,
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(child: Text(loc.newsFrequency)),
+                              DropdownButton<int>(
+                                value: _newsFrequencyMinutes,
+                                underline: const SizedBox(),
+                                onChanged:
+                                    _newsEnabled
+                                        ? (v) {
+                                          if (v == null) return;
+                                          setState(
+                                            () => _newsFrequencyMinutes = v,
+                                          );
+                                        }
+                                        : null,
+                                items:
+                                    _frequencyOptions
+                                        .map(
+                                          (m) => DropdownMenuItem<int>(
+                                            value: m,
+                                            child: Text(
+                                              _frequencyLabel(m, loc),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 40.h),
-              ],
-            ),
+
+                  SizedBox(height: 32.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GoalioColors.greenAccent,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.w),
+                        ),
+                      ),
+                      onPressed: _saving ? null : _save,
+                      child:
+                          _saving
+                              ? SizedBox(
+                                height: 20.h,
+                                width: 20.h,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : Text(
+                                loc.save,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.sp,
+                                ),
+                              ),
+                    ),
+                  ),
+                  SizedBox(height: 40.h),
+                ],
+              ),
     );
   }
 
@@ -340,20 +345,18 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.w),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4.w,
-                  offset: Offset(0.w, 2.h),
-                ),
-              ],
+        boxShadow:
+            isDark
+                ? []
+                : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4.w,
+                    offset: Offset(0.w, 2.h),
+                  ),
+                ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.w),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(12.w), child: child),
     );
   }
 
