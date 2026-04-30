@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1039306559815-b4m9stbq0jldg6u32ja8f2vkiq8kje62.apps.googleusercontent.com</string>
+	<string>1039306559815-ek6parr602vkthih13c7errrcnj91mka.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1039306559815-b4m9stbq0jldg6u32ja8f2vkiq8kje62</string>
+	<string>com.googleusercontent.apps.1039306559815-ek6parr602vkthih13c7errrcnj91mka</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>1039306559815-0kv0su08leo6asptr54siaog944tk5lb.apps.googleusercontent.com</string>
+	<string>1039306559815-029du4btjmae92r5cdkc0fuovmo3s52h.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAoLWobJYxWlyvYWET4FBBu34zQQiQSPRc</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.goalFixturesApp</string>
+	<string>com.example.goalFixturesApp.S749H4KDZQ</string>
 	<key>PROJECT_ID</key>
 	<string>goalio-49c90</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1039306559815:ios:72885aff54dd636f60fc62</string>
+	<string>1:1039306559815:ios:58ab4d6bb6d61bfb60fc62</string>
 </dict>
 </plist>
