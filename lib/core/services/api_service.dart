@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../core/constants/constants.dart';
+import 'widget_bridge.dart';
 
 class ApiService {
   static String get baseUrl => ApiConstants.authBaseUrl;
@@ -39,7 +40,9 @@ class ApiService {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token.trim());
+    final trimmed = token.trim();
+    await prefs.setString(_tokenKey, trimmed);
+    await WidgetBridge.setAuthToken(trimmed);
   }
 
   static Future<void> saveEmail(String email) async {
@@ -62,6 +65,7 @@ class ApiService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_userEmailKey);
+    await WidgetBridge.setAuthToken(null);
   }
 
   static Future<Map<String, dynamic>> getSocialPostsPaged({int page = 1, int limit = 10}) async {
@@ -337,46 +341,72 @@ class ApiService {
     String? fcmToken,
   }) async {
     final url = '$baseUrl/user/social-login';
-    try {
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: await reqHeaders,
-            body: jsonEncode({
-              'provider': provider,
-              'token': token,
-              if (email != null) 'email': email,
-              if (name != null) 'name': name,
-              if (fcmToken != null) 'fcm_token': fcmToken,
-            }),
-          )
-          .timeout(const Duration(seconds: 120));
+    final body = jsonEncode({
+      'provider': provider,
+      'token': token,
+      if (email != null) 'email': email,
+      if (name != null) 'name': name,
+      if (fcmToken != null) 'fcm_token': fcmToken,
+    });
 
-      final result = _handleResponse(response);
+    // iOS keep-alive sockets occasionally land on a server-side closed connection
+    // (ECONNRESET, errno 54). Retry transient socket failures with a fresh client.
+    const maxAttempts = 3;
+    Object? lastError;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      final client = http.Client();
+      try {
+        final response = await client
+            .post(Uri.parse(url), headers: await reqHeaders, body: body)
+            .timeout(const Duration(seconds: 120));
 
-      if (result.containsKey('data')) {
-        final data = result['data'];
-        var responseToken;
-        var userEmail;
-        if (data is List && data.isNotEmpty) {
-          responseToken = data[0]['token'];
-          userEmail = data[0]['email'];
-        } else if (data is Map) {
-          responseToken = data['token'];
-          userEmail = data['email'];
+        final result = _handleResponse(response);
+
+        if (result.containsKey('data')) {
+          final data = result['data'];
+          dynamic responseToken;
+          dynamic userEmail;
+          if (data is List && data.isNotEmpty) {
+            responseToken = data[0]['token'];
+            userEmail = data[0]['email'];
+          } else if (data is Map) {
+            responseToken = data['token'];
+            userEmail = data['email'];
+          }
+          if (responseToken != null) await saveToken(responseToken);
+          if (userEmail != null) await saveEmail(userEmail);
+        } else if (result.containsKey('token')) {
+          final responseToken = result['token'];
+          final userEmail = result['email'];
+          if (responseToken != null) await saveToken(responseToken);
+          if (userEmail != null) await saveEmail(userEmail);
         }
-        if (responseToken != null) await saveToken(responseToken);
-        if (userEmail != null) await saveEmail(userEmail);
-      } else if (result.containsKey('token')) {
-        final responseToken = result['token'];
-        final userEmail = result['email'];
-        if (responseToken != null) await saveToken(responseToken);
-        if (userEmail != null) await saveEmail(userEmail);
+        return result;
+      } catch (e) {
+        lastError = e;
+        if (!_isTransientNetworkError(e) || attempt == maxAttempts) break;
+        await Future.delayed(Duration(milliseconds: 400 * attempt));
+      } finally {
+        client.close();
       }
-      return result;
-    } catch (e) {
-      return {'error': 'Connection error: ${e.toString()}', 'code': 500};
     }
+    debugPrint('Social login failed after retries: $lastError');
+    return {
+      'error': 'Network error. Please check your connection and try again.',
+      'code': 0,
+    };
+  }
+
+  static bool _isTransientNetworkError(Object e) {
+    final s = e.toString().toLowerCase();
+    return s.contains('connection reset') ||
+        s.contains('connection closed') ||
+        s.contains('socketexception') ||
+        s.contains('handshakeexception') ||
+        s.contains('connection terminated') ||
+        s.contains('errno = 54') ||
+        s.contains('errno = 32') ||
+        s.contains('clientexception');
   }
 
   static Future<Map<String, dynamic>> forgotPassword(String email) async {

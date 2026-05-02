@@ -14,6 +14,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'core/theme/theme_manager.dart';
 import 'core/constants/constants.dart';
 import 'core/services/api_service.dart';
+import 'core/services/widget_bridge.dart';
 import 'core/utils/size_config.dart';
 import 'core/localization/language_manager.dart';
 import 'l10n/app_localizations.dart';
@@ -89,6 +90,11 @@ void main() async {
     ThemeManager.initialize(),
     MobileAds.instance.initialize()
   ]);
+
+  // Push the current API base URL to the home-screen widgets so they don't
+  // hardcode an environment. Picks up local in dev, production in release —
+  // see ApiConstants.authBaseUrl.
+  await WidgetBridge.setBaseUrl(ApiConstants.authBaseUrl);
 
   runApp(const ProviderScope(child: MyApp()));
 }

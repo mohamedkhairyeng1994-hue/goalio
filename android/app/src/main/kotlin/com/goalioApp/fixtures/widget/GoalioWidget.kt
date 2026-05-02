@@ -63,8 +63,11 @@ class GoalioWidget : GlanceAppWidget() {
 
     override val sizeMode = SizeMode.Responsive(
         setOf(
-            androidx.compose.ui.unit.DpSize(180.dp, 220.dp),
-            androidx.compose.ui.unit.DpSize(260.dp, 280.dp),
+            // Drop the previous 180×220 entry: at that size the three sections
+            // overflow and clip the pager off the bottom. Smallest now leaves
+            // ~40dp at the bottom for the pager strip.
+            androidx.compose.ui.unit.DpSize(220.dp, 260.dp),
+            androidx.compose.ui.unit.DpSize(260.dp, 300.dp),
             androidx.compose.ui.unit.DpSize(320.dp, 360.dp),
         )
     )
@@ -77,22 +80,32 @@ class GoalioWidget : GlanceAppWidget() {
 
         val cached = runCatching { repo.cached() }.getOrDefault(emptyList())
 
-        val state: WidgetUiState = runCatching {
-            repo.refresh().fold(
-                onSuccess = { snapshot ->
-                    if (!snapshot.hasFavorites) WidgetUiState.NoFavorites
-                    else WidgetUiState.Content(snapshot.matches)
-                },
-                onFailure = {
-                    android.util.Log.e(TAG, "refresh failed", it)
-                    if (cached.isNotEmpty()) WidgetUiState.Content(cached)
-                    else WidgetUiState.Error(it.message ?: "Failed to load")
-                }
-            )
-        }.getOrElse {
-            android.util.Log.e(TAG, "provideGlance failed", it)
-            if (cached.isNotEmpty()) WidgetUiState.Content(cached)
-            else WidgetUiState.Error(it.message ?: it::class.simpleName ?: "Unknown")
+        // provideGlance runs on every render — including a render triggered by
+        // tapping the Next/Prev chevron. Hitting the network here would block
+        // the page swap on a 1–3 s API round-trip and make the click feel
+        // dead on flaky networks. Render from the local cache instead; the
+        // periodic WidgetUpdateWorker (every 30 min) and the manual
+        // RefreshAction are the only paths that should hit the API.
+        val state: WidgetUiState = if (cached.isNotEmpty()) {
+            WidgetUiState.Content(cached)
+        } else {
+            // Empty cache (first add or favorites just selected) — fetch once
+            // to populate, then future renders are instant.
+            runCatching {
+                repo.refresh().fold(
+                    onSuccess = { snapshot ->
+                        if (!snapshot.hasFavorites) WidgetUiState.NoFavorites
+                        else WidgetUiState.Content(snapshot.matches)
+                    },
+                    onFailure = {
+                        android.util.Log.e(TAG, "refresh failed", it)
+                        WidgetUiState.Error(it.message ?: "Failed to load")
+                    }
+                )
+            }.getOrElse {
+                android.util.Log.e(TAG, "provideGlance failed", it)
+                WidgetUiState.Error(it.message ?: it::class.simpleName ?: "Unknown")
+            }
         }
 
         val matches = (state as? WidgetUiState.Content)?.matches.orEmpty()
@@ -119,17 +132,17 @@ class GoalioWidget : GlanceAppWidget() {
 
 @Composable
 private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int) {
-    val openAppIntent = Intent(Intent.ACTION_VIEW, Uri.parse("goalio://home")).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-
+    // The widget no longer has a whole-surface clickable: Glance's RemoteViews
+    // backing dispatches nested clicks unreliably, and a fillMaxSize click
+    // handler on the parent would swallow taps that fell on the empty space
+    // around the chevron glyphs. Specific affordances (header logo, match
+    // rows, refresh, chevrons) own their own clicks instead.
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .cornerRadius(24.dp)
             .background(WidgetTheme.SURFACE)
             .padding(horizontal = 14.dp, vertical = 12.dp)
-            .clickable(actionStartActivity(openAppIntent))
     ) {
         Header()
         Spacer(GlanceModifier.height(12.dp))
@@ -152,14 +165,27 @@ private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int) {
                 ).coerceAtLeast(1)
                 val safe = page.coerceIn(0, totalPages - 1)
 
-                Sections(
-                    yesterday = yesterday.pageSlice(safe, pageSize),
-                    today = today.pageSlice(safe, pageSize),
-                    tomorrow = tomorrow.pageSlice(safe, pageSize),
-                    logos = logos,
-                )
-                Spacer(GlanceModifier.defaultWeight())
-                Pager(safe + 1, totalPages)
+                // Sections wrapper takes whatever vertical space is left over
+                // after the Header above and the Pager below claim their
+                // fixed sizes. If the rows still don't all fit they clip
+                // inside this region, but the pager beneath stays visible —
+                // which is the whole point: the user must always see the
+                // chevrons to reach the next page.
+                Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
+                    Sections(
+                        yesterday = yesterday.pageSlice(safe, pageSize),
+                        today = today.pageSlice(safe, pageSize),
+                        tomorrow = tomorrow.pageSlice(safe, pageSize),
+                        logos = logos,
+                    )
+                }
+
+                // Always render the pager when there's more than one page so
+                // the user has an obvious way to reach matches that didn't
+                // fit on the current page.
+                if (totalPages > 1) {
+                    Pager(safe + 1, totalPages)
+                }
             }
         }
     }
@@ -167,22 +193,6 @@ private fun Root(state: WidgetUiState, logos: Map<String, Bitmap>, page: Int) {
 
 @Composable
 private fun Header() {
-    val titleStyle = TextStyle(
-        color = ColorProvider(WidgetTheme.TEXT_PRIMARY),
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
-    )
-    val refreshAffordance: @Composable () -> Unit = {
-        Image(
-            provider = ImageProvider(R.drawable.ic_widget_refresh),
-            contentDescription = "Refresh",
-            colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT)),
-            modifier = GlanceModifier
-                .size(22.dp)
-                .clickable(actionRunCallback<RefreshAction>()),
-        )
-    }
-
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -190,27 +200,56 @@ private fun Header() {
         // Glance reverses child order under RTL; emit in reverse there so the
         // final pixel layout is always logo-left, title-hugs-logo, refresh-right.
         if (isRtl()) {
-            refreshAffordance()
+            RefreshAffordance()
             Spacer(GlanceModifier.defaultWeight())
-            Text(WidgetTheme.APP_NAME, style = titleStyle)
-            Spacer(GlanceModifier.width(8.dp))
-            Image(
-                provider = ImageProvider(WidgetTheme.APP_LOGO_RES),
-                contentDescription = WidgetTheme.APP_NAME,
-                modifier = GlanceModifier.size(24.dp).cornerRadius(6.dp),
-            )
+            BrandAffordance()
         } else {
-            Image(
-                provider = ImageProvider(WidgetTheme.APP_LOGO_RES),
-                contentDescription = WidgetTheme.APP_NAME,
-                modifier = GlanceModifier.size(24.dp).cornerRadius(6.dp),
-            )
-            Spacer(GlanceModifier.width(8.dp))
-            Text(WidgetTheme.APP_NAME, style = titleStyle)
+            BrandAffordance()
             Spacer(GlanceModifier.defaultWeight())
-            refreshAffordance()
+            RefreshAffordance()
         }
     }
+}
+
+@Composable
+private fun BrandAffordance() {
+    // Logo + name combined in a single clickable row so this is the only place
+    // that opens the host app — keeping the click area off the chevrons and
+    // refresh icon, which had been losing taps to the old whole-widget click.
+    val openAppIntent = Intent(Intent.ACTION_VIEW, Uri.parse("goalio://home")).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    Row(
+        modifier = GlanceModifier.clickable(actionStartActivity(openAppIntent)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            provider = ImageProvider(WidgetTheme.APP_LOGO_RES),
+            contentDescription = WidgetTheme.APP_NAME,
+            modifier = GlanceModifier.size(24.dp).cornerRadius(6.dp),
+        )
+        Spacer(GlanceModifier.width(8.dp))
+        Text(
+            WidgetTheme.APP_NAME,
+            style = TextStyle(
+                color = ColorProvider(WidgetTheme.TEXT_PRIMARY),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun RefreshAffordance() {
+    Image(
+        provider = ImageProvider(R.drawable.ic_widget_refresh),
+        contentDescription = "Refresh",
+        colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT)),
+        modifier = GlanceModifier
+            .size(22.dp)
+            .clickable(actionRunCallback<RefreshAction>()),
+    )
 }
 
 @Composable
@@ -224,21 +263,23 @@ private fun Sections(
     tomorrow: List<Match>,
     logos: Map<String, Bitmap>,
 ) {
-    if (yesterday.isNotEmpty()) {
-        SectionPill("Yesterday")
-        yesterday.forEach { MatchRow(it, logos) }
+    Column(modifier = GlanceModifier.fillMaxWidth()) {
+        if (yesterday.isNotEmpty()) {
+            SectionPill("Yesterday")
+            yesterday.forEach { MatchRow(it, logos) }
+            Spacer(GlanceModifier.height(10.dp))
+        }
+
+        SectionPill("Today")
+        if (today.isEmpty()) EmptyRow("No matches today")
+        else today.forEach { MatchRow(it, logos) }
+
         Spacer(GlanceModifier.height(10.dp))
+
+        SectionPill("Tomorrow")
+        if (tomorrow.isEmpty()) EmptyRow("No matches tomorrow")
+        else tomorrow.forEach { MatchRow(it, logos) }
     }
-
-    SectionPill("Today")
-    if (today.isEmpty()) EmptyRow("No matches today")
-    else today.forEach { MatchRow(it, logos) }
-
-    Spacer(GlanceModifier.height(10.dp))
-
-    SectionPill("Tomorrow")
-    if (tomorrow.isEmpty()) EmptyRow("No matches tomorrow")
-    else tomorrow.forEach { MatchRow(it, logos) }
 }
 
 @Composable
@@ -318,35 +359,57 @@ private fun TeamSide(
     modifier: GlanceModifier,
     alignEnd: Boolean,
 ) {
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = if (alignEnd) Alignment.End else Alignment.Start,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (logo != null) {
-            Image(
-                provider = ImageProvider(logo),
-                contentDescription = name,
-                modifier = GlanceModifier.size(28.dp),
-            )
-        } else {
+        if (alignEnd) {
             Box(
-                modifier = GlanceModifier
-                    .size(28.dp)
-                    .cornerRadius(14.dp)
-                    .background(WidgetTheme.DIVIDER),
-            ) {}
+                modifier = GlanceModifier.defaultWeight(),
+                contentAlignment = Alignment.CenterEnd,
+            ) { TeamLabel(name) }
+            Spacer(GlanceModifier.width(6.dp))
+            TeamCrest(logo, name)
+        } else {
+            TeamCrest(logo, name)
+            Spacer(GlanceModifier.width(6.dp))
+            Box(
+                modifier = GlanceModifier.defaultWeight(),
+                contentAlignment = Alignment.CenterStart,
+            ) { TeamLabel(name) }
         }
-        Spacer(GlanceModifier.height(4.dp))
-        Text(
-            name,
-            maxLines = 1,
-            style = TextStyle(
-                color = ColorProvider(WidgetTheme.TEXT_SECONDARY),
-                fontSize = 12.sp,
-                textAlign = if (alignEnd) TextAlign.End else TextAlign.Start,
-            ),
-        )
     }
+}
+
+@Composable
+private fun TeamCrest(logo: Bitmap?, name: String) {
+    val size = 18.dp
+    if (logo != null) {
+        Image(
+            provider = ImageProvider(logo),
+            contentDescription = name,
+            modifier = GlanceModifier.size(size),
+        )
+    } else {
+        Box(
+            modifier = GlanceModifier
+                .size(size)
+                .cornerRadius(9.dp)
+                .background(WidgetTheme.DIVIDER),
+        ) {}
+    }
+}
+
+@Composable
+private fun TeamLabel(name: String) {
+    Text(
+        name,
+        maxLines = 1,
+        style = TextStyle(
+            color = ColorProvider(WidgetTheme.TEXT_SECONDARY),
+            fontSize = 12.sp,
+        ),
+    )
 }
 
 @Composable
@@ -433,48 +496,67 @@ private fun Pager(current: Int, total: Int) {
         fontSize = 13.sp,
         fontWeight = FontWeight.Medium,
     )
-    val accent = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT_ON_SURFACE))
+
     Box(
-        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (isRtl()) {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_widget_chevron_right),
-                    contentDescription = "Next",
-                    colorFilter = accent,
-                    modifier = GlanceModifier.size(20.dp).clickable(actionRunCallback<NextPageAction>()),
-                )
-                Spacer(GlanceModifier.width(14.dp))
+                NextChevron(total)
+                Spacer(GlanceModifier.width(10.dp))
                 Text("$current/$total", style = labelStyle)
-                Spacer(GlanceModifier.width(14.dp))
-                Image(
-                    provider = ImageProvider(R.drawable.ic_widget_chevron_left),
-                    contentDescription = "Prev",
-                    colorFilter = accent,
-                    modifier = GlanceModifier.size(20.dp).clickable(actionRunCallback<PrevPageAction>()),
-                )
+                Spacer(GlanceModifier.width(10.dp))
+                PrevChevron()
             } else {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_widget_chevron_left),
-                    contentDescription = "Prev",
-                    colorFilter = accent,
-                    modifier = GlanceModifier.size(20.dp).clickable(actionRunCallback<PrevPageAction>()),
-                )
-                Spacer(GlanceModifier.width(14.dp))
+                PrevChevron()
+                Spacer(GlanceModifier.width(10.dp))
                 Text("$current/$total", style = labelStyle)
-                Spacer(GlanceModifier.width(14.dp))
-                Image(
-                    provider = ImageProvider(R.drawable.ic_widget_chevron_right),
-                    contentDescription = "Next",
-                    colorFilter = accent,
-                    modifier = GlanceModifier.size(20.dp).clickable(actionRunCallback<NextPageAction>()),
-                )
+                Spacer(GlanceModifier.width(10.dp))
+                NextChevron(total)
             }
         }
     }
 }
+
+@Composable
+private fun PrevChevron() {
+    Box(
+        modifier = GlanceModifier
+            .size(36.dp)
+            .clickable(actionRunCallback<PrevPageAction>()),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            provider = ImageProvider(R.drawable.ic_widget_chevron_left),
+            contentDescription = "Prev",
+            colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT_ON_SURFACE)),
+            modifier = GlanceModifier.size(20.dp),
+        )
+    }
+}
+
+@Composable
+private fun NextChevron(total: Int) {
+    Box(
+        modifier = GlanceModifier
+            .size(36.dp)
+            .clickable(
+                actionRunCallback<NextPageAction>(
+                    actionParametersOf(NextPageAction.TOTAL_PAGES_KEY to total)
+                )
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            provider = ImageProvider(R.drawable.ic_widget_chevron_right),
+            contentDescription = "Next",
+            colorFilter = ColorFilter.tint(ColorProvider(WidgetTheme.ACCENT_ON_SURFACE)),
+            modifier = GlanceModifier.size(20.dp),
+        )
+    }
+}
+
 
 /* ------------------------------ States ------------------------------ */
 

@@ -92,7 +92,17 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                   if (imageUrl != null && imageUrl.isNotEmpty)
                     Hero(
                       tag: widget.heroTag ?? 'news_image_${_article['id']}',
-                      child: Image.network(imageUrl, fit: BoxFit.cover),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        // Some news CDNs (img.btolat.com, mediayk.gemini.media,
+                        // etc.) close TCP connections mid-stream. Without an
+                        // errorBuilder Flutter rethrows HttpException all the
+                        // way to the debugger; with one the user just sees the
+                        // fallback panel.
+                        errorBuilder: (c, e, s) =>
+                            Container(color: const Color(0xFF1E293B)),
+                      ),
                     )
                   else
                     Container(color: const Color(0xFF1E293B)),

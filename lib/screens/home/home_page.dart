@@ -823,6 +823,8 @@ class HomePageState extends ConsumerState<HomePage> {
                           width: 80.w,
                           height: 80.w,
                           fit: BoxFit.contain,
+                          errorBuilder: (c, e, s) =>
+                              Icon(Icons.emoji_events, size: 80.w),
                         )
                         : Icon(Icons.emoji_events, size: 80.w),
               ),
@@ -854,7 +856,15 @@ class HomePageState extends ConsumerState<HomePage> {
                     ),
                     child:
                         logoUrl != null && logoUrl.isNotEmpty
-                            ? Image.network(logoUrl, fit: BoxFit.contain)
+                            ? Image.network(
+                              logoUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (c, e, s) => const Icon(
+                                Icons.emoji_events,
+                                color: GoalioColors.greenAccent,
+                                size: 20,
+                              ),
+                            )
                             : const Icon(
                               Icons.emoji_events,
                               color: GoalioColors.greenAccent,
@@ -1626,6 +1636,12 @@ class HomePageState extends ConsumerState<HomePage> {
                     child: Image.network(
                       article['image_url'],
                       fit: BoxFit.cover,
+                      // Without an errorBuilder, transient CDN failures
+                      // (img.btolat.com / mediayk.gemini.media drop TCP
+                      // mid-stream) bubble up as HttpException to the
+                      // debugger. Fall back to the card background instead.
+                      errorBuilder: (c, e, s) =>
+                          Container(color: Theme.of(context).cardColor),
                     ),
                   ),
                 ),
