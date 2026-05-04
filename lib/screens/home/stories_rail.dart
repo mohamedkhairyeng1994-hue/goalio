@@ -25,21 +25,27 @@ class StoriesRail extends StatefulWidget {
 
 class _StoriesRailState extends State<StoriesRail> {
   static const String _viewedPrefsKey = 'viewed_story_ids';
-  // Cap how many tiles we keep client-side after filtering out viewed stories.
-  // Server returns up to 200 active stories, so this leaves headroom for the
-  // viewed-filter to discard plenty without leaving the rail empty.
-  static const int _maxTiles = 50;
 
   List<Story> _stories = const [];
-  // IDs the current device has already watched. Server-side stories expire in
-  // 24h so this set stays small without explicit pruning.
+  // IDs the device has watched. Drives the rail order (unseen tiles first,
+  // viewed tiles pushed to the end) and the muted-ring styling. Stories
+  // expire in 24h server-side so this set stays small without explicit pruning.
   Set<int> _viewedIds = {};
   bool _isUploading = false;
 
-  // Brand color used for the active ring. Matches the accent everywhere else
-  // in the app. Viewed stories use a muted grey so the user can see at a
-  // glance which ones are new.
+  // Brand color used for the active ring. Viewed stories use a muted grey.
   static const Color _ringColor = GoalioColors.greenAccent;
+
+  // Server stories partitioned so unseen come first, then viewed — both
+  // halves keep their server (newest-first) order.
+  List<Story> get _orderedStories {
+    final unseen = <Story>[];
+    final seen = <Story>[];
+    for (final s in _stories) {
+      (_viewedIds.contains(s.id) ? seen : unseen).add(s);
+    }
+    return [...unseen, ...seen];
+  }
 
   @override
   void initState() {
@@ -69,22 +75,9 @@ class _StoriesRailState extends State<StoriesRail> {
       _readViewedIds(),
     ]);
     if (!mounted) return;
-
-    final allStories = results[0] as List<Story>;
-    final viewed = results[1] as Set<int>;
-
-    // Drop stories the user has already seen and cap the rail at 50 tiles.
-    final unseen = <Story>[];
-    for (final s in allStories) {
-      if (!viewed.contains(s.id)) {
-        unseen.add(s);
-        if (unseen.length >= _maxTiles) break;
-      }
-    }
-
     setState(() {
-      _stories = unseen;
-      _viewedIds = viewed;
+      _stories = results[0] as List<Story>;
+      _viewedIds = results[1] as Set<int>;
     });
   }
 
@@ -141,13 +134,13 @@ class _StoriesRailState extends State<StoriesRail> {
     );
   }
 
-  void _openViewer(int index) {
+  void _openViewer(List<Story> ordered, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => StoryViewerPage(
-          stories: _stories,
+          stories: ordered,
           initialIndex: index,
-          onView: (storyId) => _markViewed(storyId),
+          onView: _markViewed,
         ),
       ),
     );
@@ -156,16 +149,17 @@ class _StoriesRailState extends State<StoriesRail> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ordered = _orderedStories;
     return SizedBox(
       height: 92.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
-        itemCount: _stories.length + 1,
+        itemCount: ordered.length + 1,
         itemBuilder: (ctx, i) {
           if (i == 0) return _buildAddTile(isDark);
-          final story = _stories[i - 1];
-          return _buildStoryTile(story, i - 1, isDark);
+          final story = ordered[i - 1];
+          return _buildStoryTile(story, i - 1, isDark, ordered);
         },
       ),
     );
@@ -232,7 +226,7 @@ class _StoriesRailState extends State<StoriesRail> {
     );
   }
 
-  Widget _buildStoryTile(Story story, int index, bool isDark) {
+  Widget _buildStoryTile(Story story, int index, bool isDark, List<Story> ordered) {
     final mediaUrl = story.mediaUrl;
     final label = story.displayLabel;
     final isViewed = _viewedIds.contains(story.id);
@@ -245,7 +239,7 @@ class _StoriesRailState extends State<StoriesRail> {
     return Padding(
       padding: EdgeInsetsDirectional.only(end: 10.w),
       child: GestureDetector(
-        onTap: () => _openViewer(index),
+        onTap: () => _openViewer(ordered, index),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
