@@ -12,6 +12,24 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
+gradle.beforeProject {
+    plugins.withId("com.android.library") {
+        extensions.configure<com.android.build.gradle.BaseExtension>("android") {
+            if (namespace == null) {
+                namespace = group.toString()
+            }
+        }
+    }
+    plugins.withId("com.android.application") {
+        extensions.configure<com.android.build.gradle.BaseExtension>("android") {
+            if (namespace == null) {
+                namespace = group.toString()
+            }
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

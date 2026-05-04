@@ -93,7 +93,7 @@ class _SignupPageState extends State<SignupPage> {
                 height: 300.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: GoalioColors.greenAccent.withOpacity(0.1),
+                  color: GoalioColors.greenAccent.withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -105,7 +105,7 @@ class _SignupPageState extends State<SignupPage> {
                 height: 200.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: GoalioColors.blueAccent.withOpacity(0.1),
+                  color: GoalioColors.blueAccent.withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -161,8 +161,9 @@ class _SignupPageState extends State<SignupPage> {
                           icon: Icons.person_outline,
                           isDark: isDark,
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return AppLocalizations.of(context)!.enterName;
+                            }
                             return null;
                           },
                         ),
@@ -173,12 +174,14 @@ class _SignupPageState extends State<SignupPage> {
                           icon: Icons.email_outlined,
                           isDark: isDark,
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return AppLocalizations.of(context)!.enterEmail;
+                            }
                             if (!RegExp(
                               r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                            ).hasMatch(value))
+                            ).hasMatch(value)) {
                               return AppLocalizations.of(context)!.invalidEmail;
+                            }
                             return null;
                           },
                         ),
@@ -204,14 +207,16 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                           obscureText: !_isPasswordVisible,
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return AppLocalizations.of(
                                 context,
                               )!.enterPassword;
-                            if (value.length < 6)
+                            }
+                            if (value.length < 6) {
                               return AppLocalizations.of(
                                 context,
                               )!.passwordTooShort;
+                            }
                             return null;
                           },
                         ),
@@ -317,8 +322,8 @@ class _SignupPageState extends State<SignupPage> {
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16.w),
                 border: Border.all(
                   color: isDark ? Colors.white10 : Colors.black12,

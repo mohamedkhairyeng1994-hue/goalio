@@ -307,19 +307,19 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
               decoration: BoxDecoration(
                 color:
                     Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.05)
+                        ? Colors.white.withValues(alpha: 0.05)
                         : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color:
                       Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.1)
+                          ? Colors.white.withValues(alpha: 0.1)
                           : const Color(0xFFE2E8F0),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -477,18 +477,14 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
                                 end: Alignment.bottomRight,
                                 colors: [
                                   isSelected
-                                      ? GoalioColors.greenAccent.withOpacity(
-                                        isDark ? 0.2 : 0.1,
-                                      )
+                                      ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.2 : 0.1,)
                                       : (isDark
-                                          ? Colors.white.withOpacity(0.05)
+                                          ? Colors.white.withValues(alpha: 0.05)
                                           : const Color(0xFFF8FAFC)),
                                   isSelected
-                                      ? GoalioColors.greenAccent.withOpacity(
-                                        isDark ? 0.05 : 0.02,
-                                      )
+                                      ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.05 : 0.02,)
                                       : (isDark
-                                          ? Colors.white.withOpacity(0.02)
+                                          ? Colors.white.withValues(alpha: 0.02)
                                           : Colors.white),
                                 ],
                               ),
@@ -498,7 +494,7 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
                                     isSelected
                                         ? GoalioColors.greenAccent
                                         : (isDark
-                                            ? Colors.white.withOpacity(0.1)
+                                            ? Colors.white.withValues(alpha: 0.1)
                                             : const Color(0xFFE2E8F0)),
                                 width: isSelected ? 2 : 1,
                               ),
@@ -507,16 +503,14 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
                                       ? [
                                         BoxShadow(
                                           color: GoalioColors.greenAccent
-                                              .withOpacity(0.2),
+                                              .withValues(alpha: 0.2),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         ),
                                       ]
                                       : [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(
-                                            isDark ? 0.1 : 0.04,
-                                          ),
+                                          color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04,),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         ),
@@ -538,7 +532,7 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
+                                          color: Colors.black.withValues(alpha: 0.1),
                                           blurRadius: 4,
                                           offset: const Offset(0, 2),
                                         ),
@@ -547,10 +541,8 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
                                         color:
                                             isSelected
                                                 ? GoalioColors.greenAccent
-                                                    .withOpacity(0.5)
-                                                : Colors.black.withOpacity(
-                                                  0.05,
-                                                ),
+                                                    .withValues(alpha: 0.5)
+                                                : Colors.black.withValues(alpha: 0.05,),
                                         width: 1,
                                       ),
                                     ),
@@ -661,7 +653,7 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
               color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),

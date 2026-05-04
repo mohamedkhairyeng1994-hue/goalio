@@ -5,7 +5,7 @@ Widget buildTeamLogo(String? url, {double size = 24}) {
   if (url == null || url == 'N/A' || url.isEmpty) {
     return CircleAvatar(
       radius: size / 2,
-      backgroundColor: Colors.white.withOpacity(0.05),
+      backgroundColor: Colors.white.withValues(alpha: 0.05),
       child: Icon(Icons.shield, size: size * 0.6, color: Colors.white24),
     );
   }
@@ -23,7 +23,7 @@ Widget buildTeamLogo(String? url, {double size = 24}) {
       if (loadingProgress == null) return child;
       return CircleAvatar(
         radius: size / 2,
-        backgroundColor: Colors.white.withOpacity(0.05),
+        backgroundColor: Colors.white.withValues(alpha: 0.05),
         child: SizedBox(
           width: size * 0.5,
           height: size * 0.5,
@@ -34,7 +34,7 @@ Widget buildTeamLogo(String? url, {double size = 24}) {
                     ? loadingProgress.cumulativeBytesLoaded /
                         loadingProgress.expectedTotalBytes!
                     : null,
-            color: GoalioColors.greenAccent.withOpacity(0.3),
+            color: GoalioColors.greenAccent.withValues(alpha: 0.3),
           ),
         ),
       );
@@ -42,7 +42,7 @@ Widget buildTeamLogo(String? url, {double size = 24}) {
     errorBuilder:
         (c, e, s) => CircleAvatar(
           radius: size / 2,
-          backgroundColor: Colors.white.withOpacity(0.05),
+          backgroundColor: Colors.white.withValues(alpha: 0.05),
           child: Icon(Icons.shield, size: size * 0.6, color: Colors.white24),
         ),
   );

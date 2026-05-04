@@ -81,9 +81,7 @@ class LeaguesListView extends StatelessWidget {
                                       Icon(
                                         Icons.sports_soccer,
                                         size: 48,
-                                        color: secondaryTextColor.withOpacity(
-                                          0.5,
-                                        ),
+                                        color: secondaryTextColor.withValues(alpha: 0.5,),
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
@@ -198,24 +196,24 @@ class LeaguesListView extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               isSelected
-                  ? GoalioColors.greenAccent.withOpacity(isDark ? 0.25 : 0.15)
-                  : (isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF8FAFC)),
+                  ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.25 : 0.15)
+                  : (isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF8FAFC)),
               isSelected
-                  ? GoalioColors.greenAccent.withOpacity(isDark ? 0.1 : 0.05)
-                  : (isDark ? Colors.white.withOpacity(0.02) : Colors.white),
+                  ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.1 : 0.05)
+                  : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? GoalioColors.greenAccent
-                : (isDark ? Colors.white.withOpacity(0.1) : const Color(0xFFE2E8F0)),
+                : (isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0)),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: GoalioColors.greenAccent.withOpacity(0.2),
+                    color: GoalioColors.greenAccent.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -224,7 +222,7 @@ class LeaguesListView extends StatelessWidget {
                   ? []
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -245,12 +243,12 @@ class LeaguesListView extends StatelessWidget {
                         color: Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? GoalioColors.greenAccent : Colors.black.withOpacity(0.05),
+                          color: isSelected ? GoalioColors.greenAccent : Colors.black.withValues(alpha: 0.05),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: isSelected ? GoalioColors.greenAccent.withOpacity(0.2) : Colors.black.withOpacity(0.05),
+                            color: isSelected ? GoalioColors.greenAccent.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.05),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -296,7 +294,7 @@ class LeaguesListView extends StatelessWidget {
                             Text(
                               'COMING SOON',
                               style: TextStyle(
-                                color: GoalioColors.greenAccent.withOpacity(0.5),
+                                color: GoalioColors.greenAccent.withValues(alpha: 0.5),
                                 fontWeight: FontWeight.w900,
                                 fontSize: 8,
                                 letterSpacing: 0.5,
@@ -309,7 +307,7 @@ class LeaguesListView extends StatelessWidget {
                       Icon(
                         Icons.lock_outline,
                         size: 16,
-                        color: secondaryTextColor.withOpacity(0.3),
+                        color: secondaryTextColor.withValues(alpha: 0.3),
                       ),
                   ],
                 ),
@@ -324,7 +322,7 @@ class LeaguesListView extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

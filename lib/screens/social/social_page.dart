@@ -5,6 +5,7 @@ import '../../core/constants/constants.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/services/api_service.dart';
 import 'package:share_plus/share_plus.dart';
+import 'create_social_post_page.dart';
 
 /// Returns a human-readable relative time string (e.g. "3h ago", "Yesterday")
 String _relativeTime(String? isoString) {
@@ -271,6 +272,27 @@ class SocialPageState extends State<SocialPage> {
         centerTitle: false,
       ),
       body: _buildBody(isDark),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCreatePost,
+        backgroundColor: GoalioColors.greenAccent,
+        foregroundColor: Colors.black,
+        tooltip: 'Create post',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Future<void> _openCreatePost() async {
+    final token = await ApiService.getToken();
+    if (!mounted) return;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to post')),
+      );
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CreateSocialPostPage()),
     );
   }
 
@@ -358,7 +380,7 @@ class SocialPageState extends State<SocialPage> {
                     borderRadius: BorderRadius.circular(30.w),
                     boxShadow: [
                       BoxShadow(
-                        color: GoalioColors.greenAccent.withOpacity(0.4),
+                        color: GoalioColors.greenAccent.withValues(alpha: 0.4),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -411,13 +433,13 @@ class SocialPageState extends State<SocialPage> {
         borderRadius: BorderRadius.circular(20.w),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.05),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.05),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -475,7 +497,7 @@ class SocialPageState extends State<SocialPage> {
             _ExpandableText(
               text: activeContent,
               style: TextStyle(
-                color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
                 fontSize: 14.sp,
                 height: 1.4,
               ),
@@ -548,7 +570,7 @@ class SocialPageState extends State<SocialPage> {
                     Container(
                       padding: EdgeInsets.all(14.w),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.55),
+                        color: Colors.black.withValues(alpha: 0.55),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.play_arrow_rounded,
@@ -692,7 +714,7 @@ class SocialPageState extends State<SocialPage> {
       height: 40.w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.w),
-        color: GoalioColors.greenAccent.withOpacity(0.2),
+        color: GoalioColors.greenAccent.withValues(alpha: 0.2),
       ),
       child: Icon(Icons.person, color: GoalioColors.greenAccent, size: 22.w),
     );
@@ -702,20 +724,20 @@ class SocialPageState extends State<SocialPage> {
 class _ExpandableText extends StatefulWidget {
   final String text;
   final TextStyle style;
-  final int maxLines;
 
   const _ExpandableText({
-    Key? key,
     required this.text,
     required this.style,
-    this.maxLines = 4,
-  }) : super(key: key);
+  });
 
   @override
   State<_ExpandableText> createState() => _ExpandableTextState();
 }
 
 class _ExpandableTextState extends State<_ExpandableText> {
+  // Lines shown before the "Show more" affordance kicks in.
+  static const int _collapsedMaxLines = 3;
+
   bool _isExpanded = false;
 
   @override
@@ -732,7 +754,7 @@ class _ExpandableTextState extends State<_ExpandableText> {
             Text(
               widget.text,
               style: widget.style,
-              maxLines: _isExpanded ? null : widget.maxLines,
+              maxLines: _isExpanded ? null : _collapsedMaxLines,
               overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
             ),
             if (!_isExpanded && widget.text.length > 100)
@@ -757,7 +779,7 @@ class _ExpandableTextState extends State<_ExpandableText> {
 class _EmbeddedPostWidget extends StatefulWidget {
   final String htmlContent;
   final double height;
-  const _EmbeddedPostWidget({Key? key, required this.htmlContent, required this.height}) : super(key: key);
+  const _EmbeddedPostWidget({required this.htmlContent, required this.height});
 
   @override
   State<_EmbeddedPostWidget> createState() => _EmbeddedPostWidgetState();
@@ -822,11 +844,10 @@ class _CommentsSheet extends StatefulWidget {
   final VoidCallback onCommentAdded;
 
   const _CommentsSheet({
-    Key? key,
     required this.post,
     required this.isDark,
     required this.onCommentAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<_CommentsSheet> createState() => _CommentsSheetState();
@@ -979,7 +1000,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                     decoration: BoxDecoration(
-                      color: GoalioColors.greenAccent.withOpacity(0.1),
+                      color: GoalioColors.greenAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.w),
                     ),
                     child: Text(
@@ -1052,7 +1073,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
           if (_replyingTo != null)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-              color: GoalioColors.greenAccent.withOpacity(0.1),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.1),
               child: Row(
                 children: [
                   Icon(Icons.reply_rounded, size: 16.w, color: GoalioColors.greenAccent),
@@ -1084,7 +1105,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
               color: widget.isDark ? const Color(0xFF1A1A1A) : Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -1095,10 +1116,10 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: widget.isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade100,
+                      color: widget.isDark ? Colors.white.withValues(alpha: 0.07) : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(28.w),
                       border: Border.all(
-                        color: widget.isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+                        color: widget.isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
                       ),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 18.w),
@@ -1158,7 +1179,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: GoalioColors.greenAccent.withOpacity(0.3),
+                    color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                     width: isReply ? 1.0 : 1.5,
                   ),
                 ),
@@ -1199,7 +1220,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                       decoration: BoxDecoration(
                         color: widget.isDark 
-                          ? (isReply ? Colors.white12 : Colors.white.withOpacity(0.05)) 
+                          ? (isReply ? Colors.white12 : Colors.white.withValues(alpha: 0.05)) 
                           : (isReply ? Colors.grey.shade200 : Colors.grey.shade100),
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(16.w),
@@ -1212,7 +1233,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                         style: TextStyle(
                           height: 1.4,
                           fontSize: 14.sp,
-                          color: widget.isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                          color: widget.isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
                         ),
                       ),
                     ),
@@ -1240,7 +1261,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
           
           // Render replies
           if (replies.isNotEmpty)
-            ...replies.map((r) => _buildCommentItem(r as Map<String, dynamic>, isReply: true)).toList(),
+            ...replies.map((r) => _buildCommentItem(r as Map<String, dynamic>, isReply: true)),
         ],
       ),
     );

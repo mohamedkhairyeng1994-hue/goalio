@@ -48,7 +48,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               height: 300.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: GoalioColors.greenAccent.withOpacity(0.1),
+                color: GoalioColors.greenAccent.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -60,7 +60,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               height: 200.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: GoalioColors.blueAccent.withOpacity(0.1),
+                color: GoalioColors.blueAccent.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -144,9 +144,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: GoalioColors.greenAccent.withOpacity(
-                                    0.3,
-                                  ),
+                                  color: GoalioColors.greenAccent.withValues(alpha: 0.3,),
                                   blurRadius: 12.w,
                                   offset: Offset(0.w, 4.h),
                                 ),
@@ -257,8 +255,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16.w),
                 border: Border.all(
                   color: isDark ? Colors.white10 : Colors.black12,

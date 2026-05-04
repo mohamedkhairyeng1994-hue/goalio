@@ -78,10 +78,10 @@ class MatchItemWidget extends ConsumerWidget {
           border: Border.all(
             color:
                 isLive
-                    ? Colors.redAccent.withOpacity(0.6)
+                    ? Colors.redAccent.withValues(alpha: 0.6)
                     : isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.03),
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.03),
             width: 1,
           ),
         ),
@@ -265,7 +265,7 @@ class MatchItemWidget extends ConsumerWidget {
               color:
                   isDark
                       ? Colors.white10
-                      : Colors.black.withOpacity(0.05),
+                      : Colors.black.withValues(alpha: 0.05),
               margin: EdgeInsets.symmetric(horizontal: 6.w),
             ),
             _MatchActionButton(
@@ -396,7 +396,7 @@ class MatchItemWidget extends ConsumerWidget {
         color: Colors.redAccent,
         borderRadius: BorderRadius.circular(1.w),
         border: Border.all(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           width: 0.4,
         ),
       ),
@@ -444,17 +444,17 @@ class _MatchActionButton extends ConsumerWidget {
           width: 52.w,
           height: 28.h,
           decoration: BoxDecoration(
-            color: GoalioColors.greenAccent.withOpacity(0.08),
+            color: GoalioColors.greenAccent.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10.w),
             border: Border.all(
-              color: GoalioColors.greenAccent.withOpacity(0.2),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.2),
             ),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                GoalioColors.greenAccent.withOpacity(0.05),
-                GoalioColors.greenAccent.withOpacity(0.15),
+                GoalioColors.greenAccent.withValues(alpha: 0.05),
+                GoalioColors.greenAccent.withValues(alpha: 0.15),
               ],
             ),
           ),

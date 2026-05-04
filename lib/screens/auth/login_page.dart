@@ -6,7 +6,6 @@ import '../../screens/auth/forgot_password_page.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/size_config.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -275,7 +274,7 @@ class _LoginPageState extends State<LoginPage> {
               height: 300.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: GoalioColors.greenAccent.withOpacity(0.1),
+                color: GoalioColors.greenAccent.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -287,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
               height: 200.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: GoalioColors.blueAccent.withOpacity(0.1),
+                color: GoalioColors.blueAccent.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -344,12 +343,14 @@ class _LoginPageState extends State<LoginPage> {
                         icon: Icons.email_outlined,
                         isDark: isDark,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return AppLocalizations.of(context)!.enterEmail;
+                          }
                           if (!RegExp(
                             r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(value))
+                          ).hasMatch(value)) {
                             return AppLocalizations.of(context)!.invalidEmail;
+                          }
                           return null;
                         },
                       ),
@@ -374,8 +375,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         obscureText: !_isPasswordVisible,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return AppLocalizations.of(context)!.enterPassword;
+                          }
                           return null;
                         },
                       ),
@@ -416,7 +418,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: GoalioColors.greenAccent.withOpacity(0.3),
+                              color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                               blurRadius: 12.w,
                               offset: Offset(0.w, 4.h),
                             ),
@@ -577,8 +579,8 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16.w),
                 border: Border.all(
                   color: isDark ? Colors.white10 : Colors.black12,
@@ -626,8 +628,8 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.05),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
           shape: BoxShape.circle,
           border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
         ),

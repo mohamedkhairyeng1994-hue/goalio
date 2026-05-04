@@ -38,13 +38,13 @@ class GroupsListWidget extends ConsumerWidget {
             boxShadow: [
               if (isDark)
                 BoxShadow(
-                  color: GoalioColors.greenAccent.withOpacity(0.1),
+                  color: GoalioColors.greenAccent.withValues(alpha: 0.1),
                   blurRadius: 20.w,
                   offset: Offset(0, 8.h),
                 )
               else
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -220,7 +220,7 @@ class _GroupItemWidget extends ConsumerWidget {
             color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12.w),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+              color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
             ),
           ),
           child: Row(
@@ -229,10 +229,10 @@ class _GroupItemWidget extends ConsumerWidget {
                 height: 30.w,
                 width: 30.w,
                 decoration: BoxDecoration(
-                  color: _getLeagueColor(group.type).withOpacity(0.15),
+                  color: _getLeagueColor(group.type).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8.w),
                   border: Border.all(
-                    color: _getLeagueColor(group.type).withOpacity(0.3),
+                    color: _getLeagueColor(group.type).withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -296,7 +296,7 @@ class _GroupItemWidget extends ConsumerWidget {
               Container(
                 width: 1,
                 height: 18.h,
-                color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+                color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
                 margin: EdgeInsets.symmetric(horizontal: 10.w),
               ),
               Row(

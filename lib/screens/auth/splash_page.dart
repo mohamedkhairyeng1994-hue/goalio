@@ -69,7 +69,7 @@ class _SplashPageState extends State<SplashPage>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      GoalioColors.greenAccent.withOpacity(0.05),
+                      GoalioColors.greenAccent.withValues(alpha: 0.05),
                       Colors.transparent,
                     ],
                   ),
@@ -160,7 +160,7 @@ class _SplashPageState extends State<SplashPage>
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      GoalioColors.greenAccent.withOpacity(0.5),
+                      GoalioColors.greenAccent.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

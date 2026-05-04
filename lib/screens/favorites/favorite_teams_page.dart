@@ -355,18 +355,18 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
       child: Container(
         decoration: BoxDecoration(
           color:
-              isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF1F5F9),
+              isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.1)
+                    ? Colors.white.withValues(alpha: 0.1)
                     : const Color(0xFFE2E8F0),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -535,13 +535,13 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
             end: Alignment.bottomRight,
             colors: [
               isSelected
-                  ? GoalioColors.greenAccent.withOpacity(isDark ? 0.2 : 0.1)
+                  ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.2 : 0.1)
                   : (isDark
-                      ? Colors.white.withOpacity(0.05)
+                      ? Colors.white.withValues(alpha: 0.05)
                       : const Color(0xFFF8FAFC)),
               isSelected
-                  ? GoalioColors.greenAccent.withOpacity(isDark ? 0.05 : 0.02)
-                  : (isDark ? Colors.white.withOpacity(0.02) : Colors.white),
+                  ? GoalioColors.greenAccent.withValues(alpha: isDark ? 0.05 : 0.02)
+                  : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
@@ -550,7 +550,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                 isSelected
                     ? GoalioColors.greenAccent
                     : (isDark
-                        ? Colors.white.withOpacity(0.1)
+                        ? Colors.white.withValues(alpha: 0.1)
                         : const Color(0xFFE2E8F0)),
             width: isSelected ? 2 : 1,
           ),
@@ -572,8 +572,8 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                         border: Border.all(
                           color:
                               isSelected
-                                  ? GoalioColors.greenAccent.withOpacity(0.5)
-                                  : Colors.black.withOpacity(0.05),
+                                  ? GoalioColors.greenAccent.withValues(alpha: 0.5)
+                                  : Colors.black.withValues(alpha: 0.05),
                           width: 1,
                         ),
                       ),
@@ -611,7 +611,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
                             fontSize: 6.sp,
                             fontWeight: FontWeight.bold,
                             color: isSelected
-                                ? GoalioColors.greenAccent.withOpacity(0.8)
+                                ? GoalioColors.greenAccent.withValues(alpha: 0.8)
                                 : (isDark ? Colors.white38 : Colors.black38),
                           ),
                           maxLines: 1,
@@ -648,7 +648,7 @@ class _FavoriteTeamsPageState extends State<FavoriteTeamsPage> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

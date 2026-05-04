@@ -75,12 +75,8 @@ class LeaderboardListWidget extends ConsumerWidget {
                     color:
                         user.isYou
                             ? (isDark
-                                ? GoalioColors.greenAccent.withOpacity(
-                                  0.15,
-                                )
-                                : GoalioColors.greenAccent.withOpacity(
-                                  0.08,
-                                ))
+                                ? GoalioColors.greenAccent.withValues(alpha: 0.15,)
+                                : GoalioColors.greenAccent.withValues(alpha: 0.08,))
                             : (isEven
                                 ? (isDark
                                     ? const Color(0xFF0F172A)
@@ -88,7 +84,7 @@ class LeaderboardListWidget extends ConsumerWidget {
                                 : (isDark
                                     ? const Color(
                                       0xFF1E293B,
-                                    ).withOpacity(0.3)
+                                    ).withValues(alpha: 0.3)
                                     : Colors.white)),
                     borderRadius:
                         isLast
@@ -110,8 +106,8 @@ class LeaderboardListWidget extends ConsumerWidget {
                               : BorderSide(
                                 color:
                                     isDark
-                                        ? Colors.white.withOpacity(0.03)
-                                        : Colors.black.withOpacity(0.02),
+                                        ? Colors.white.withValues(alpha: 0.03)
+                                        : Colors.black.withValues(alpha: 0.02),
                               ),
                     ),
                   ),
@@ -152,9 +148,7 @@ class LeaderboardListWidget extends ConsumerWidget {
                                         ? GoalioColors.greenAccent
                                         : (isDark
                                             ? Colors.white10
-                                            : Colors.black.withOpacity(
-                                              0.05,
-                                            )),
+                                            : Colors.black.withValues(alpha: 0.05,)),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -317,7 +311,7 @@ class LeaderboardListWidget extends ConsumerWidget {
       height: 24.w,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: Text(
@@ -350,7 +344,7 @@ class LeaderboardListWidget extends ConsumerWidget {
       width: 14.w,
       height: 14.w,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: Center(child: Icon(icon, color: color, size: 12.w)),
@@ -365,8 +359,8 @@ class LeaderboardListWidget extends ConsumerWidget {
         decoration: BoxDecoration(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.02),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(12.w),
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w),

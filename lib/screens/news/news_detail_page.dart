@@ -114,9 +114,9 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(0.3),
+                          Colors.black.withValues(alpha: 0.3),
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -146,7 +146,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: GoalioColors.greenAccent.withOpacity(0.2),
+                          color: GoalioColors.greenAccent.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12.w),
                         ),
                         child: Text(
@@ -199,9 +199,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                     children: [
                       CircleAvatar(
                         radius: 12.w,
-                        backgroundColor: GoalioColors.greenAccent.withOpacity(
-                          0.2,
-                        ),
+                        backgroundColor: GoalioColors.greenAccent.withValues(alpha: 0.2,),
                         child: Icon(
                           Icons.person,
                           size: 14.w,
@@ -222,7 +220,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
 
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 24.h),
-                    child: Divider(color: Colors.grey.withOpacity(0.2)),
+                    child: Divider(color: Colors.grey.withValues(alpha: 0.2)),
                   ),
 
                   // Description / Content
@@ -240,7 +238,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                         height: 1.6,
                         color:
                             isDark
-                                ? Colors.white.withOpacity(0.9)
+                                ? Colors.white.withValues(alpha: 0.9)
                                 : Colors.black87,
                       ),
                     )

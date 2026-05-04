@@ -215,7 +215,7 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
                         SwitchListTile(
                           value: _newsEnabled,
                           onChanged: (v) => setState(() => _newsEnabled = v),
-                          activeColor: GoalioColors.greenAccent,
+                          activeThumbColor: GoalioColors.greenAccent,
                           secondary: Icon(
                             Icons.article_outlined,
                             color: GoalioColors.blueAccent,
@@ -226,7 +226,7 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
                           height: 1,
                           color: Theme.of(
                             context,
-                          ).dividerColor.withOpacity(0.2),
+                          ).dividerColor.withValues(alpha: 0.2),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -350,7 +350,7 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
                 ? []
                 : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 4.w,
                     offset: Offset(0.w, 2.h),
                   ),
@@ -370,7 +370,7 @@ class _NotificationManagerPageState extends State<NotificationManagerPage> {
       child: SwitchListTile(
         value: _events[key] ?? true,
         onChanged: (v) => setState(() => _events[key] = v),
-        activeColor: GoalioColors.greenAccent,
+        activeThumbColor: GoalioColors.greenAccent,
         secondary: Icon(icon, color: iconColor ?? GoalioColors.blueAccent),
         title: Text(title),
       ),

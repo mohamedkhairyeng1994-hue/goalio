@@ -266,7 +266,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               8.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(25.w),
                             ),
                             child: TabBar(
@@ -286,7 +286,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                 borderRadius: BorderRadius.circular(25.w),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: GoalioColors.greenAccent.withOpacity(0.3),
+                                    color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                                     blurRadius: 8.w,
                                     offset: Offset(0, 2.h),
                                   ),
@@ -342,8 +342,8 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                             thickness: 1.0,
                             color:
                                 isDark
-                                    ? Colors.white.withOpacity(0.1)
-                                    : Colors.black.withOpacity(0.1),
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.black.withValues(alpha: 0.1),
                           ),
                         ],
                       ),
@@ -623,7 +623,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                         color:
                             isLive
                                 ? Colors.redAccent
-                                : Colors.white.withOpacity(0.15),
+                                : Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12.w),
                       ),
                       child: Text(
@@ -800,7 +800,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   Icon(
                     Icons.sports_soccer_outlined,
                     size: 64.w,
-                    color: GoalioColors.greenAccent.withOpacity(0.4),
+                    color: GoalioColors.greenAccent.withValues(alpha: 0.4),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -1222,7 +1222,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                           bottom: 0,
                           child: Container(
                             width: 2.w,
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2),
                           ),
                         ),
                         // Events Column
@@ -1269,12 +1269,12 @@ class _MatchDetailPageState extends State<MatchDetailPage>
         border: Border.all(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.1),
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1425,10 +1425,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16.w),
-                border: Border.all(color: iconColor.withOpacity(0.5)),
+                border: Border.all(color: iconColor.withValues(alpha: 0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -1487,9 +1487,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   Widget _buildTimelineKey() {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor.withOpacity(0.5),
+        color: Theme.of(context).cardColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12.w),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -1658,7 +1658,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               style: TextStyle(
                 color: Theme.of(
                   context,
-                ).textTheme.bodyMedium?.color?.withOpacity(0.9),
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.9),
                 fontSize: 12.sp,
                 fontWeight: FontWeight.normal,
               ),
@@ -1758,7 +1758,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           color: headerBg,
           borderRadius: BorderRadius.circular(12.w),
           border: Border.all(
-            color: GoalioColors.greenAccent.withOpacity(0.3),
+            color: GoalioColors.greenAccent.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -1767,7 +1767,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             Container(
               padding: EdgeInsets.all(6.w),
               decoration: BoxDecoration(
-                color: GoalioColors.greenAccent.withOpacity(0.2),
+                color: GoalioColors.greenAccent.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -1864,12 +1864,12 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12.w),
                   border: Border.all(
-                    color: wdlColor.withOpacity(0.3),
+                    color: wdlColor.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),
@@ -1890,7 +1890,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                   .textTheme
                                   .bodySmall
                                   ?.color
-                                  ?.withOpacity(0.8),
+                                  ?.withValues(alpha: 0.8),
                             ),
                             SizedBox(width: 4.w),
                             Text(
@@ -1902,7 +1902,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                     .textTheme
                                     .bodySmall
                                     ?.color
-                                    ?.withOpacity(0.8),
+                                    ?.withValues(alpha: 0.8),
                               ),
                             ),
                             if (timeLabel.isNotEmpty) ...[
@@ -1914,7 +1914,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                     .textTheme
                                     .bodySmall
                                     ?.color
-                                    ?.withOpacity(0.8),
+                                    ?.withValues(alpha: 0.8),
                               ),
                               SizedBox(width: 4.w),
                               Text(
@@ -1926,7 +1926,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                       .textTheme
                                       .bodySmall
                                       ?.color
-                                      ?.withOpacity(0.8),
+                                      ?.withValues(alpha: 0.8),
                                 ),
                               ),
                             ],
@@ -1938,10 +1938,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                             vertical: 2.h,
                           ),
                           decoration: BoxDecoration(
-                            color: wdlColor.withOpacity(0.15),
+                            color: wdlColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6.w),
                             border: Border.all(
-                              color: wdlColor.withOpacity(0.3),
+                              color: wdlColor.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Text(
@@ -1984,10 +1984,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                               vertical: 6.h,
                             ),
                             decoration: BoxDecoration(
-                              color: wdlColor.withOpacity(0.08),
+                              color: wdlColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(8.w),
                               border: Border.all(
-                                color: wdlColor.withOpacity(0.5),
+                                color: wdlColor.withValues(alpha: 0.5),
                                 width: 1.5,
                               ),
                             ),
@@ -2015,7 +2015,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                   .textTheme
                                   .bodyMedium
                                   ?.color
-                                  ?.withOpacity(0.85),
+                                  ?.withValues(alpha: 0.85),
                               fontWeight: FontWeight.w600,
                               fontSize: 13.sp,
                             ),
@@ -2251,7 +2251,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20.w),
             ),
             child: Text(
@@ -2336,7 +2336,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             color:
                 i % 2 == 0
                     ? Theme.of(context).cardColor
-                    : Theme.of(context).cardColor.withOpacity(0.6),
+                    : Theme.of(context).cardColor.withValues(alpha: 0.6),
             borderRadius:
                 i == 0
                     ? BorderRadius.vertical(top: Radius.circular(10.w))
@@ -2352,7 +2352,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               Container(
                 width: 1,
                 height: 32.h,
-                color: Theme.of(context).dividerColor.withOpacity(0.2),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
               ),
               // Away player
               Expanded(child: _buildPlayerCell(away, align: TextAlign.right)),
@@ -2439,7 +2439,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             borderRadius: BorderRadius.circular(16.w),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -2537,7 +2537,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -2580,7 +2580,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(3.w),
               ),
               child: Text(
@@ -2605,9 +2605,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
       width: 24.w,
       height: 24.w,
       decoration: BoxDecoration(
-        color: GoalioColors.greenAccent.withOpacity(0.15),
+        color: GoalioColors.greenAccent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6.w),
-        border: Border.all(color: GoalioColors.greenAccent.withOpacity(0.4)),
+        border: Border.all(color: GoalioColors.greenAccent.withValues(alpha: 0.4)),
       ),
       child: Center(
         child: Text(
@@ -2670,7 +2670,7 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   Icon(
                     icon,
                     size: 64.w,
-                    color: GoalioColors.greenAccent.withOpacity(0.3),
+                    color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -2701,7 +2701,7 @@ class PitchPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withOpacity(0.4)
+          ..color = Colors.white.withValues(alpha: 0.4)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 
@@ -2711,7 +2711,7 @@ class PitchPainter extends CustomPainter {
     final stripeWidth = size.width / stripeCount;
     for (int i = 0; i < stripeCount; i++) {
       stripePaint.color =
-          i % 2 == 0 ? Colors.white.withOpacity(0.05) : Colors.transparent;
+          i % 2 == 0 ? Colors.white.withValues(alpha: 0.05) : Colors.transparent;
       canvas.drawRect(
         Rect.fromLTWH(i * stripeWidth, 0, stripeWidth, size.height),
         stripePaint,

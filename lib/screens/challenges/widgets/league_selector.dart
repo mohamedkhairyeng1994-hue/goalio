@@ -40,11 +40,11 @@ class ChallengeLeagueSelector extends ConsumerWidget {
             decoration: BoxDecoration(
               color:
                   isDark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.black.withOpacity(0.03),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.03),
               borderRadius: BorderRadius.circular(10.w),
               border: Border.all(
-                color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+                color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
               ),
             ),
             child: Row(

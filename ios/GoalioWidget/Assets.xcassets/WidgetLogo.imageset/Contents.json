@@ -1,7 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "goalio_logo.png",
+      "filename" : "generated_app_icon_no_text.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "generated_app_icon_no_text_dark.png",
       "idiom" : "universal",
       "scale" : "1x"
     },

@@ -24,7 +24,6 @@ class _GoalioNativeAdWidgetState extends State<GoalioNativeAdWidget> {
   void _loadAd() {
     _nativeAd = NativeAd(
       adUnitId: AdManager.nativeAdUnitId,
-      factoryId: 'adFactoryExample', // This requires native setup on Android/iOS
       listener: NativeAdListener(
         onAdLoaded: (ad) {
           setState(() {
@@ -37,7 +36,6 @@ class _GoalioNativeAdWidgetState extends State<GoalioNativeAdWidget> {
         },
       ),
       request: const AdRequest(),
-      // Use standard template for easier setup while remaining high-fidelity
       nativeTemplateStyle: NativeTemplateStyle(
           templateType: TemplateType.medium,
           mainBackgroundColor: Colors.black12,
@@ -81,7 +79,7 @@ class _GoalioNativeAdWidgetState extends State<GoalioNativeAdWidget> {
         borderRadius: BorderRadius.circular(16.w),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8.w,
             offset: Offset(0.w, 4.h),
           ),

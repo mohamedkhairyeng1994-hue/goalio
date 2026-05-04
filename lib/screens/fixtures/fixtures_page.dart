@@ -110,8 +110,8 @@ class FixturesPageState extends State<FixturesPage>
         decoration: BoxDecoration(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.03),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(25.w),
         ),
         child: TabBar(
@@ -128,7 +128,7 @@ class FixturesPageState extends State<FixturesPage>
             borderRadius: BorderRadius.circular(25.w),
             boxShadow: [
               BoxShadow(
-                color: GoalioColors.greenAccent.withOpacity(0.3),
+                color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                 blurRadius: 8.w,
                 offset: Offset(0, 2.h),
               ),
@@ -209,7 +209,7 @@ class FixturesPageState extends State<FixturesPage>
           horizontal: 16.w,
           vertical: 12.h,
         ),
-        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+        color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
         child: SafeArea(
           bottom: false,
           child: Row(
@@ -244,14 +244,14 @@ class FixturesPageState extends State<FixturesPage>
       decoration: BoxDecoration(
         color:
             isDark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.03),
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12.w),
         border: Border.all(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.05),
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: TextField(
@@ -435,7 +435,7 @@ class FixturesPageState extends State<FixturesPage>
           color:
               enabled
                   ? activeColor
-                  : Theme.of(context).disabledColor.withOpacity(0.6),
+                  : Theme.of(context).disabledColor.withValues(alpha: 0.6),
           size: 20.w,
         ),
         onPressed:
@@ -812,7 +812,7 @@ class FixturesPageState extends State<FixturesPage>
                               color:
                                   isDark
                                       ? Colors.white12
-                                      : Colors.black.withOpacity(0.05),
+                                      : Colors.black.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12.w),
                             ),
                             child: TextField(
@@ -1078,8 +1078,9 @@ class _FixtureListState extends State<FixtureList>
             _competitions = grouped.values.toList();
           }
           _isLoading = false;
-          for (var comp in _competitions)
+          for (var comp in _competitions) {
             _expandedLeagues.add(comp['name'].toString());
+          }
         });
       }
 
@@ -1091,8 +1092,9 @@ class _FixtureListState extends State<FixtureList>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          if (_competitions.isEmpty)
+          if (_competitions.isEmpty) {
             _errorMessage = AppLocalizations.of(context)!.couldNotLoadMatches;
+          }
         });
       }
       if (!forceScrape) _scrapeInBackground();
@@ -1136,8 +1138,9 @@ class _FixtureListState extends State<FixtureList>
         setState(() {
           _competitions = grouped.values.toList();
           _isLoading = false;
-          for (var comp in _competitions)
+          for (var comp in _competitions) {
             _expandedLeagues.add(comp['name'].toString());
+          }
         });
       }
     } catch (_) {
@@ -1278,16 +1281,16 @@ class _FixtureListState extends State<FixtureList>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.amber.withOpacity(isDark ? 0.2 : 0.1),
-                  GoalioColors.greenAccent.withOpacity(isDark ? 0.2 : 0.1),
+                  Colors.amber.withValues(alpha: isDark ? 0.2 : 0.1),
+                  GoalioColors.greenAccent.withValues(alpha: isDark ? 0.2 : 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(12.w),
               border: Border.all(
                 color:
                     isDark
-                        ? Colors.amber.withOpacity(0.2)
-                        : Colors.amber.withOpacity(0.1),
+                        ? Colors.amber.withValues(alpha: 0.2)
+                        : Colors.amber.withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -1323,7 +1326,7 @@ class _FixtureListState extends State<FixtureList>
                 (m) =>
                     MatchCard(match: m, onToggleFavorite: _toggleFavoriteTeam),
               )
-              .toList(),
+              ,
           Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Divider(
@@ -1441,17 +1444,17 @@ class _FixtureListState extends State<FixtureList>
             Container(
               padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: iconColor.withOpacity(0.05),
+                    color: iconColor.withValues(alpha: 0.05),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
                 ],
               ),
-              child: Icon(icon, size: 60.w, color: iconColor.withOpacity(0.8)),
+              child: Icon(icon, size: 60.w, color: iconColor.withValues(alpha: 0.8)),
             ),
             SizedBox(height: 24.h),
             Text(
@@ -1544,20 +1547,20 @@ class _FixtureListState extends State<FixtureList>
             colors:
                 isDark
                     ? [
-                      GoalioColors.greenAccent.withOpacity(0.15),
-                      GoalioColors.blueAccent.withOpacity(0.15),
+                      GoalioColors.greenAccent.withValues(alpha: 0.15),
+                      GoalioColors.blueAccent.withValues(alpha: 0.15),
                     ]
                     : [
-                      GoalioColors.greenAccent.withOpacity(0.08),
-                      GoalioColors.blueAccent.withOpacity(0.08),
+                      GoalioColors.greenAccent.withValues(alpha: 0.08),
+                      GoalioColors.blueAccent.withValues(alpha: 0.08),
                     ],
           ),
           borderRadius: BorderRadius.circular(12.w),
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.08),
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
           ),
         ),
         child: Row(
@@ -1665,8 +1668,9 @@ class _FixtureListState extends State<FixtureList>
     final fieldName = isHome ? 'home_is_favorite' : 'away_is_favorite';
 
     if (teamId == null) {
-      if (mounted)
+      if (mounted) {
         GoalioMessages.showError(context, "Cannot favorite team: missing ID");
+      }
       return;
     }
 
@@ -1716,12 +1720,6 @@ class MatchCard extends StatelessWidget {
   final Function(Map<String, dynamic>, bool)? onToggleFavorite;
   const MatchCard({super.key, required this.match, this.onToggleFavorite});
 
-  int _safeInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    return int.tryParse(value?.toString() ?? '') ?? 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     final status = match['status'];
@@ -1749,7 +1747,7 @@ class MatchCard extends StatelessWidget {
                   ? []
                   : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 8.w,
                       offset: Offset(0, 2.h),
                     ),
@@ -2012,7 +2010,7 @@ class MatchCard extends StatelessWidget {
         color: Colors.redAccent,
         borderRadius: BorderRadius.circular(1.w),
         border: Border.all(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           width: 0.4,
         ),
       ),

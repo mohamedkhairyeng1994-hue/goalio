@@ -145,16 +145,16 @@ class _GoalioMessageWidgetState extends State<_GoalioMessageWidget>
                   decoration: BoxDecoration(
                     color:
                         Theme.of(context).brightness == Brightness.dark
-                            ? Colors.black.withOpacity(0.7)
-                            : Colors.white.withOpacity(0.8),
+                            ? Colors.black.withValues(alpha: 0.7)
+                            : Colors.white.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(20.w),
                     border: Border.all(
-                      color: _getColor().withOpacity(0.3),
+                      color: _getColor().withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: _getColor().withOpacity(0.1),
+                        color: _getColor().withValues(alpha: 0.1),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
@@ -165,7 +165,7 @@ class _GoalioMessageWidgetState extends State<_GoalioMessageWidget>
                       Container(
                         padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          color: _getColor().withOpacity(0.1),
+                          color: _getColor().withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(_getIcon(), color: _getColor(), size: 24.w),

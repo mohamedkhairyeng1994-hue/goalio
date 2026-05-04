@@ -436,10 +436,11 @@ class LeaguesPageState extends State<LeaguesPage>
     }
 
     // 2. Trigger background scraping in parallel
-    if (kDebugMode)
+    if (kDebugMode) {
       debugPrint(
         'Starting background scraping for: $originalName (ID: $leagueId)',
       );
+    }
 
     try {
       final results = await Future.wait([
@@ -549,7 +550,7 @@ class LeaguesPageState extends State<LeaguesPage>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         if (onBackPressed()) return;
         if (Navigator.canPop(context)) {
@@ -635,19 +636,19 @@ class LeaguesPageState extends State<LeaguesPage>
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color:
-            isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF1F5F9),
+            isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
-              isDark ? Colors.white.withOpacity(0.1) : const Color(0xFFE2E8F0),
+              isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color:
                 isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.03),
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -721,14 +722,14 @@ class LeaguesPageState extends State<LeaguesPage>
             decoration: BoxDecoration(
               color:
                   isDark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.black.withOpacity(0.05),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.1),
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -885,8 +886,8 @@ class LeaguesPageState extends State<LeaguesPage>
           decoration: BoxDecoration(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.03),
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(20),
           ),
           child: TabBar(
@@ -901,7 +902,7 @@ class LeaguesPageState extends State<LeaguesPage>
               color: GoalioColors.greenAccent,
               boxShadow: [
                 BoxShadow(
-                  color: GoalioColors.greenAccent.withOpacity(0.3),
+                  color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -983,21 +984,21 @@ class LeaguesPageState extends State<LeaguesPage>
               20,
             ),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
                   color:
                       isDark
-                          ? Colors.black.withOpacity(0.2)
-                          : Colors.black.withOpacity(0.05),
+                          ? Colors.black.withValues(alpha: 0.2)
+                          : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -1085,7 +1086,7 @@ class LeaguesPageState extends State<LeaguesPage>
             Icon(
               Icons.newspaper_outlined,
               size: 64,
-              color: GoalioColors.greenAccent.withOpacity(0.3),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
@@ -1147,14 +1148,14 @@ class LeaguesPageState extends State<LeaguesPage>
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.02)
-                        : Colors.black.withOpacity(0.01),
+                        ? Colors.white.withValues(alpha: 0.02)
+                        : Colors.black.withValues(alpha: 0.01),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color:
                       isDark
-                          ? Colors.white.withOpacity(0.05)
-                          : Colors.black.withOpacity(0.04),
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.04),
                   width: 1,
                 ),
               ),
@@ -1237,7 +1238,7 @@ class LeaguesPageState extends State<LeaguesPage>
                                     height: 16,
                                     decoration: BoxDecoration(
                                       color: GoalioColors.greenAccent
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -1393,8 +1394,8 @@ class LeaguesPageState extends State<LeaguesPage>
     final headerTextColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final headerBgColor =
         isDark
-            ? Colors.white.withOpacity(0.08)
-            : Colors.black.withOpacity(0.04);
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.04);
 
     return Column(
       children: [
@@ -1406,7 +1407,7 @@ class LeaguesPageState extends State<LeaguesPage>
             color: headerBgColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+              color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
               width: 1,
             ),
           ),
@@ -1479,14 +1480,14 @@ class LeaguesPageState extends State<LeaguesPage>
                   color:
                       isChampionsLeague
                           ? (isDark
-                              ? Colors.blue.withOpacity(0.08)
+                              ? Colors.blue.withValues(alpha: 0.08)
                               : const Color(0xFFEFF6FF))
                           : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   border:
                       isChampionsLeague
                           ? Border.all(
-                            color: Colors.blue.withOpacity(isDark ? 0.2 : 0.1),
+                            color: Colors.blue.withValues(alpha: isDark ? 0.2 : 0.1),
                             width: 1,
                           )
                           : null,
@@ -1518,7 +1519,7 @@ class LeaguesPageState extends State<LeaguesPage>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 2,
                                 ),
                               ],
@@ -1542,9 +1543,7 @@ class LeaguesPageState extends State<LeaguesPage>
                                         Icons.sports_soccer,
                                         size:
                                             12, // Changed from 48 to 12 to fit container
-                                        color: secondaryTextColor.withOpacity(
-                                          0.5,
-                                        ),
+                                        color: secondaryTextColor.withValues(alpha: 0.5,),
                                       ),
                             ),
                           ),
@@ -1756,7 +1755,7 @@ class LeaguesPageState extends State<LeaguesPage>
                         color:
                             isDark
                                 ? Colors.white10
-                                : Colors.black.withOpacity(0.05),
+                                : Colors.black.withValues(alpha: 0.05),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -1819,14 +1818,14 @@ class LeaguesPageState extends State<LeaguesPage>
               isSelected
                   ? GoalioColors.greenAccent
                   : (isDark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.black.withOpacity(0.04)),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.04)),
           borderRadius: BorderRadius.circular(12),
           boxShadow:
               isSelected
                   ? [
                     BoxShadow(
-                      color: GoalioColors.greenAccent.withOpacity(0.3),
+                      color: GoalioColors.greenAccent.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1874,14 +1873,14 @@ class LeaguesPageState extends State<LeaguesPage>
       decoration: BoxDecoration(
         color:
             isDark
-                ? Colors.white.withOpacity(0.02)
-                : Colors.black.withOpacity(0.01),
+                ? Colors.white.withValues(alpha: 0.02)
+                : Colors.black.withValues(alpha: 0.01),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
               isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.04),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.04),
           width: 1,
         ),
       ),
@@ -1899,15 +1898,15 @@ class LeaguesPageState extends State<LeaguesPage>
                       rank <= 3
                           ? [
                             GoalioColors.greenAccent,
-                            GoalioColors.greenAccent.withOpacity(0.6),
+                            GoalioColors.greenAccent.withValues(alpha: 0.6),
                           ]
                           : [
                             isDark
                                 ? Colors.white10
-                                : Colors.black.withOpacity(0.05),
+                                : Colors.black.withValues(alpha: 0.05),
                             isDark
                                 ? Colors.white10
-                                : Colors.black.withOpacity(0.05),
+                                : Colors.black.withValues(alpha: 0.05),
                           ],
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -1930,10 +1929,10 @@ class LeaguesPageState extends State<LeaguesPage>
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: GoalioColors.greenAccent.withOpacity(0.2),
+                  color: GoalioColors.greenAccent.withValues(alpha: 0.2),
                   width: 2,
                 ),
               ),
@@ -1997,8 +1996,8 @@ class LeaguesPageState extends State<LeaguesPage>
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.03),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

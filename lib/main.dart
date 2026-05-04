@@ -17,6 +17,8 @@ import 'core/services/api_service.dart';
 import 'core/services/widget_bridge.dart';
 import 'core/utils/size_config.dart';
 import 'core/localization/language_manager.dart';
+import 'core/utils/http_overrides.dart';
+import 'dart:io';
 import 'l10n/app_localizations.dart';
 
 // Screens
@@ -45,8 +47,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final isEnabled = prefs.getBool('notifications_enabled') ?? true;
   if (!isEnabled) return;
 
-  if (kDebugMode)
+  if (kDebugMode) {
     debugPrint("Handling a background message: ${message.messageId}");
+  }
 
   if (message.messageId != null) {
     // When the app is in the background or killed, we still report as received
@@ -63,6 +66,7 @@ void Function(int index)? mainPageTabSwitcher;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
 
   try {
     await Firebase.initializeApp();
@@ -109,8 +113,9 @@ class MyApp extends StatelessWidget {
       if (kDebugMode) debugPrint("App: Global 401 detected, logging out...");
       await ApiService.clearAuth();
       if (navigatorKey.currentState == null) {
-        if (kDebugMode)
+        if (kDebugMode) {
           debugPrint("App: Error - navigatorKey.currentState is NULL!");
+        }
       } else {
         if (kDebugMode) debugPrint("App: Navigating to Initializer...");
         navigatorKey.currentState?.pushAndRemoveUntil(
@@ -645,7 +650,7 @@ class MainPageState extends ConsumerState<MainPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
 
         // 1. Let current screen handle back press if it has internal navigation
@@ -747,14 +752,14 @@ class MainPageState extends ConsumerState<MainPage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: GoalioColors.greenAccent.withOpacity(0.4),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.4),
               blurRadius: 16,
               spreadRadius: 2,
               offset: const Offset(0, 6),
             ),
           ],
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             width: 1.5,
           ),
         ),
@@ -775,11 +780,11 @@ class MainPageState extends ConsumerState<MainPage> {
       height: 55.h + bottomPadding,
       padding: EdgeInsets.only(bottom: (bottomPadding - 8).clamp(0.0, double.infinity)),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor.withOpacity(0.98),
+        color: Theme.of(context).cardColor.withValues(alpha: 0.98),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.w)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -882,14 +887,14 @@ class MainPageState extends ConsumerState<MainPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: GoalioColors.greenAccent.withOpacity(0.4),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.4),
               blurRadius: 15,
               spreadRadius: 2,
               offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(
-            color: GoalioColors.greenAccent.withOpacity(isSelected ? 0.8 : 0.2),
+            color: GoalioColors.greenAccent.withValues(alpha: isSelected ? 0.8 : 0.2),
             width: 3,
           ),
         ),

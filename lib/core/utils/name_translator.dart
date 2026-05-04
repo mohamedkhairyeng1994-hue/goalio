@@ -4,13 +4,13 @@ extension ArabicNameExtension on String {
   /// Apply only the hardcoded mapped names list.
   /// Returns original text if name not found.
   String toArabicName(BuildContext context) {
-    if (this.isEmpty) return this;
+    if (isEmpty) return this;
 
     final langCode = Localizations.localeOf(context).languageCode;
     if (langCode != 'ar') return this;
 
     // Attempt map lookup case-insensitive.
-    final key = this.trim().toLowerCase();
+    final key = trim().toLowerCase();
     return _famousPlayersMap[key] ?? this;
   }
 

@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -43,22 +41,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
   // ── Palette (aligned with rest of the app — greenAccent + blueAccent) ─────
   static const Color _green = GoalioColors.greenAccent;
-  static const Color _blue = GoalioColors.blueAccent;
-
-  // Brand accent aliases — kept for backwards-compat with existing widgets so
-  // everything now flows through greenAccent / blueAccent / amber.
-  static const Color _gold = Color(0xFFF59E0B);       // amber highlight
-  static const Color _purple = GoalioColors.greenAccent;
-  static const Color _purpleLight = GoalioColors.greenAccent;
-  static const Color _darkBg = GoalioColors.background;
-  static const Color _card = GoalioColors.cardBackground;
-  static const Color _cardBorder = Color(0xFF334155);
-
-  // Position colors (subtle shades of brand accents)
-  static const Color _gkColor = Color(0xFFF59E0B);
-  static const Color _defColor = GoalioColors.blueAccent;
-  static const Color _midColor = GoalioColors.greenAccent;
-  static const Color _fwdColor = Color(0xFFEF4444);
 
   @override
   void initState() {
@@ -120,9 +102,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
   bool get _isFinished => _data['is_finished'] == true;
   bool get _isLive => _data['is_live'] == true;
-
-  static const Color _neonGreen = Color(0xFF10B981);
-  static const Color _accentGold = Color(0xFFFFD700);
 
   Color _posColor(String group) {
     switch (group) {
@@ -193,11 +172,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     final awayName = _data['away_team']?.toString() ?? widget.match['away_team']?.toString() ?? 'Away';
     final homeLogo = _data['home_logo'] ?? widget.match['home_team_image'] ?? widget.match['home_logo'];
     final awayLogo = _data['away_logo'] ?? widget.match['away_team_image'] ?? widget.match['away_logo'];
-    final homeForm = (_data['home'] as Map?) ?? {};
-    final awayForm = (_data['away'] as Map?) ?? {};
-    final homeFormation = homeForm['formation']?.toString() ?? '';
-    final awayFormation = awayForm['formation']?.toString() ?? '';
-
     // All players list
     final all = _allPlayers;
 
@@ -327,7 +301,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.w),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
       ),
       margin: EdgeInsets.all(16.w),
       child: Column(
@@ -382,7 +356,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20.w),
       ),
       child: Text(
@@ -396,22 +370,12 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     );
   }
 
-  Widget _headerTeamModern(BuildContext context, String name, dynamic logo, {required bool isLeft, required bool isDark}) {
-    // This method is now replaced by _headerTeamStandard but kept for safety if referenced elsewhere temporarily
-    return _headerTeamStandard(context, name, logo, isLeft: isLeft);
-  }
-
-  Widget _headerVSCircle(BuildContext context, bool isDark) {
-    // Replaced by _headerVS
-    return _headerVS(context);
-  }
-
   Widget _buildTeamSegmentedControl(BuildContext context, String home, String away, bool isDark) {
     return Container(
       height: 40.h,
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).dividerColor.withOpacity(0.1),
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10.h),
       ),
       child: Row(
@@ -462,7 +426,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10.w),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -506,7 +470,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : (enabled ? Colors.grey : Colors.grey.withOpacity(0.3)),
+              color: active ? Colors.white : (enabled ? Colors.grey : Colors.grey.withValues(alpha: 0.3)),
               fontSize: 11.sp,
               fontWeight: FontWeight.bold,
             ),
@@ -533,10 +497,10 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: active ? Theme.of(context).primaryColor.withOpacity(0.1) : Theme.of(context).cardColor,
+            color: active ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(10.w),
             border: Border.all(
-              color: active ? Theme.of(context).primaryColor : Theme.of(context).dividerColor.withOpacity(0.5),
+              color: active ? Theme.of(context).primaryColor : Theme.of(context).dividerColor.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -569,10 +533,10 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24.w),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.5) : const Color(0xFF10B981).withOpacity(0.3), 
+            color: isDark ? Colors.black.withValues(alpha: 0.5) : const Color(0xFF10B981).withValues(alpha: 0.3), 
             blurRadius: 30, 
             offset: const Offset(0, 15)
           ),
@@ -592,7 +556,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.2), Colors.transparent, Colors.black.withOpacity(0.2)],
+                  colors: [Colors.black.withValues(alpha: 0.2), Colors.transparent, Colors.black.withValues(alpha: 0.2)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -755,7 +719,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.w),
       ),
       child: Row(
@@ -779,7 +743,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
 
 
   Widget _buildStatusRow(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color statusColor;
     final String statusLabel;
     final String statusSub;
@@ -809,7 +772,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.w),
         border: Border.all(
-          color: statusColor.withOpacity(0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -818,7 +781,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: isLive
@@ -846,7 +809,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                 Text(
                   statusSub,
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                     fontSize: 9.sp,
                   ),
                 ),
@@ -920,7 +883,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10.w),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.4),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
           width: 1,
         ),
       ),
@@ -970,7 +933,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                       style: TextStyle(color: Colors.grey, fontSize: 9.sp, fontWeight: FontWeight.w500),
                     ),
                     SizedBox(width: 6.w),
-                    Container(width: 4.w, height: 4.w, decoration: BoxDecoration(color: teamColor.withOpacity(0.5), shape: BoxShape.circle)),
+                    Container(width: 4.w, height: 4.w, decoration: BoxDecoration(color: teamColor.withValues(alpha: 0.5), shape: BoxShape.circle)),
                     SizedBox(width: 6.w),
                     ...player.events.take(3).map((e) => Padding(
                       padding: EdgeInsets.only(right: 4.w),
@@ -1000,9 +963,9 @@ class _FantasyHubTabState extends State<FantasyHubTab>
       width: 32.w,
       height: 32.w,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Center(
         child: Text(
@@ -1037,28 +1000,6 @@ class _FantasyHubTabState extends State<FantasyHubTab>
         Text(
           showActual ? 'PTS' : 'PROJ',
           style: TextStyle(color: Colors.grey, fontSize: 8.sp, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Widget _teamDot(Color color, bool isHome) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 5.w,
-          height: 5.w,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        SizedBox(width: 3.w),
-        Text(
-          isHome ? 'HM' : 'AW',
-          style: TextStyle(
-            color: color,
-            fontSize: 8.sp,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ],
     );
@@ -1114,7 +1055,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
     return Container(
       padding: isEmoji ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: isEmoji ? null : BoxDecoration(
-        color: color.withOpacity(isDark ? 0.15 : 0.1),
+        color: color.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(6.w),
       ),
       child: Row(
@@ -1125,7 +1066,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
             SizedBox(width: 2.w),
           ],
           Text(
-            isEmoji ? emoji! : (minute ?? detail ?? t.toUpperCase()),
+            isEmoji ? emoji : (minute ?? detail ?? t.toUpperCase()),
             style: TextStyle(
               color: isEmoji ? null : color,
               fontSize: 8.sp,
@@ -1176,7 +1117,7 @@ class _FantasyHubTabState extends State<FantasyHubTab>
                   Icon(
                     Icons.emoji_events_outlined,
                     size: 64.w,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -1238,7 +1179,7 @@ class _PitchPainter extends CustomPainter {
 
     // Lines
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
+      ..color = Colors.white.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -1331,7 +1272,7 @@ class _PitchPlayerIcon extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(4.w),
               ),
               child: Text(
@@ -1381,14 +1322,14 @@ class _PlayerDetailsDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(28.w),
-          border: Border.all(color: posColor.withOpacity(0.3), width: 2),
+          border: Border.all(color: posColor.withValues(alpha: 0.3), width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                CircleAvatar(backgroundColor: posColor.withOpacity(0.2), child: Text(player.number, style: TextStyle(color: posColor, fontWeight: FontWeight.bold))),
+                CircleAvatar(backgroundColor: posColor.withValues(alpha: 0.2), child: Text(player.number, style: TextStyle(color: posColor, fontWeight: FontWeight.bold))),
                 SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
@@ -1442,7 +1383,7 @@ class _PlayerDetailsDialog extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.w),
       ),
       child: Text(
@@ -1498,9 +1439,9 @@ class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin 
       builder: (_, __) => Container(
         width: 10.w, height: 10.w,
         decoration: BoxDecoration(
-          color: widget.color.withOpacity(_anim.value),
+          color: widget.color.withValues(alpha: _anim.value),
           shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: widget.color.withOpacity(_anim.value * 0.5), blurRadius: 6, spreadRadius: 1)],
+          boxShadow: [BoxShadow(color: widget.color.withValues(alpha: _anim.value * 0.5), blurRadius: 6, spreadRadius: 1)],
         ),
       ),
     );

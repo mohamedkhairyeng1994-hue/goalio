@@ -9,16 +9,16 @@ import '../../core/constants/constants.dart';
 import '../../core/utils/size_config.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({Key? key}) : super(key: key);
+  const OnboardingPage({super.key});
 
   @override
-  _OnboardingPageState createState() => _OnboardingPageState();
+  State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
   List<dynamic> _allLeagues = [];
   List<dynamic> _filteredLeagues = [];
-  List<dynamic> _selectedLeagues = [];
+  final List<dynamic> _selectedLeagues = [];
   bool _isLoading = true;
   bool _isSaving = false;
   bool _showSelectedOnly = false;
@@ -518,7 +518,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),

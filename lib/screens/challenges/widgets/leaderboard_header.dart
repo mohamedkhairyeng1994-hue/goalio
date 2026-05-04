@@ -86,11 +86,11 @@ class LeaderboardHeaderDelegate extends SliverPersistentHeaderDelegate {
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF1E293B).withOpacity(0.8)
-                  : Colors.white.withOpacity(0.8),
+                  ? const Color(0xFF1E293B).withValues(alpha: 0.8)
+                  : Colors.white.withValues(alpha: 0.8),
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+                  color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
                   width: 1.5,
                 ),
               ),

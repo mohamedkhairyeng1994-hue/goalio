@@ -20,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifications/notifications_providers.dart';
 import '../notifications/notifications_page.dart';
 import '../../core/widgets/native_ad_widget.dart';
+import 'stories_rail.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final VoidCallback onNavigateToFixtures;
@@ -50,6 +51,10 @@ class HomePageState extends ConsumerState<HomePage> {
   final ScrollController _horizontalMatchesController = ScrollController();
   final ScrollController _leaguesScrollController = ScrollController();
 
+  // Bumped on every pull-to-refresh so StoriesRail can re-fetch in step
+  // with the rest of the home screen.
+  final ValueNotifier<int> _storiesRefreshTick = ValueNotifier<int>(0);
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +66,7 @@ class HomePageState extends ConsumerState<HomePage> {
     _scrollController.dispose();
     _horizontalMatchesController.dispose();
     _leaguesScrollController.dispose();
+    _storiesRefreshTick.dispose();
     super.dispose();
   }
 
@@ -94,6 +100,10 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Future<void> loadData({bool forceScrape = false, bool silent = false}) async {
     final hasData = _news.isNotEmpty || _upcomingMatches.isNotEmpty;
+
+    // Tell StoriesRail to refetch alongside the rest of the home screen.
+    // Bumped on initial load and every subsequent pull-to-refresh.
+    _storiesRefreshTick.value++;
 
     if (!silent && !hasData && mounted) {
       setState(() {
@@ -194,10 +204,6 @@ class HomePageState extends ConsumerState<HomePage> {
           .get(highlightsUrl, headers: headers)
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200 && mounted) {
-        final now = DateTime.now();
-        final todayDateStr =
-            "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-
         final decoded = json.decode(utf8.decode(response.bodyBytes));
         final List<dynamic> rawMatches =
             decoded is Map ? (decoded['data'] ?? []) : (decoded as List);
@@ -383,8 +389,8 @@ class HomePageState extends ConsumerState<HomePage> {
               SliverAppBar(
                 backgroundColor:
                     isDark
-                        ? Colors.black.withOpacity(0.3)
-                        : Colors.white.withOpacity(0.3),
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.3),
                 flexibleSpace: ClipRRect(
                   child: BackdropFilter(
                     filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -481,7 +487,7 @@ class HomePageState extends ConsumerState<HomePage> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -514,8 +520,8 @@ class HomePageState extends ConsumerState<HomePage> {
                     decoration: BoxDecoration(
                       color:
                           isDark
-                              ? Colors.white.withOpacity(0.08)
-                              : Colors.black.withOpacity(0.05),
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12.w),
                     ),
                     child: IconButton(
@@ -530,11 +536,19 @@ class HomePageState extends ConsumerState<HomePage> {
                 ],
               ),
 
+              // Stories rail (under the header)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 4.h),
+                  child: StoriesRail(refreshTrigger: _storiesRefreshTick),
+                ),
+              ),
+
               // Hero Match Section (The Big Card)
               if (heroMatch != null) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 16.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -689,8 +703,9 @@ class HomePageState extends ConsumerState<HomePage> {
                     final adOffset = (index + 1) ~/ 6;
                     final actualIndex = index - adOffset;
 
-                    if (actualIndex >= _news.length)
+                    if (actualIndex >= _news.length) {
                       return const SizedBox.shrink();
+                    }
 
                     return _buildImmersiveNewsCard(_news[actualIndex]);
                   }, childCount: _news.length + (_news.length ~/ 5)),
@@ -789,20 +804,20 @@ class HomePageState extends ConsumerState<HomePage> {
                 isDark
                     ? [
                       const Color(0xFF1E293B),
-                      const Color(0xFF0F172A).withOpacity(0.8),
+                      const Color(0xFF0F172A).withValues(alpha: 0.8),
                     ]
                     : [Colors.white, const Color(0xFFF1F5F9)],
           ),
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.08)
-                    : Colors.black.withOpacity(0.05),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.05),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -843,12 +858,12 @@ class HomePageState extends ConsumerState<HomePage> {
                     decoration: BoxDecoration(
                       color:
                           isDark
-                              ? Colors.white.withOpacity(0.05)
+                              ? Colors.white.withValues(alpha: 0.05)
                               : Colors.white,
                       borderRadius: BorderRadius.circular(12.w),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -915,12 +930,6 @@ class HomePageState extends ConsumerState<HomePage> {
         ),
       ),
     );
-  }
-
-  int _safeInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   Widget _buildRedCardBadge(
@@ -1040,7 +1049,7 @@ class HomePageState extends ConsumerState<HomePage> {
         color: Colors.redAccent,
         borderRadius: BorderRadius.circular(1.w),
         border: Border.all(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           width: 0.4,
         ),
       ),
@@ -1076,7 +1085,7 @@ class HomePageState extends ConsumerState<HomePage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: GoalioColors.greenAccent.withOpacity(0.15),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.15),
               blurRadius: 20.w,
               offset: Offset(0, 8.h),
             ),
@@ -1093,7 +1102,7 @@ class HomePageState extends ConsumerState<HomePage> {
                     vertical: 4.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(20.w),
                   ),
                   child: Text(
@@ -1295,7 +1304,7 @@ class HomePageState extends ConsumerState<HomePage> {
                 child: Container(
                   padding: EdgeInsets.all(4.w),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -1371,13 +1380,13 @@ class HomePageState extends ConsumerState<HomePage> {
           border: Border.all(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.08)
-                    : Colors.black.withOpacity(0.05),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.05),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1552,7 +1561,7 @@ class HomePageState extends ConsumerState<HomePage> {
               ),
             ),
             Divider(
-              color: Theme.of(context).dividerColor.withOpacity(0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
               height: 16.h,
             ),
             Row(
@@ -1655,7 +1664,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.9),
+                        Colors.black.withValues(alpha: 0.9),
                       ],
                     ),
                   ),

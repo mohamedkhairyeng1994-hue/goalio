@@ -77,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (v) {
                     ThemeManager().toggleTheme(v);
                   },
-                  activeColor: GoalioColors.greenAccent,
+                  activeThumbColor: GoalioColors.greenAccent,
                 ),
               ),
 
@@ -107,7 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           onChanged: (v) {
                             LanguageManager().setLanguage(v ? 'ar' : 'en');
                           },
-                          activeColor: GoalioColors.greenAccent,
+                          activeThumbColor: GoalioColors.greenAccent,
                         ),
                       ],
                     ),
@@ -135,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       setState(() => _notificationsEnabled = !v);
                     }
                   },
-                  activeColor: GoalioColors.greenAccent,
+                  activeThumbColor: GoalioColors.greenAccent,
                 ),
               ),
               _buildSettingTile(
@@ -303,7 +303,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ? []
                 : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 4.w,
                     offset: Offset(0.w, 2.h),
                   ),
@@ -322,7 +322,7 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing ??
             Icon(
               Icons.chevron_right,
-              color: Theme.of(context).iconTheme.color?.withOpacity(0.3),
+              color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.3),
             ),
         onTap: onTap,
         shape: RoundedRectangleBorder(

@@ -64,9 +64,9 @@ void showCreateLeagueDialog(BuildContext context, WidgetRef ref) {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.black26 : Colors.black.withOpacity(0.03),
+                      color: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(12.w),
-                      border: Border.all(color: GoalioColors.greenAccent.withOpacity(0.3)),
+                      border: Border.all(color: GoalioColors.greenAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +171,7 @@ void showJoinLeagueDialog(BuildContext context, WidgetRef ref) {
                 hintText: AppLocalizations.of(context)!.leagueCodeHint,
                 hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
                 filled: true,
-                fillColor: isDark ? Colors.black26 : Colors.black.withOpacity(0.03),
+                fillColor: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.03),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.w),
                   borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.black12),

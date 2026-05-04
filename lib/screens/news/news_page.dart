@@ -214,7 +214,7 @@ class NewsPageState extends State<NewsPage> {
             Icon(
               Icons.newspaper,
               size: 64.w,
-              color: GoalioColors.greenAccent.withOpacity(0.5),
+              color: GoalioColors.greenAccent.withValues(alpha: 0.5),
             ),
             SizedBox(height: 16.h),
             Text(
@@ -270,8 +270,9 @@ class NewsPageState extends State<NewsPage> {
               final adOffset = (index + 1) ~/ 6;
               final actualIndex = index - adOffset;
 
-              if (actualIndex >= layoutItems.length)
+              if (actualIndex >= layoutItems.length) {
                 return const SizedBox.shrink();
+              }
 
               final item = layoutItems[actualIndex];
 
@@ -353,7 +354,7 @@ class NewsPageState extends State<NewsPage> {
               horizontal: 16.w,
               vertical: 12.h,
             ),
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
             child: SafeArea(
               bottom: false,
               child: Row(
@@ -401,7 +402,7 @@ class GoalioNewsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.w),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8.w,
             offset: Offset(0.w, 4.h),
           ),
@@ -435,8 +436,8 @@ class GoalioNewsCard extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.9),
-                      Colors.black.withOpacity(0.3),
+                      Colors.black.withValues(alpha: 0.9),
+                      Colors.black.withValues(alpha: 0.3),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.5, 1.0],

@@ -31,6 +31,9 @@ dependencies:
   google_mobile_ads: ^5.0.0
   webview_flutter: ^4.13.1
   share_plus: ^10.1.4
+  image_picker: ^1.1.2
+  cupertino_http: ^2.4.0
+  cronet_http: ^0.2.1
 
 dev_dependencies:
   flutter_test:

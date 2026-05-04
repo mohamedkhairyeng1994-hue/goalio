@@ -196,9 +196,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: GoalioColors.greenAccent.withOpacity(
-                                    0.3,
-                                  ),
+                                  color: GoalioColors.greenAccent.withValues(alpha: 0.3,),
                                   blurRadius: 12.w,
                                   offset: Offset(0.w, 4.h),
                                 ),
@@ -252,8 +250,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           decoration: BoxDecoration(
             color:
                 isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.05),
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16.w),
             border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
           ),

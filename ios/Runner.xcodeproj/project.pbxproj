@@ -7,15 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04B85ACCABC1F35420A83B5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B5C14FE087D675A886CAA1D /* Assets.xcassets */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		301C66B97A4A645EAEEFD0EB /* GoalioWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985703A6802E4AFB35136E05 /* GoalioWidgetBundle.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
+		3B10CDBB2558771378902BE8 /* GoalioWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 776CE27EE1BAB73269786E33 /* GoalioWidget.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		5D834B74BB828755F7B4ECF5 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CBC8A1720D4DB89E539087 /* Intents.swift */; };
+		7418DCE3BF0490BFA494EBF9 /* MatchAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92EF3AB1CEE84B9A2E3312E8 /* MatchAPI.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		74858FB11ED2DC5600515810 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 74858FB01ED2DC5600515810 /* GoogleService-Info.plist */; };
+		74858FB31ED2DC5600515810 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FB21ED2DC5600515810 /* WidgetBridge.swift */; };
+		7E6E572B3379E1AAB8E01FF9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 840A4D8AEB55D85CDE76F39E /* Foundation.framework */; };
+		810E778CAADDAE89FD2388D3 /* GoalioWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = FC2C095D0F4C8A8087A1BF60 /* GoalioWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		936D4EE1C6FD0CF5F9887B2A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0CE146196BAC60F2B83FA47 /* Theme.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		AA445FB40694D5D6D71621D1 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F18223320E116F2B2AE1B259 /* Pods_Runner.framework */; };
+		B4BD789D9DAAD5B4014B3313 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988621DC1EC837FE9C857F5C /* SharedConfig.swift */; };
+		E005E52A7365C542B95B857B /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56E34D15B57045521345997 /* Views.swift */; };
+		E6DE6DBD3C42FF9E3D20A200 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 916700BF662F10704EDF1561 /* Models.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,9 +38,27 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		C2C4AC4E64BAA34468E95EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AE7B13E91900BD5FB932E874;
+			remoteInfo = GoalioWidget;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1824F005925F7710356F9017 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				810E778CAADDAE89FD2388D3 /* GoalioWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -44,15 +74,24 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		1B5C14FE087D675A886CAA1D /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1F3B482DA79949B73166D370 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2ED2819A98654ECF1D8FB0DF /* GoalioWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = GoalioWidget.entitlements; sourceTree = "<group>"; };
 		2F6D983D4FFC0007782A66D1 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		73CBC8A1720D4DB89E539087 /* Intents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		74858FB01ED2DC5600515810 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		74858FB21ED2DC5600515810 /* WidgetBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
+		776CE27EE1BAB73269786E33 /* GoalioWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoalioWidget.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		83F709E84D5EE67EC696477C /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		840A4D8AEB55D85CDE76F39E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		916700BF662F10704EDF1561 /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		92EF3AB1CEE84B9A2E3312E8 /* MatchAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MatchAPI.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,11 +99,24 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		985703A6802E4AFB35136E05 /* GoalioWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoalioWidgetBundle.swift; sourceTree = "<group>"; };
+		988621DC1EC837FE9C857F5C /* SharedConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedConfig.swift; sourceTree = "<group>"; };
 		9AE3DC4E6EE81206544ABA16 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		D56E34D15B57045521345997 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		F0CE146196BAC60F2B83FA47 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F18223320E116F2B2AE1B259 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC2C095D0F4C8A8087A1BF60 /* GoalioWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GoalioWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2E89BDF96E3D74DE81422D66 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E6E572B3379E1AAB8E01FF9 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -82,6 +134,25 @@
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 			);
 			path = RunnerTests;
+			sourceTree = "<group>";
+		};
+		3B4DC35794BCA1DAE6E3BD0A /* GoalioWidget */ = {
+			isa = PBXGroup;
+			children = (
+				985703A6802E4AFB35136E05 /* GoalioWidgetBundle.swift */,
+				776CE27EE1BAB73269786E33 /* GoalioWidget.swift */,
+				916700BF662F10704EDF1561 /* Models.swift */,
+				92EF3AB1CEE84B9A2E3312E8 /* MatchAPI.swift */,
+				F0CE146196BAC60F2B83FA47 /* Theme.swift */,
+				D56E34D15B57045521345997 /* Views.swift */,
+				73CBC8A1720D4DB89E539087 /* Intents.swift */,
+				988621DC1EC837FE9C857F5C /* SharedConfig.swift */,
+				1B5C14FE087D675A886CAA1D /* Assets.xcassets */,
+				1F3B482DA79949B73166D370 /* Info.plist */,
+				2ED2819A98654ECF1D8FB0DF /* GoalioWidget.entitlements */,
+			);
+			name = GoalioWidget;
+			path = GoalioWidget;
 			sourceTree = "<group>";
 		};
 		7674464E469AEED70574688C /* Pods */ = {
@@ -114,6 +185,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				7674464E469AEED70574688C /* Pods */,
 				E401B2C4ED385551CC3D7E3B /* Frameworks */,
+				3B4DC35794BCA1DAE6E3BD0A /* GoalioWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -122,6 +194,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				FC2C095D0F4C8A8087A1BF60 /* GoalioWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -136,16 +209,26 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				74858FB21ED2DC5600515810 /* WidgetBridge.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				74858FB01ED2DC5600515810 /* GoogleService-Info.plist */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
 		};
+		D999E897F3BA1D8B2CA8AF27 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				840A4D8AEB55D85CDE76F39E /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		E401B2C4ED385551CC3D7E3B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				F18223320E116F2B2AE1B259 /* Pods_Runner.framework */,
+				D999E897F3BA1D8B2CA8AF27 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -180,6 +263,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				1824F005925F7710356F9017 /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				D555335FA004A477243A4A6E /* [CP] Embed Pods Frameworks */,
 				622D6174C82E9C2521ED4E0A /* [CP] Copy Pods Resources */,
@@ -187,11 +271,29 @@
 			buildRules = (
 			);
 			dependencies = (
+				5CD7A963EB05FA404DEC7BFF /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		AE7B13E91900BD5FB932E874 /* GoalioWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9F1F39925FF44A76B047850B /* Build configuration list for PBXNativeTarget "GoalioWidget" */;
+			buildPhases = (
+				2E5E8B3C78575AF54DA6A1E9 /* Sources */,
+				2E89BDF96E3D74DE81422D66 /* Frameworks */,
+				AB95430595D74A5630729F49 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GoalioWidget;
+			productName = GoalioWidget;
+			productReference = FC2C095D0F4C8A8087A1BF60 /* GoalioWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -211,6 +313,11 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 					};
+					AE7B13E91900BD5FB932E874 = {
+						CreatedOnToolsVersion = 15.0;
+						DevelopmentTeam = S749H4KDZQ;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
@@ -228,6 +335,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				AE7B13E91900BD5FB932E874 /* GoalioWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -249,6 +357,14 @@
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				74858FB11ED2DC5600515810 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB95430595D74A5630729F49 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04B85ACCABC1F35420A83B5C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +461,21 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2E5E8B3C78575AF54DA6A1E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				301C66B97A4A645EAEEFD0EB /* GoalioWidgetBundle.swift in Sources */,
+				3B10CDBB2558771378902BE8 /* GoalioWidget.swift in Sources */,
+				E6DE6DBD3C42FF9E3D20A200 /* Models.swift in Sources */,
+				7418DCE3BF0490BFA494EBF9 /* MatchAPI.swift in Sources */,
+				936D4EE1C6FD0CF5F9887B2A /* Theme.swift in Sources */,
+				E005E52A7365C542B95B857B /* Views.swift in Sources */,
+				5D834B74BB828755F7B4ECF5 /* Intents.swift in Sources */,
+				B4BD789D9DAAD5B4014B3313 /* SharedConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C807D294A63A400263BE5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -358,6 +489,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				74858FB31ED2DC5600515810 /* WidgetBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -369,6 +501,12 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		5CD7A963EB05FA404DEC7BFF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GoalioWidget;
+			target = AE7B13E91900BD5FB932E874 /* GoalioWidget */;
+			targetProxy = C2C4AC4E64BAA34468E95EFF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -522,6 +660,61 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
 			name = Profile;
+		};
+		5A17E69EE92F00599C9665D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = GoalioWidget/GoalioWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S749H4KDZQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GoalioWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.goalFixturesApp.S749H4KDZQ.GoalioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		66C98E523FB4E934ADD1FBA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = GoalioWidget/GoalioWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S749H4KDZQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GoalioWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.goalFixturesApp.S749H4KDZQ.GoalioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
 		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -693,6 +886,34 @@
 			};
 			name = Release;
 		};
+		B6323B92D576580C00CE5F56 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = GoalioWidget/GoalioWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S749H4KDZQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GoalioWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.goalFixturesApp.S749H4KDZQ.GoalioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -722,6 +943,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9F1F39925FF44A76B047850B /* Build configuration list for PBXNativeTarget "GoalioWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A17E69EE92F00599C9665D2 /* Release */,
+				66C98E523FB4E934ADD1FBA6 /* Debug */,
+				B6323B92D576580C00CE5F56 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,10 +1,6 @@
-import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-import '../../core/constants/constants.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/utils/name_translator.dart';
@@ -36,21 +32,12 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
   // ── Palette (Official FPL Style) ──────────────────────────────────────────
   static const Color _plPurple = Color(0xFF37003C); // Official PL Deep Purple
   static const Color _plGreen = Color(0xFF00FF85); // Official PL Neon Green
-  static const Color _plBlue = Color(0xFF02EFFF); // Official PL Cyan
-  static const Color _gold = Color(0xFFFFD700);
-  static const Color _benchBg = Color(0xFF00FF85); // Lighter green for dugout
 
   // Position colours
   static const Color _gkColor = Color(0xFFEAB308);
   static const Color _defColor = Color(0xFF3B82F6);
   static const Color _midColor = Color(0xFF10B981);
   static const Color _fwdColor = Color(0xFFEF4444);
-
-  // Pitch colours
-  static const Color _pitchDark = Color(0xFF135730);
-  static const Color _pitchLight = Color(0xFF186638);
-  static const Color _pitchBorder = Color(0xFF2D9C5A);
-  static const Color _lineWhite = Color(0x99FFFFFF);
 
   @override
   void initState() {
@@ -168,8 +155,9 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
     if (pg.startsWith('F') ||
         pg.startsWith('A') ||
         pg.contains('ATTACK') ||
-        pId == '4')
+        pId == '4') {
       return 'FWD';
+    }
 
     // If absolutely nothing is found or it's 'UNK', default to MID (most common) or first 3 chars
     if (pg.isEmpty || pg == 'UNK' || pg == 'UNKNOWN') return 'MID';
@@ -245,7 +233,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                       width: 3.w,
                       height: 16.h,
                       decoration: BoxDecoration(
-                        color: _plPurple.withOpacity(0.5),
+                        color: _plPurple.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -269,7 +257,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF65AC7F).withOpacity(0.4),
+                  color: const Color(0xFF65AC7F).withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(12.w),
                 ),
                 child: Padding(
@@ -363,7 +351,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                             _isPitchView
                                 ? [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -395,7 +383,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                             !_isPitchView
                                 ? [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -435,7 +423,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
         borderRadius: BorderRadius.circular(10.w),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF02FEFF).withOpacity(0.2),
+            color: const Color(0xFF02FEFF).withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -456,7 +444,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
           Text(
             'Pts',
             style: TextStyle(
-              color: _plPurple.withOpacity(0.8),
+              color: _plPurple.withValues(alpha: 0.8),
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
             ),
@@ -488,7 +476,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                   bottom: Radius.circular(12.w),
                 ),
                 border: Border.all(
-                  color: _plGreen.withOpacity(0.5),
+                  color: _plGreen.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -531,24 +519,6 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
     );
   }
 
-  Widget _buildBannerItem() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.sports_soccer_rounded, color: _plPurple, size: 16.w),
-        SizedBox(width: 8.w),
-        Text(
-          'Fantasy',
-          style: TextStyle(
-            color: _plPurple,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _playerRow(
     BuildContext context,
@@ -599,7 +569,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
           // ── Premium Badge ────────────────────────
           GestureDetector(
             onTap: () => _showPlayerDetails(context, player),
-            child: Container(
+            child: SizedBox(
               width: 42.w,
               height: 44.h,
               child: Stack(
@@ -619,7 +589,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -637,13 +607,13 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                                   errorBuilder:
                                       (c, e, s) => Icon(
                                         Icons.sports_soccer,
-                                        color: _plPurple.withOpacity(0.2),
+                                        color: _plPurple.withValues(alpha: 0.2),
                                         size: 22.w,
                                       ),
                                 )
                                 : Icon(
                                   Icons.sports_soccer,
-                                  color: _plPurple.withOpacity(0.2),
+                                  color: _plPurple.withValues(alpha: 0.2),
                                   size: 22.w,
                                 ),
                       ),
@@ -667,7 +637,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                           border: Border.all(color: Colors.white, width: 1),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 2,
                             ),
                           ],
@@ -698,7 +668,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                           border: Border.all(color: _plPurple, width: 1.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 2,
                             ),
                           ],
@@ -735,7 +705,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -784,16 +754,6 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
 
   // ── Sub card ───────────────────────────────────────────────────────────────
 
-  Widget _buildSubCard(
-    BuildContext context,
-    Map<String, dynamic> player,
-    bool isDark,
-  ) {
-    // Reuse _pitchPlayer for perfect design consistency between pitch and dugout
-    final pos = _getPositionShort(player);
-    return _pitchPlayer(context, player, _posColor(pos));
-  }
-
   // ── List View ─────────────────────────────────────────────────────────────
 
   Widget _buildListView(
@@ -841,7 +801,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
           child: Text(
             title,
             style: TextStyle(
-              color: isDark ? Colors.white70 : _plPurple.withOpacity(0.6),
+              color: isDark ? Colors.white70 : _plPurple.withValues(alpha: 0.6),
               fontSize: 11.sp,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.5,
@@ -850,10 +810,10 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
         ),
         Container(
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
             borderRadius: BorderRadius.circular(12.w),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+              color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
             ),
           ),
           child: Column(
@@ -898,7 +858,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                       color:
                           isDark
                               ? Colors.white10
-                              : Colors.grey.withOpacity(0.1),
+                              : Colors.grey.withValues(alpha: 0.1),
                     ),
                   ),
         ),
@@ -941,7 +901,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: _posColor(pos).withOpacity(0.1),
+                color: _posColor(pos).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6.w),
               ),
               child: Text(
@@ -979,7 +939,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
               borderRadius: BorderRadius.vertical(top: Radius.circular(24.w)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, -5),
                 ),
@@ -993,7 +953,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                   height: 4.h,
                   decoration: BoxDecoration(
                     color:
-                        isDark ? Colors.white24 : Colors.grey.withOpacity(0.3),
+                        isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1024,9 +984,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                               ),
                             ),
                             Text(
-                              ArabicNameExtension(team).toArabicName(context) +
-                                  " • " +
-                                  pos,
+                              "${ArabicNameExtension(team).toArabicName(context)} • $pos",
                               style: TextStyle(
                                 color: isDark ? Colors.white70 : Colors.black54,
                                 fontSize: 13.sp,
@@ -1052,7 +1010,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
                               children: [
                                 Icon(
                                   Icons.analytics_outlined,
-                                  color: Colors.grey.withOpacity(0.3),
+                                  color: Colors.grey.withValues(alpha: 0.3),
                                   size: 48.w,
                                 ),
                                 SizedBox(height: 16.h),
@@ -1144,9 +1102,9 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
       builder: (context, child) {
         final gradient = LinearGradient(
           colors: [
-            Colors.grey.withOpacity(0.1),
-            Colors.grey.withOpacity(0.2),
-            Colors.grey.withOpacity(0.1),
+            Colors.grey.withValues(alpha: 0.1),
+            Colors.grey.withValues(alpha: 0.2),
+            Colors.grey.withValues(alpha: 0.1),
           ],
           stops: [
             math.max(0, _shimmerCtrl.value - 0.3),
@@ -1161,7 +1119,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
           width: w,
           height: h,
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(radius.w),
           ),
           child: ClipRRect(
@@ -1188,7 +1146,7 @@ class _LeagueFantasyTabState extends State<LeagueFantasyTab>
             Icon(
               Icons.emoji_events_outlined,
               size: 60.w,
-              color: const Color(0xFF7C3AED).withOpacity(0.35),
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
             ),
             SizedBox(height: 16.h),
             Text(
@@ -1244,7 +1202,7 @@ class _PitchPainter extends CustomPainter {
 
     final linePaint =
         Paint()
-          ..color = Colors.white.withOpacity(0.4)
+          ..color = Colors.white.withValues(alpha: 0.4)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 
@@ -1266,7 +1224,7 @@ class _PitchPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(W / 2, H / 2),
       3.5,
-      Paint()..color = Colors.white.withOpacity(0.8),
+      Paint()..color = Colors.white.withValues(alpha: 0.8),
     );
 
     // ── Penalty boxes ─────────────────────────────────────────────────────
@@ -1294,7 +1252,7 @@ class _PitchPainter extends CustomPainter {
     );
 
     // ── Penalty spots ─────────────────────────────────────────────────────
-    final spotPaint = Paint()..color = Colors.white.withOpacity(0.7);
+    final spotPaint = Paint()..color = Colors.white.withValues(alpha: 0.7);
     canvas.drawCircle(Offset(W / 2, margin + boxH * 0.65), 3, spotPaint);
     canvas.drawCircle(Offset(W / 2, H - margin - boxH * 0.65), 3, spotPaint);
 
@@ -1378,7 +1336,7 @@ class _JerseyPainter extends CustomPainter {
     // Collar detail
     final detailPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.15)
+          ..color = Colors.black.withValues(alpha: 0.15)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 
@@ -1388,13 +1346,13 @@ class _JerseyPainter extends CustomPainter {
     final neckPath = Path();
     neckPath.moveTo(w * 0.4, h * 0.2);
     neckPath.quadraticBezierTo(w * 0.5, h * 0.35, w * 0.6, h * 0.2);
-    canvas.drawPath(neckPath, Paint()..color = Colors.black.withOpacity(0.2));
+    canvas.drawPath(neckPath, Paint()..color = Colors.black.withValues(alpha: 0.2));
 
     if (isGk) {
       // Add subtle pattern for GKs
       final patternPaint =
           Paint()
-            ..color = Colors.white.withOpacity(0.2)
+            ..color = Colors.white.withValues(alpha: 0.2)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1;
       for (double i = 0.3; i < 0.8; i += 0.2) {

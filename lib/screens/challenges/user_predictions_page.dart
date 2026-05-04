@@ -184,7 +184,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -276,13 +276,13 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
               ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04),
         ),
       ),
       child: Theme(
@@ -358,7 +358,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
           width: 38.w,
           padding: EdgeInsets.symmetric(vertical: 3.h),
           decoration: BoxDecoration(
-            color: isLive ? Colors.red.withOpacity(0.08) : (isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04)),
+            color: isLive ? Colors.red.withValues(alpha: 0.08) : (isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.04)),
             borderRadius: BorderRadius.circular(6.w),
           ),
           child: Column(
@@ -415,7 +415,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
 
   Widget _buildMatchTrailing(dynamic match, bool isDark) {
     final points = (match['total_points'] as num).toInt();
-    final dividerColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.06);
+    final dividerColor = isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.06);
 
     return Container(
       padding: EdgeInsets.only(left: 4.w),
@@ -432,7 +432,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: points > 0 ? GoalioColors.greenAccent.withOpacity(0.1) : (isDark ? Colors.white10 : Colors.black12),
+                  color: points > 0 ? GoalioColors.greenAccent.withValues(alpha: 0.1) : (isDark ? Colors.white10 : Colors.black12),
                   borderRadius: BorderRadius.circular(6.w),
                 ),
                 child: Text(
@@ -478,10 +478,10 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.015),
+          color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.015),
           borderRadius: BorderRadius.circular(12.w),
           border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.03),
+            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
           ),
         ),
         child: Row(
@@ -493,7 +493,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
               height: 22.w,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Text(
@@ -510,7 +510,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
               child: Icon(
                 isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
                 size: 16.w,
-                color: isCorrect ? Colors.green.withOpacity(0.8) : Colors.red.withOpacity(0.8),
+                color: isCorrect ? Colors.green.withValues(alpha: 0.8) : Colors.red.withValues(alpha: 0.8),
               ),
             ),
             
@@ -570,7 +570,7 @@ class _UserPredictionsPageState extends ConsumerState<UserPredictionsPage> {
                     style: TextStyle(
                       fontSize: 8.sp,
                       fontWeight: FontWeight.w900,
-                      color: Colors.green.withOpacity(0.6),
+                      color: Colors.green.withValues(alpha: 0.6),
                     ),
                   ),
                 ],

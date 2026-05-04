@@ -188,12 +188,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           color:
               isDark
                   ? (isRead
-                      ? const Color(0xFF1E293B).withOpacity(0.5)
+                      ? const Color(0xFF1E293B).withValues(alpha: 0.5)
                       : const Color(0xFF1E293B))
-                  : (isRead ? Colors.white.withOpacity(0.6) : Colors.white),
+                  : (isRead ? Colors.white.withValues(alpha: 0.6) : Colors.white),
           borderRadius: BorderRadius.circular(12.w),
           border: Border.all(
-            color: isDark ? Colors.white12 : Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -217,8 +217,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                 isRead
                                     ? (isDark
                                         ? Colors.white10
-                                        : Colors.black.withOpacity(0.05))
-                                    : iconColor.withOpacity(0.1),
+                                        : Colors.black.withValues(alpha: 0.05))
+                                    : iconColor.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(iconData, size: 18.w, color: iconColor),
