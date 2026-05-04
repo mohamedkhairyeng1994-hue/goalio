@@ -170,7 +170,6 @@ class _ManageLeaguesPageState extends State<ManageLeaguesPage> {
       setState(() {
         _selectedLeagues = newSelected;
       });
-      debugPrint("Loaded ${_selectedLeagues.length} favorite leagues");
     } catch (e) {
       debugPrint("Error loading favorite leagues: $e");
     }

@@ -370,5 +370,14 @@
   "freqEveryDay": "مرة في اليوم",
   "preferencesSaved": "تم حفظ التفضيلات",
   "preferencesSaveFailed": "تعذّر حفظ التفضيلات. حاول مرة أخرى.",
-  "save": "حفظ"
+  "save": "حفظ",
+  "editProfile": "تعديل الملف الشخصي",
+  "editProfileSubtitle": "حدّث اسمك وكلمة المرور",
+  "email": "البريد الإلكتروني",
+  "currentPassword": "كلمة المرور الحالية",
+  "changePassword": "تغيير كلمة المرور",
+  "changePasswordOptional": "اتركها فارغة للإبقاء على كلمة المرور الحالية",
+  "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+  "profileUpdateFailed": "تعذّر تحديث الملف الشخصي. حاول مرة أخرى.",
+  "socialAccountPasswordHint": "لقد سجّلت الدخول بحساب اجتماعي — تغيير كلمة المرور غير متاح."
 }

@@ -5,6 +5,7 @@ import '../../core/theme/theme_manager.dart';
 import '../../core/constants/constants.dart';
 import '../../screens/favorites/favorite_teams_page.dart';
 import '../../screens/favorites/manage_leagues_page.dart';
+import '../../screens/settings/edit_profile_page.dart';
 import '../../screens/settings/privacy_policy_page.dart';
 import '../../screens/settings/terms_of_service_page.dart';
 import '../../screens/settings/feedback_page.dart';
@@ -197,6 +198,19 @@ class _SettingsPageState extends State<SettingsPage> {
               _buildSectionHeader(
                 context,
                 AppLocalizations.of(context)!.account,
+              ),
+              _buildSettingTile(
+                context,
+                icon: Icons.person_outline,
+                title: AppLocalizations.of(context)!.editProfile,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfilePage(),
+                    ),
+                  );
+                },
               ),
               _buildSettingTile(
                 context,

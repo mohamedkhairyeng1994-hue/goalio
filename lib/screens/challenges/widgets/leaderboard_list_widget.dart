@@ -28,6 +28,29 @@ class LeaderboardListWidget extends ConsumerWidget {
       skipLoadingOnRefresh: true,
       data: (state) {
         final ranks = state.list;
+        // Surface empty state instead of an invisible zero-height sliver —
+        // historically a UTF-8 / silent-decode failure on the leaderboard
+        // request would land here and the table would just look "missing".
+        if (ranks.isEmpty && !state.hasMore) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 24.w,
+                vertical: 32.h,
+              ),
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.errorLoadingLeaderboard,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black54,
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         return SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             // Trigger load more when reaching the end

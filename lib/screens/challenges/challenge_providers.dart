@@ -80,9 +80,13 @@ final selectedGroupProvider = NotifierProvider<SelectedGroupNotifier, Group?>(
 class GroupRanksNotifier extends AsyncNotifier<LeaderboardState> {
   @override
   FutureOr<LeaderboardState> build() async {
-    // Watch selected group to automatically re-fetch when it changes
+    // Watch selected group AND locale so the leaderboard refetches if the
+    // user switches language while a group is open (without a watch on
+    // appLocaleProvider the cached LeaderboardState would survive the
+    // locale change unchanged).
     final group = ref.watch(selectedGroupProvider);
-    
+    ref.watch(appLocaleProvider);
+
     if (group == null) {
       return LeaderboardState(list: [], currentPage: 0, hasMore: false);
     }

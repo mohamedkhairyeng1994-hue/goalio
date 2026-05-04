@@ -20,24 +20,19 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 
   void _loadAd() {
-    debugPrint("AdMob: Starting to load banner ad...");
     _bannerAd = BannerAd(
       adUnitId: AdManager.bannerAdUnitId,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          debugPrint("AdMob: Banner ad loaded successfully!");
           setState(() {
             _isLoaded = true;
           });
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint("AdMob: Banner ad FAILED to load: ${error.message} (Code: ${error.code})");
           ad.dispose();
         },
-        onAdOpened: (ad) => debugPrint("AdMob: Banner ad opened."),
-        onAdClosed: (ad) => debugPrint("AdMob: Banner ad closed."),
       ),
     )..load();
   }

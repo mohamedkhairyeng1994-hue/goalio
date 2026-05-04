@@ -436,14 +436,8 @@ class LeaguesPageState extends State<LeaguesPage>
     }
 
     // 2. Trigger background scraping in parallel
-    if (kDebugMode) {
-      debugPrint(
-        'Starting background scraping for: $originalName (ID: $leagueId)',
-      );
-    }
-
     try {
-      final results = await Future.wait([
+      await Future.wait([
         ApiService.scrapeStandingsForLeague(
           originalName,
           leagueId: leagueId,
@@ -466,13 +460,6 @@ class LeaguesPageState extends State<LeaguesPage>
           return false;
         }),
       ]);
-
-      final allSuccess = results.every((res) => res == true);
-      if (kDebugMode) {
-        debugPrint(
-          'Background scraping for $originalName finished. Success: $allSuccess',
-        );
-      }
 
       if (!mounted) return;
 

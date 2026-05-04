@@ -48,7 +48,6 @@ class AdManager {
         onAdLoaded: (ad) {
           _interstitialAd = ad;
           _interstitialLoadAttempts = 0;
-          debugPrint("AdMob: Interstitial loaded.");
         },
         onAdFailedToLoad: (error) {
           _interstitialLoadAttempts++;
@@ -56,7 +55,6 @@ class AdManager {
           if (_interstitialLoadAttempts <= 3) {
             loadInterstitial();
           }
-          debugPrint("AdMob: Interstitial failed: ${error.message}");
         },
       ),
     );

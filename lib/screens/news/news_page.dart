@@ -86,8 +86,6 @@ class NewsPageState extends State<NewsPage> {
         scrape: forceScrape,
       );
 
-      if (kDebugMode) debugPrint('📰 Loaded ${fetchedNews.length} news items');
-
       if (mounted) {
         setState(() {
           if (append) {

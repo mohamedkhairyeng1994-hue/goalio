@@ -2263,6 +2263,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @editProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your name and password'**
+  String get editProfileSubtitle;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @changePasswordOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to keep your current password'**
+  String get changePasswordOptional;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdated;
+
+  /// No description provided for @profileUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update your profile. Try again.'**
+  String get profileUpdateFailed;
+
+  /// No description provided for @socialAccountPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You signed in with a social account — password change isn\'t available.'**
+  String get socialAccountPasswordHint;
 }
 
 class _AppLocalizationsDelegate

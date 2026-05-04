@@ -564,5 +564,14 @@
   "freqEveryDay": "Once a day",
   "preferencesSaved": "Preferences saved",
   "preferencesSaveFailed": "Couldn't save your preferences. Try again.",
-  "save": "Save"
+  "save": "Save",
+  "editProfile": "Edit Profile",
+  "editProfileSubtitle": "Update your name and password",
+  "email": "Email",
+  "currentPassword": "Current Password",
+  "changePassword": "Change Password",
+  "changePasswordOptional": "Leave blank to keep your current password",
+  "profileUpdated": "Profile updated successfully",
+  "profileUpdateFailed": "Couldn't update your profile. Try again.",
+  "socialAccountPasswordHint": "You signed in with a social account — password change isn't available."
 }

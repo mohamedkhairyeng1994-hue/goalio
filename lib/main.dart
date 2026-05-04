@@ -47,10 +47,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final isEnabled = prefs.getBool('notifications_enabled') ?? true;
   if (!isEnabled) return;
 
-  if (kDebugMode) {
-    debugPrint("Handling a background message: ${message.messageId}");
-  }
-
   if (message.messageId != null) {
     // When the app is in the background or killed, we still report as received
     await ApiService.markNotificationAsReceived(message.messageId!);
@@ -110,14 +106,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Ensure the logout callback is registered (moved here to support Hot Reload)
     ApiService.onUnauthorized = () async {
-      if (kDebugMode) debugPrint("App: Global 401 detected, logging out...");
       await ApiService.clearAuth();
-      if (navigatorKey.currentState == null) {
-        if (kDebugMode) {
-          debugPrint("App: Error - navigatorKey.currentState is NULL!");
-        }
-      } else {
-        if (kDebugMode) debugPrint("App: Navigating to Initializer...");
+      if (navigatorKey.currentState != null) {
         navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const Initializer()),
           (route) => false,
@@ -363,7 +353,6 @@ class MainPageState extends ConsumerState<MainPage> {
     final isEnabled = prefs.getBool('notifications_enabled') ?? true;
     if (!isEnabled) return;
 
-    debugPrint("Handling notification: $data");
     final type = data['type'];
 
     if (type == 'matchday_notification' || type == 'score_notification') {
@@ -445,7 +434,6 @@ class MainPageState extends ConsumerState<MainPage> {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
         final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         if (apnsToken == null) {
-          debugPrint("APNS token not available on iOS, skipping FCM token retrieval.");
           return;
         }
       }
@@ -553,7 +541,6 @@ class MainPageState extends ConsumerState<MainPage> {
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         String? token = await messaging.getToken();
         if (token != null) {
-          debugPrint("FCM Token: $token");
           await ApiService.updateFcmToken(token);
         }
 
@@ -563,7 +550,6 @@ class MainPageState extends ConsumerState<MainPage> {
           final isEnabled = prefs.getBool('notifications_enabled') ?? true;
           if (!isEnabled) return;
 
-          debugPrint("Foreground message received: ${message.messageId}");
           if (message.messageId != null) {
             ApiService.markNotificationAsReceived(message.messageId!);
           }
@@ -607,13 +593,11 @@ class MainPageState extends ConsumerState<MainPage> {
 
         // 2. Handle background message clicks
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-          debugPrint("App opened via notification: ${message.messageId}");
           _handleNotificationMessage(message.data);
         });
 
         // Listen for token updates
         FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-          debugPrint("FCM Token Refreshed: $newToken");
           ApiService.updateFcmToken(newToken);
         });
       }

@@ -196,15 +196,30 @@ class SocialRepository {
 
   // ====== User-submitted posts (held for admin approval) ======
 
-  static Future<Map<String, dynamic>> createPost({required String content}) async {
+  /// User-submitted social post. Uses multipart so an optional photo/video
+  /// can ride along; backend caps media at 20MB and accepts jpg/jpeg/png/gif/
+  /// mp4/mov. Either [content] or [mediaPath] must be non-empty (server-side
+  /// rule is `content required_without:media`).
+  static Future<Map<String, dynamic>> createPost({
+    String? content,
+    String? mediaPath,
+  }) async {
     try {
-      final response = await http
-          .post(
-            Uri.parse('$_baseUrl/social-posts'),
-            headers: await ApiClient.reqHeaders,
-            body: jsonEncode({'content': content}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final uri = Uri.parse('$_baseUrl/social-posts');
+      final request = http.MultipartRequest('POST', uri);
+      final headers = await ApiClient.reqHeaders;
+      headers.remove('Content-Type'); // multipart sets its own boundary
+      request.headers.addAll(headers);
+
+      if (content != null && content.isNotEmpty) {
+        request.fields['content'] = content;
+      }
+      if (mediaPath != null && mediaPath.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath('media', mediaPath));
+      }
+
+      final streamed = await request.send().timeout(const Duration(seconds: 60));
+      final response = await http.Response.fromStream(streamed);
 
       if (response.statusCode == 201) {
         return jsonDecode(response.body) as Map<String, dynamic>;

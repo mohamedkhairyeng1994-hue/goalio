@@ -88,17 +88,13 @@ class NotificationsRepository {
 
   static Future<void> markAsReceived(String messageId) async {
     try {
-      final response = await http
+      await http
           .post(
             Uri.parse('$_baseUrl/notifications/received'),
             headers: await ApiClient.reqHeaders,
             body: jsonEncode({'notification_id': messageId}),
           )
           .timeout(const Duration(seconds: 10));
-
-      if (kDebugMode) {
-        debugPrint('Notification delivery confirmation status: ${response.statusCode}');
-      }
     } catch (e) {
       if (kDebugMode) debugPrint('Error confirming notification delivery: $e');
     }

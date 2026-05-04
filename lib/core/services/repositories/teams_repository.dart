@@ -14,7 +14,6 @@ class TeamsRepository {
           .timeout(const Duration(seconds: 120));
 
       ApiClient.checkAuth(response);
-      debugPrint('getAllTeams status: ${response.statusCode}');
       if (response.statusCode == 200) {
         try {
           return ApiClient.parseList(jsonDecode(response.body));

@@ -15,7 +15,6 @@ class ThemeManager extends ValueNotifier<ThemeMode> {
   ThemeManager._internal() : super(ThemeMode.dark);
 
   static Future<void> initialize() async {
-    debugPrint('ThemeManager: Initializing...');
     await _instance._loadTheme();
   }
 
@@ -36,7 +35,6 @@ class ThemeManager extends ValueNotifier<ThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedMode = prefs.getString(_themeKey);
-      debugPrint('ThemeManager: Loaded theme mode: $savedMode');
 
       if (savedMode == 'light') {
         value = ThemeMode.light;

@@ -32,7 +32,6 @@ class _GoalioNativeAdWidgetState extends State<GoalioNativeAdWidget> {
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          debugPrint('AdMob: Native Ad failed to load: $error');
         },
       ),
       request: const AdRequest(),

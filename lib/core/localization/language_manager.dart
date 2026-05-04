@@ -35,7 +35,6 @@ class LanguageManager extends ValueNotifier<Locale> {
   LanguageManager._internal() : super(const Locale('en'));
 
   static Future<void> initialize() async {
-    debugPrint('LanguageManager: Initializing...');
     await _instance._loadLanguage();
   }
 
@@ -43,7 +42,6 @@ class LanguageManager extends ValueNotifier<Locale> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedLanguageCode = prefs.getString(_languageKey);
-      debugPrint('LanguageManager: Loaded language code: $savedLanguageCode');
 
       if (savedLanguageCode != null) {
         value = Locale(savedLanguageCode);

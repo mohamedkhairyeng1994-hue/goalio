@@ -255,13 +255,48 @@ class AuthRepository {
     }
   }
 
+  /// PUT /user/profile — updates the user's name and/or password.
+  /// Pass [currentPassword] + [newPassword] (+ confirmation) to change the
+  /// password; pass [fullname] alone to rename. Returns the parsed response
+  /// map; on success it includes the updated profile under `data`.
+  static Future<Map<String, dynamic>> updateProfile({
+    String? fullname,
+    String? currentPassword,
+    String? newPassword,
+    String? newPasswordConfirmation,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        if (fullname != null && fullname.isNotEmpty) 'fullname': fullname,
+        if (newPassword != null && newPassword.isNotEmpty) ...{
+          'current_password': currentPassword ?? '',
+          'password': newPassword,
+          'password_confirmation': newPasswordConfirmation ?? newPassword,
+        },
+      };
+
+      final response = await http
+          .put(
+            Uri.parse('$_baseUrl/user/profile'),
+            headers: await ApiClient.reqHeaders,
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      return ApiClient.handleResponse(response);
+    } catch (e) {
+      debugPrint('updateProfile exception: $e');
+      return {'error': 'Connection error: ${e.toString()}', 'code': 500};
+    }
+  }
+
   static Future<void> updateFcmToken(String token) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final language = prefs.getString('user_language_code') ?? 'en';
       final notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
 
-      final response = await http
+      await http
           .post(
             Uri.parse('$_baseUrl/user/fcm-token'),
             headers: await ApiClient.reqHeaders,
@@ -272,10 +307,6 @@ class AuthRepository {
             }),
           )
           .timeout(const Duration(seconds: 30));
-
-      if (kDebugMode) {
-        debugPrint('FCM token update status: ${response.statusCode} (Language: $language)');
-      }
     } catch (e) {
       if (kDebugMode) debugPrint('Error updating FCM token: $e');
     }

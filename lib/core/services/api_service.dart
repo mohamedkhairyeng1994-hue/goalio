@@ -91,6 +91,19 @@ class ApiService {
   static Future<Map<String, dynamic>?> getUserProfile({int? leagueId}) =>
       AuthRepository.getUserProfile(leagueId: leagueId);
 
+  static Future<Map<String, dynamic>> updateProfile({
+    String? fullname,
+    String? currentPassword,
+    String? newPassword,
+    String? newPasswordConfirmation,
+  }) =>
+      AuthRepository.updateProfile(
+        fullname: fullname,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        newPasswordConfirmation: newPasswordConfirmation,
+      );
+
   static Future<void> updateFcmToken(String token) =>
       AuthRepository.updateFcmToken(token);
 
@@ -359,8 +372,11 @@ class ApiService {
   }) =>
       SocialRepository.addComment(postId, comment, parentId: parentId);
 
-  static Future<Map<String, dynamic>> createSocialPost({required String content}) =>
-      SocialRepository.createPost(content: content);
+  static Future<Map<String, dynamic>> createSocialPost({
+    String? content,
+    String? mediaPath,
+  }) =>
+      SocialRepository.createPost(content: content, mediaPath: mediaPath);
 
   static Future<List<Map<String, dynamic>>> getMySocialPosts({
     int page = 1,

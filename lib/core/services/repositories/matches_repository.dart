@@ -41,7 +41,6 @@ class MatchesRepository {
       if (response.statusCode == 200) {
         return ApiClient.parseList(jsonDecode(response.body));
       }
-      debugPrint('API Error getMatches: ${response.statusCode} - ${response.body}');
       return [];
     } catch (e) {
       debugPrint('Error fetching matches: $e');

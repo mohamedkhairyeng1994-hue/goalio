@@ -1160,4 +1160,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get save => 'حفظ';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get editProfileSubtitle => 'حدّث اسمك وكلمة المرور';
+
+  @override
+  String get email => 'البريد الإلكتروني';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get changePasswordOptional =>
+      'اتركها فارغة للإبقاء على كلمة المرور الحالية';
+
+  @override
+  String get profileUpdated => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get profileUpdateFailed => 'تعذّر تحديث الملف الشخصي. حاول مرة أخرى.';
+
+  @override
+  String get socialAccountPasswordHint =>
+      'لقد سجّلت الدخول بحساب اجتماعي — تغيير كلمة المرور غير متاح.';
 }

@@ -59,13 +59,19 @@ class SocialPageState extends State<SocialPage> {
   final ScrollController _scrollController = ScrollController();
 
   List<Map<String, dynamic>> _posts = [];
+  // Buffer of posts discovered by the silent poll. They are NOT inserted into
+  // the live feed yet — that would shift the user's scroll position out from
+  // under them. Flushed into _posts only when the user taps the "new posts"
+  // banner (or pulls to refresh).
+  final List<Map<String, dynamic>> _pendingNewPosts = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
   int _currentPage = 1;
-  int _newestId = 0;          // ID of the most recent post we have loaded
-  int _newPostsCount = 0;     // How many new posts found silently
+  int _newestId = 0;          // ID of the most recent post we know about (loaded OR pending)
   String _error = '';
+
+  int get _newPostsCount => _pendingNewPosts.length;
 
   Timer? _silentTimer;
 
@@ -136,35 +142,48 @@ class SocialPageState extends State<SocialPage> {
   }
 
   // ── Silent background poll ─────────────────────────────────
+  // Stores anything new in the pending buffer (drives the banner) instead of
+  // splicing it into the live list — that would shift the user's scroll
+  // position downward mid-scroll, which is the bug the user was hitting.
   Future<void> _silentPoll() async {
     if (_newestId == 0) return;
     final newPosts = await ApiService.getSocialPostsSince(_newestId);
     if (newPosts.isEmpty || !mounted) return;
     setState(() {
-      _newPostsCount += newPosts.length;
-      // Prepend silently without resetting list
-      _posts.insertAll(0, newPosts.map(_normalisePost));
-      _newestId = _posts.first['id'] as int? ?? _newestId;
+      // newPosts comes back newest-first; prepending keeps that order in the
+      // buffer so flushing later preserves it.
+      _pendingNewPosts.insertAll(0, newPosts.map(_normalisePost));
+      _newestId = _pendingNewPosts.first['id'] as int? ?? _newestId;
     });
   }
 
   // ── Pull-to-refresh (manual) ───────────────────────────────
   Future<void> _pullRefresh() async {
-    setState(() { _newPostsCount = 0; });
+    setState(() => _pendingNewPosts.clear());
     await _initialLoad();
   }
 
-  // ── Jump to top and clear banner ───────────────────────────
-  void _jumpToTop() {
-    _scrollController.animateTo(0,
-        duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
-    setState(() => _newPostsCount = 0);
+  // ── Reveal buffered posts and jump to top ─────────────────
+  void _showNewPosts() {
+    if (_pendingNewPosts.isNotEmpty) {
+      setState(() {
+        _posts.insertAll(0, _pendingNewPosts);
+        _pendingNewPosts.clear();
+      });
+    }
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(0,
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    }
   }
 
   // ── Public reset (called from main nav) ───────────────────
   void resetState() {
-    _newPostsCount = 0;
-    _jumpToTop();
+    _pendingNewPosts.clear();
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(0,
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    }
     _initialLoad();
   }
 
@@ -371,7 +390,7 @@ class SocialPageState extends State<SocialPage> {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: _jumpToTop,
+                onTap: _showNewPosts,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),

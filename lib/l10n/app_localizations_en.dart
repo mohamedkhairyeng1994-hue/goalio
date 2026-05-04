@@ -1167,4 +1167,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get save => 'Save';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get editProfileSubtitle => 'Update your name and password';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get changePasswordOptional =>
+      'Leave blank to keep your current password';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully';
+
+  @override
+  String get profileUpdateFailed => 'Couldn\'t update your profile. Try again.';
+
+  @override
+  String get socialAccountPasswordHint =>
+      'You signed in with a social account — password change isn\'t available.';
 }

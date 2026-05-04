@@ -44,9 +44,6 @@ class ApiClient {
   /// Fires the unauthorized callback if the response is 401. No-op otherwise.
   static void checkAuth(http.Response response) {
     if (response.statusCode == 401) {
-      if (kDebugMode) {
-        debugPrint('ApiClient: 401 Unauthorized for ${response.request?.url}');
-      }
       onUnauthorized?.call();
     }
   }

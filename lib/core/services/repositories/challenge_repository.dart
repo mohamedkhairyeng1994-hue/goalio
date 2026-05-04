@@ -18,7 +18,11 @@ class ChallengeRepository {
 
       ApiClient.checkAuth(response);
       if (response.statusCode == 200) {
-        return ApiClient.parseList(jsonDecode(response.body));
+        // Force UTF-8 decoding. response.body picks the charset from
+        // Content-Type and falls back to Latin-1 — that mangles any Arabic
+        // bytes (group/user names) and makes jsonDecode throw, which our
+        // outer catch then silently turns into an empty list.
+        return ApiClient.parseList(jsonDecode(utf8.decode(response.bodyBytes)));
       }
       return [];
     } catch (e) {
@@ -165,13 +169,16 @@ class ChallengeRepository {
 
       ApiClient.checkAuth(response);
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
+        // Force UTF-8 — see note in getLeagues. Without this, an Arabic name
+        // anywhere in the response trips jsonDecode and the catch below hides
+        // it as an empty leaderboard.
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
         return Map<String, dynamic>.from(decoded['data'] ?? {});
       }
       return {};
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        debugPrint('Error fetching challenge league leaderboard: $e');
+        debugPrint('Error fetching challenge league leaderboard: $e\n$st');
       }
       return {};
     }
