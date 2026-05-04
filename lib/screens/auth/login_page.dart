@@ -8,7 +8,6 @@ import '../../core/utils/size_config.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../../core/utils/messages.dart';
 import 'dart:io' show Platform;
 import '../../l10n/app_localizations.dart';
@@ -30,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoginLoading = false;
   bool _isGoogleLoading = false;
   bool _isAppleLoading = false;
-  bool _isFacebookLoading = false;
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _handleLogin() async {
@@ -186,60 +184,6 @@ class _LoginPageState extends State<LoginPage> {
       }
     } finally {
       if (mounted) setState(() => _isAppleLoading = false);
-    }
-  }
-
-  Future<void> _handleFacebookSignIn() async {
-    setState(() => _isFacebookLoading = true);
-    
-    String? fcmToken;
-    try {
-      fcmToken = await FirebaseMessaging.instance.getToken();
-    } catch (e) {
-      debugPrint("Error getting FCM token: $e");
-    }
-
-    try {
-      final LoginResult fbResult = await FacebookAuth.instance.login(
-        permissions: ['public_profile', 'email']
-      );
-      
-      if (fbResult.status == LoginStatus.success) {
-        final userData = await FacebookAuth.instance.getUserData();
-
-        final result = await ApiService.socialLogin(
-          provider: 'facebook',
-          token: userData['id'],
-          email: userData['email'],
-          name: userData['name'],
-          fcmToken: fcmToken,
-        );
-
-        if (mounted) {
-          if (result.containsKey('data') || result.containsKey('token')) {
-            widget.onLoginSuccess();
-          } else {
-            GoalioMessages.showError(
-              context,
-              result['error'] ?? "Facebook sign-in failed",
-            );
-          }
-        }
-      } else {
-        if (mounted) {
-          GoalioMessages.showError(
-            context,
-            "Facebook Sign-In Error: ${fbResult.message}",
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Facebook Sign-In Error: $e');
-      if (mounted) {
-        GoalioMessages.showError(context, "Facebook Sign-In Error: $e");
-      }
-    } finally {
-      if (mounted) setState(() => _isFacebookLoading = false);
     }
   }
 
@@ -503,14 +447,6 @@ class _LoginPageState extends State<LoginPage> {
                               onTap: _handleAppleSignIn,
                             ),
                           ],
-                          SizedBox(width: 16.w),
-                          _buildSocialButton(
-                            icon: FontAwesomeIcons.facebook,
-                            iconColor: const Color(0xFF1877F2),
-                            isLoading: _isFacebookLoading,
-                            isDark: isDark,
-                            onTap: _handleFacebookSignIn,
-                          ),
                         ],
                       ),
                       SizedBox(height: 28.h),
