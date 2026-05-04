@@ -23,9 +23,10 @@ struct MatchDto: Decodable {
     let homeScore: String?
     let awayScore: String?
     let status: String?
+    let competition: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, time, status
+        case id, time, status, competition
         case homeTeam  = "home_team"
         case awayTeam  = "away_team"
         case homeLogo  = "home_logo"
@@ -47,6 +48,7 @@ struct Match: Hashable {
     let homeScore: String?
     let awayScore: String?
     let status: String?
+    let competition: String?
     let bucket: Bucket
 
     var hasScore: Bool { homeScore != nil && awayScore != nil }
@@ -73,6 +75,7 @@ extension MatchDto {
             homeScore: homeScore,
             awayScore: awayScore,
             status: status,
+            competition: competition,
             bucket: bucket
         )
     }

@@ -169,17 +169,30 @@ private struct MatchRow: View {
 
     var body: some View {
         Link(destination: URL(string: "goalio://match?id=\(match.id)")!) {
-            HStack(alignment: .center, spacing: 8) {
-                TeamSide(name: match.homeTeam, logoData: logos[match.homeLogo], alignEnd: false)
-                    .frame(maxWidth: .infinity)
+            VStack(alignment: .center, spacing: 2) {
+                // League name above each match — same style as the
+                // fixtures match-detail header: centered, green accent,
+                // small bold uppercase.
+                if let comp = match.competition?.trimmingCharacters(in: .whitespaces),
+                   !comp.isEmpty {
+                    Text(comp.uppercased())
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(WidgetTheme.accent)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                HStack(alignment: .center, spacing: 8) {
+                    TeamSide(name: match.homeTeam, logoData: logos[match.homeLogo], alignEnd: false)
+                        .frame(maxWidth: .infinity)
 
-                CenterTime(match: match)
-                    .padding(.horizontal, 4)
+                    CenterTime(match: match)
+                        .padding(.horizontal, 4)
 
-                TeamSide(name: match.awayTeam, logoData: logos[match.awayLogo], alignEnd: true)
-                    .frame(maxWidth: .infinity)
+                    TeamSide(name: match.awayTeam, logoData: logos[match.awayLogo], alignEnd: true)
+                        .frame(maxWidth: .infinity)
+                }
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 4)
         }
     }
 }
