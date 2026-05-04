@@ -59,12 +59,27 @@ private struct ContentView: View {
     let logos: [String: Data]
     let page: Int
 
-    private let pageSize = 2
-
     var body: some View {
         let yesterday = matches.filter { $0.bucket == .yesterday }
         let today     = matches.filter { $0.bucket == .today }
         let tomorrow  = matches.filter { $0.bucket == .tomorrow }
+
+        // systemLarge has fixed height (~382 pt). After header + footer +
+        // section pills + padding, only 4–5 match rows fit. Each visible
+        // section pill steals ~1 row of capacity, so shrink pageSize as more
+        // sections are active — otherwise the widget overflows and iOS clips
+        // the header and pager.
+        let activeSections =
+            (yesterday.isEmpty ? 0 : 1) +
+            (today.isEmpty     ? 0 : 1) +
+            (tomorrow.isEmpty  ? 0 : 1)
+        let pageSize: Int = {
+            switch activeSections {
+            case 3:  return 1   // 3 pills + 3 rows = fits
+            case 2:  return 2   // 2 pills + 4 rows = fits
+            default: return 4   // 1 pill  + 4 rows = fits
+            }
+        }()
 
         let totalPages = max(
             1,
@@ -75,46 +90,54 @@ private struct ContentView: View {
         )
         let safePage = min(max(0, page), totalPages - 1)
 
+        // Compute the slice we want to render for each bucket on this page.
+        // Empty buckets (and empty pages of partially-filled buckets) collapse
+        // entirely instead of showing a pill + "No matches" placeholder, so the
+        // widget doesn't waste vertical space when one of the days is quiet.
+        let yesterdayPage = slice(yesterday, page: safePage, size: pageSize)
+        let todayPage     = slice(today,     page: safePage, size: pageSize)
+        let tomorrowPage  = slice(tomorrow,  page: safePage, size: pageSize)
+        let allEmpty = yesterdayPage.isEmpty && todayPage.isEmpty && tomorrowPage.isEmpty
+
         VStack(alignment: .leading, spacing: 8) {
-            if !yesterday.isEmpty {
+            if !yesterdayPage.isEmpty {
                 SectionPill(label: "Yesterday")
-                ForEach(slice(yesterday, page: safePage), id: \.self) { match in
+                ForEach(yesterdayPage, id: \.self) { match in
                     MatchRow(match: match, logos: logos)
                 }
-                Spacer().frame(height: 4)
             }
 
-            SectionPill(label: "Today")
-            let todayPage = slice(today, page: safePage)
-            if todayPage.isEmpty {
-                EmptyRow(text: "No matches today")
-            } else {
+            if !todayPage.isEmpty {
+                SectionPill(label: "Today")
                 ForEach(todayPage, id: \.self) { match in
                     MatchRow(match: match, logos: logos)
                 }
             }
 
-            Spacer().frame(height: 4)
-
-            SectionPill(label: "Tomorrow")
-            let tomorrowPage = slice(tomorrow, page: safePage)
-            if tomorrowPage.isEmpty {
-                EmptyRow(text: "No matches tomorrow")
-            } else {
+            if !tomorrowPage.isEmpty {
+                SectionPill(label: "Tomorrow")
                 ForEach(tomorrowPage, id: \.self) { match in
                     MatchRow(match: match, logos: logos)
                 }
             }
 
+            if allEmpty {
+                Spacer()
+                EmptyRow(text: "No matches in this period")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+
             Spacer(minLength: 0)
-            Pager(current: safePage + 1, total: totalPages)
+            if totalPages > 1 {
+                Pager(current: safePage + 1, total: totalPages)
+            }
         }
     }
 
-    private func slice(_ list: [Match], page: Int) -> [Match] {
-        let from = page * pageSize
+    private func slice(_ list: [Match], page: Int, size: Int) -> [Match] {
+        let from = page * size
         guard from < list.count else { return [] }
-        let to = min(from + pageSize, list.count)
+        let to = min(from + size, list.count)
         return Array(list[from..<to])
     }
 
