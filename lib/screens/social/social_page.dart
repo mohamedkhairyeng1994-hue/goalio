@@ -5,7 +5,6 @@ import '../../core/constants/constants.dart';
 import '../../core/utils/size_config.dart';
 import '../../core/services/api_service.dart';
 import 'package:share_plus/share_plus.dart';
-import 'create_social_post_page.dart';
 
 /// Returns a human-readable relative time string (e.g. "3h ago", "Yesterday")
 String _relativeTime(String? isoString) {
@@ -291,27 +290,6 @@ class SocialPageState extends State<SocialPage> {
         centerTitle: false,
       ),
       body: _buildBody(isDark),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openCreatePost,
-        backgroundColor: GoalioColors.greenAccent,
-        foregroundColor: Colors.black,
-        tooltip: 'Create post',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Future<void> _openCreatePost() async {
-    final token = await ApiService.getToken();
-    if (!mounted) return;
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login to post')),
-      );
-      return;
-    }
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const CreateSocialPostPage()),
     );
   }
 

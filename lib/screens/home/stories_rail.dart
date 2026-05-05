@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/constants.dart';
 import '../../core/models/story.dart';
-import '../../core/services/api_service.dart';
 import '../../core/services/repositories/stories_repository.dart';
 import '../../core/utils/size_config.dart';
 import 'story_viewer_page.dart';
 
 /// Horizontal rail of circular story tiles shown on the home screen.
-/// First tile is "Add Your Story" — opens an image picker, uploads to backend,
-/// and shows a "pending approval" snackbar. Other tiles open the story viewer.
+/// Tiles open the story viewer. Stories themselves are admin-published.
 ///
 /// Pass [refreshTrigger] from the parent to refetch on pull-to-refresh — the
 /// rail listens for value changes and re-runs [_load] each time.
@@ -31,7 +28,6 @@ class _StoriesRailState extends State<StoriesRail> {
   // viewed tiles pushed to the end) and the muted-ring styling. Stories
   // expire in 24h server-side so this set stays small without explicit pruning.
   Set<int> _viewedIds = {};
-  bool _isUploading = false;
 
   // Brand color used for the active ring. Viewed stories use a muted grey.
   static const Color _ringColor = GoalioColors.greenAccent;
@@ -97,43 +93,6 @@ class _StoriesRailState extends State<StoriesRail> {
     );
   }
 
-  Future<void> _pickAndUpload() async {
-    final token = await ApiService.getToken();
-    if (!mounted) return;
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login to add a story')),
-      );
-      return;
-    }
-
-    final picker = ImagePicker();
-    final XFile? file = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1280,
-      imageQuality: 85,
-    );
-    if (file == null || !mounted) return;
-
-    setState(() => _isUploading = true);
-    final result = await ApiService.createStory(filePath: file.path);
-    if (!mounted) return;
-    setState(() => _isUploading = false);
-
-    if (result['error'] != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: ${result['error']}')),
-      );
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Story submitted! Pending admin approval.'),
-        duration: Duration(seconds: 4),
-      ),
-    );
-  }
-
   void _openViewer(List<Story> ordered, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -155,11 +114,10 @@ class _StoriesRailState extends State<StoriesRail> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
-        itemCount: ordered.length + 1,
+        itemCount: ordered.length,
         itemBuilder: (ctx, i) {
-          if (i == 0) return _buildAddTile(isDark);
-          final story = ordered[i - 1];
-          return _buildStoryTile(story, i - 1, isDark, ordered);
+          final story = ordered[i];
+          return _buildStoryTile(story, i, isDark, ordered);
         },
       ),
     );
@@ -168,63 +126,6 @@ class _StoriesRailState extends State<StoriesRail> {
   // Sizing tokens — tweak these two to resize the whole rail.
   static const double _tileSize = 56;   // diameter of the avatar circle (in .w units)
   static const double _labelWidth = 64; // capped label width so long names ellipsize
-
-  Widget _buildAddTile(bool isDark) {
-    return Padding(
-      padding: EdgeInsetsDirectional.only(end: 10.w),
-      child: GestureDetector(
-        onTap: _isUploading ? null : _pickAndUpload,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: _tileSize.w,
-              height: _tileSize.w,
-              padding: EdgeInsets.all(2.w),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: _ringColor, width: 2),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
-                ),
-                child: _isUploading
-                    ? Padding(
-                        padding: EdgeInsets.all(14.w),
-                        child: const CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: GoalioColors.greenAccent,
-                        ),
-                      )
-                    : Icon(
-                        Icons.add,
-                        size: 22.w,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            SizedBox(
-              width: _labelWidth.w,
-              child: Text(
-                'Your Story',
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.5.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildStoryTile(Story story, int index, bool isDark, List<Story> ordered) {
     final mediaUrl = story.mediaUrl;

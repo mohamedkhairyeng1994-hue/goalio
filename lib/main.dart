@@ -9,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 // Managers & Utils
 import 'core/theme/theme_manager.dart';
@@ -55,6 +56,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+// On iOS 14+ AdMob silently delivers no-fill / blank ads if the App Tracking
+// Transparency status is still `notDetermined`, so the prompt MUST resolve
+// before MobileAds.initialize() runs. Android has no ATT — initialize directly.
+Future<void> _initMobileAds() async {
+  if (Platform.isIOS) {
+    try {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('ATT request failed: $e');
+    }
+  }
+  await MobileAds.instance.initialize();
+}
+
 // Lets other screens (e.g. the notifications page) ask the currently-mounted
 // MainPage to switch tabs without needing a GlobalKey. MainPage registers its
 // handler in initState and clears it in dispose.
@@ -88,7 +106,7 @@ void main() async {
   await Future.wait([
     LanguageManager.initialize(),
     ThemeManager.initialize(),
-    MobileAds.instance.initialize()
+    _initMobileAds(),
   ]);
 
   // Push the current API base URL to the home-screen widgets so they don't
