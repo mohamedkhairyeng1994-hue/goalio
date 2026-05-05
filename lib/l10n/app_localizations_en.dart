@@ -661,6 +661,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get varLabel => 'VAR';
 
   @override
+  String get tvChannelsLabel => 'TV CHANNELS';
+
+  @override
   String get teamForm => 'TEAM FORM';
 
   @override

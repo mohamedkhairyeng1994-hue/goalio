@@ -658,6 +658,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get varLabel => 'تقنية الفيديو';
 
   @override
+  String get tvChannelsLabel => 'القنوات الناقلة';
+
+  @override
   String get teamForm => 'حالة الفريق';
 
   @override

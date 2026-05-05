@@ -845,10 +845,13 @@ class _MatchDetailPageState extends State<MatchDetailPage>
     final awayForm = (rawForm['away'] as List<dynamic>?) ?? [];
     final hasForm = homeForm.isNotEmpty || awayForm.isNotEmpty;
 
+    final channels = (_overview['channels'] as List<dynamic>?) ?? [];
+    final hasChannels = channels.isNotEmpty;
+
     final bool hasInfo =
         scoreInfo['venue'] != null || scoreInfo['date'] != null;
 
-    if (!hasInfo && !hasForm) {
+    if (!hasInfo && !hasForm && !hasChannels) {
       return _buildNoDataWidget(
         context: context,
         icon: Icons.info_outline,
@@ -878,6 +881,9 @@ class _MatchDetailPageState extends State<MatchDetailPage>
               ),
               // Venue / Date info strip
               if (hasInfo) _buildInfoStrip(scoreInfo),
+
+              // ── TV Channels ────────────────────────────────────────────
+              if (hasChannels) ..._buildChannelsSection(context, channels),
 
               // ── Team Form ──────────────────────────────────────────────
               if (hasForm)
@@ -1717,6 +1723,76 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   // ─────────────────────────────────────────────────────────────────────────
   //  FORM SECTION
   // ─────────────────────────────────────────────────────────────────────────
+
+  /// TV CHANNELS section: a labelled `Wrap` of pill-shaped chips, each chip
+  /// pairs the channel logo (when available) with its name. `Wrap` lays the
+  /// chips horizontally and flows to the next line when the row fills, so
+  /// the grid is responsive across phone widths and orientations.
+  List<Widget> _buildChannelsSection(BuildContext context, List<dynamic> channels) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+
+    return [
+      Padding(
+        padding: EdgeInsets.only(top: 10.h, bottom: 12.h),
+        child: _buildSectionTitle(AppLocalizations.of(context)!.tvChannelsLabel),
+      ),
+      Wrap(
+        spacing: 8.w,
+        runSpacing: 8.h,
+        children: channels.map<Widget>((c) {
+          final ch = c as Map<String, dynamic>;
+          final name = (ch['name'] ?? '').toString();
+          final logo = (ch['logo_url'] ?? '').toString();
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: chipBg,
+              borderRadius: BorderRadius.circular(20.w),
+              border: Border.all(
+                color: GoalioColors.greenAccent.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (logo.isNotEmpty) ...[
+                  ClipOval(
+                    child: Image.network(
+                      logo,
+                      width: 16.w,
+                      height: 16.w,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.live_tv,
+                        size: 14.w,
+                        color: GoalioColors.greenAccent,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                ] else ...[
+                  Icon(Icons.live_tv, size: 14.w, color: GoalioColors.greenAccent),
+                  SizedBox(width: 6.w),
+                ],
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+      SizedBox(height: 4.h),
+    ];
+  }
 
   List<Widget> _buildFormSection(
     BuildContext context,

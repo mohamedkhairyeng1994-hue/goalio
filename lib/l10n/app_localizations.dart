@@ -1322,6 +1322,12 @@ abstract class AppLocalizations {
   /// **'VAR'**
   String get varLabel;
 
+  /// No description provided for @tvChannelsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TV CHANNELS'**
+  String get tvChannelsLabel;
+
   /// No description provided for @teamForm.
   ///
   /// In en, this message translates to:
