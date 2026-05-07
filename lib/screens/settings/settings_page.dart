@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/theme_manager.dart';
 import '../../core/constants/constants.dart';
+import '../../core/utils/messages.dart';
 import '../../screens/favorites/favorite_teams_page.dart';
 import '../../screens/favorites/manage_leagues_page.dart';
 import '../../screens/settings/edit_profile_page.dart';
@@ -38,6 +39,60 @@ class _SettingsPageState extends State<SettingsPage> {
         _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       });
     }
+  }
+
+  /// Two-step destructive flow: show a confirmation dialog, and only if the
+  /// user confirms call DELETE /user/account. On success we reuse [onLogout]
+  /// so the app navigates back to the login screen with the same teardown
+  /// (token cleared, route stack reset) as a normal sign-out.
+  Future<void> _confirmDeleteAccount() async {
+    final l = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(ctx).cardColor,
+        title: Text(l.deleteAccountConfirmTitle),
+        content: Text(l.deleteAccountConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: GoalioColors.greenAccent),
+      ),
+    );
+
+    final result = await ApiService.deleteAccount();
+
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+
+    if (result.containsKey('error')) {
+      GoalioMessages.showError(
+        context,
+        result['message']?.toString() ??
+            result['error']?.toString() ??
+            l.deleteAccountFailed,
+      );
+      return;
+    }
+
+    GoalioMessages.showSuccess(context, l.deleteAccountSuccess);
+    widget.onLogout();
   }
 
 
@@ -245,6 +300,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 titleColor: Colors.redAccent,
                 iconColor: Colors.redAccent,
                 onTap: widget.onLogout,
+              ),
+              _buildSettingTile(
+                context,
+                icon: Icons.delete_forever_outlined,
+                title: AppLocalizations.of(context)!.deleteAccount,
+                titleColor: Colors.redAccent,
+                iconColor: Colors.redAccent,
+                onTap: _confirmDeleteAccount,
               ),
 
               SizedBox(

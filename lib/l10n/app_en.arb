@@ -575,5 +575,12 @@
   "changePasswordOptional": "Leave blank to keep your current password",
   "profileUpdated": "Profile updated successfully",
   "profileUpdateFailed": "Couldn't update your profile. Try again.",
-  "socialAccountPasswordHint": "You signed in with a social account — password change isn't available."
+  "socialAccountPasswordHint": "You signed in with a social account — password change isn't available.",
+  "deleteAccount": "Delete Account",
+  "deleteAccountConfirmTitle": "Delete your account?",
+  "deleteAccountConfirmMessage": "This permanently removes your profile, favorites, predictions, and notifications. This action cannot be undone.",
+  "deleteAccountConfirm": "Delete",
+  "cancel": "Cancel",
+  "deleteAccountSuccess": "Your account has been deleted",
+  "deleteAccountFailed": "Couldn't delete your account. Try again."
 }

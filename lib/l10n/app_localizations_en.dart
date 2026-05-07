@@ -1199,4 +1199,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get socialAccountPasswordHint =>
       'You signed in with a social account — password change isn\'t available.';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'This permanently removes your profile, favorites, predictions, and notifications. This action cannot be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete';
+
+  @override
+  String get deleteAccountSuccess => 'Your account has been deleted';
+
+  @override
+  String get deleteAccountFailed => 'Couldn\'t delete your account. Try again.';
 }

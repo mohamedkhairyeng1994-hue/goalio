@@ -380,5 +380,12 @@
   "changePasswordOptional": "اتركها فارغة للإبقاء على كلمة المرور الحالية",
   "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
   "profileUpdateFailed": "تعذّر تحديث الملف الشخصي. حاول مرة أخرى.",
-  "socialAccountPasswordHint": "لقد سجّلت الدخول بحساب اجتماعي — تغيير كلمة المرور غير متاح."
+  "socialAccountPasswordHint": "لقد سجّلت الدخول بحساب اجتماعي — تغيير كلمة المرور غير متاح.",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountConfirmTitle": "حذف حسابك؟",
+  "deleteAccountConfirmMessage": "سيؤدي هذا إلى حذف ملفك الشخصي ومفضلاتك وتوقعاتك وإشعاراتك بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+  "deleteAccountConfirm": "حذف",
+  "cancel": "إلغاء",
+  "deleteAccountSuccess": "تم حذف حسابك",
+  "deleteAccountFailed": "تعذّر حذف الحساب. حاول مرة أخرى."
 }

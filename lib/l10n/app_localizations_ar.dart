@@ -1192,4 +1192,23 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get socialAccountPasswordHint =>
       'لقد سجّلت الدخول بحساب اجتماعي — تغيير كلمة المرور غير متاح.';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountConfirmTitle => 'حذف حسابك؟';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'سيؤدي هذا إلى حذف ملفك الشخصي ومفضلاتك وتوقعاتك وإشعاراتك بشكل دائم. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get deleteAccountConfirm => 'حذف';
+
+  @override
+  String get deleteAccountSuccess => 'تم حذف حسابك';
+
+  @override
+  String get deleteAccountFailed => 'تعذّر حذف الحساب. حاول مرة أخرى.';
 }

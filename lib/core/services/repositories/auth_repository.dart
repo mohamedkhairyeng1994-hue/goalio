@@ -290,6 +290,31 @@ class AuthRepository {
     }
   }
 
+  /// DELETE /user/account — permanently deletes the authenticated user.
+  ///
+  /// On success the server invalidates the bearer token, so we also clear
+  /// the locally cached auth state to make sure the next request is treated
+  /// as logged-out. Returns the parsed response map.
+  static Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('$_baseUrl/user/account'),
+            headers: await ApiClient.reqHeaders,
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final result = ApiClient.handleResponse(response);
+      if (!result.containsKey('error')) {
+        await clearAuth();
+      }
+      return result;
+    } catch (e) {
+      debugPrint('deleteAccount exception: $e');
+      return {'error': 'Connection error: ${e.toString()}', 'code': 500};
+    }
+  }
+
   static Future<void> updateFcmToken(String token) async {
     try {
       final prefs = await SharedPreferences.getInstance();

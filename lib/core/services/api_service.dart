@@ -107,6 +107,9 @@ class ApiService {
   static Future<void> updateFcmToken(String token) =>
       AuthRepository.updateFcmToken(token);
 
+  static Future<Map<String, dynamic>> deleteAccount() =>
+      AuthRepository.deleteAccount();
+
   // ====== Matches ======
 
   static Future<List<dynamic>> getMatches({String? date}) =>
