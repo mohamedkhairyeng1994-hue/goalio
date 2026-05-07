@@ -56,21 +56,35 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// On iOS 14+ AdMob silently delivers no-fill / blank ads if the App Tracking
-// Transparency status is still `notDetermined`, so the prompt MUST resolve
-// before MobileAds.initialize() runs. Android has no ATT — initialize directly.
+// AdMob initialization is decoupled from ATT. The system prompt is requested
+// later from Initializer.initState (see [requestAttIfNeeded]) once the app is
+// in the .active state — Apple's requestTrackingAuthorization is a silent
+// no-op while the app is still launching. AdMob serves non-personalized ads
+// until ATT resolves and switches to personalized once consent is granted, so
+// initializing first is safe.
 Future<void> _initMobileAds() async {
-  if (Platform.isIOS) {
-    try {
-      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.notDetermined) {
-        await AppTrackingTransparency.requestTrackingAuthorization();
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('ATT request failed: $e');
-    }
-  }
   await MobileAds.instance.initialize();
+}
+
+/// Show the ATT system prompt when the iOS user hasn't decided yet. Must be
+/// called *after* the first frame has rendered so the UIApplication is in
+/// the .active state — otherwise iOS silently no-ops without ever prompting,
+/// which is exactly the behavior Apple's reviewer reports.
+///
+/// The 200ms delay handles a race where the keyWindow's scene activation
+/// hasn't fully transitioned by the time addPostFrameCallback fires on
+/// certain iPad / iOS 17+ combos.
+Future<void> requestAttIfNeeded() async {
+  if (!Platform.isIOS) return;
+  try {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+    if (status == TrackingStatus.notDetermined) {
+      await AppTrackingTransparency.requestTrackingAuthorization();
+    }
+  } catch (e) {
+    if (kDebugMode) debugPrint('ATT request failed: $e');
+  }
 }
 
 // Lets other screens (e.g. the notifications page) ask the currently-mounted
@@ -257,6 +271,12 @@ class _InitializerState extends State<Initializer> {
   void initState() {
     super.initState();
     _checkAuth();
+    // ATT prompt must fire *after* the first frame so iOS sees the app as
+    // active — calling it during main() / pre-runApp returns notDetermined
+    // without ever displaying the dialog (the App Review rejection cause).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      requestAttIfNeeded();
+    });
   }
 
   Future<void> _checkAuth() async {
