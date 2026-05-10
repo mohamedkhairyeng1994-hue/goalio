@@ -10,7 +10,7 @@ enum SharedConfig {
     // the WidgetBridge yet (e.g. the widget loaded before the app opened
     // for the first time). Matches the production branch of
     // ApiConstants.authBaseUrl in lib/core/constants/constants.dart.
-    static let defaultBaseURL = "https://goalio.smartoo.site/api"
+    static let defaultBaseURL = "https://goalio.site/api"
 
     // Resolved base URL: prefer whatever the Dart side wrote into the App
     // Group's UserDefaults via WidgetBridge, fall back to the default above.

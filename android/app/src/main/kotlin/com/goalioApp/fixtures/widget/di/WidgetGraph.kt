@@ -17,7 +17,7 @@ object WidgetGraph {
     // Fallback used only if Flutter hasn't pushed the URL yet (e.g. widget
     // added before the app is opened). Matches ApiConstants.authBaseUrl's
     // production branch.
-    private const val DEFAULT_BASE_URL = "https://goalio.smartoo.site/api/"
+    private const val DEFAULT_BASE_URL = "https://goalio.site/api/"
 
     private const val FLUTTER_PREFS = "FlutterSharedPreferences"
     private const val BASE_URL_KEY  = "flutter.widget_base_url"

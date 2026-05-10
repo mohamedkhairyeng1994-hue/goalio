@@ -128,7 +128,7 @@ with `goalio_logo.png`).
 | Deep link to match   | `OpenMatchAction` → `goalio://match?id=`          | `Link(destination: goalio://match?id=)`        |
 | Deep link to home    | Whole-widget click → `goalio://home`              | Outer `Link(destination: goalio://home)`       |
 | Theme colors         | `WidgetTheme.kt`                                  | `Theme.swift`                                  |
-| Backend endpoint     | `https://goalio.smartoo.site/api/widget/matches`  | same                                           |
+| Backend endpoint     | `https://goalio.site/api/widget/matches`          | same                                           |
 
 Same JSON contract on both sides:
 `{ yesterday[], today[], tomorrow[], has_favorites }` — see
