@@ -1156,10 +1156,12 @@ class _FixtureListState extends State<FixtureList>
   Widget build(BuildContext context) {
     super.build(context);
 
-    // Always wrap in RefreshIndicator so pull-to-refresh works in every state
+    // Always wrap in RefreshIndicator so pull-to-refresh works in every state.
+    // forceScrape:false returns cached data fast and triggers _scrapeInBackground()
+    // — the spinner dismisses quickly, scrape results land progressively after.
     return RefreshIndicator(
       color: GoalioColors.greenAccent,
-      onRefresh: () => _loadMatches(forceScrape: true),
+      onRefresh: () => _loadMatches(forceScrape: false),
       child: _buildContent(),
     );
   }

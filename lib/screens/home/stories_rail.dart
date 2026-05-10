@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/constants.dart';
@@ -22,6 +24,10 @@ class StoriesRail extends StatefulWidget {
 
 class _StoriesRailState extends State<StoriesRail> {
   static const String _viewedPrefsKey = 'viewed_story_ids';
+  // Stories are cached locally so the rail can paint instantly on cold start
+  // and survive transient API failures, instead of going blank until the
+  // network call returns.
+  static const String _cachePrefsKey = 'cached_stories_v1';
 
   List<Story> _stories = const [];
   // IDs the device has watched. Drives the rail order (unseen tiles first,
@@ -66,15 +72,66 @@ class _StoriesRailState extends State<StoriesRail> {
   }
 
   Future<void> _load() async {
-    final results = await Future.wait([
-      StoriesRepository.fetchAll(),
-      _readViewedIds(),
-    ]);
+    // Stale-while-revalidate. On the first call (state still empty) paint
+    // whatever we have in local cache so the rail isn't blank while the
+    // network request flies. On subsequent calls (pull-to-refresh) we already
+    // have rows on screen, so skip the cache hop and go straight to the wire.
+    if (_stories.isEmpty) {
+      final cached = await _readCachedStories();
+      final viewedIds = await _readViewedIds();
+      if (mounted && cached.isNotEmpty) {
+        setState(() {
+          // Drop client-side-expired rows defensively — the server already
+          // filters them, but cache could outlive their TTL.
+          _stories = cached.where((s) => !s.isExpired).toList();
+          _viewedIds = viewedIds;
+        });
+      }
+    }
+
+    final fresh = await StoriesRepository.fetchAll();
+    final viewedIds = await _readViewedIds();
     if (!mounted) return;
+
+    // Empty server response can mean "genuinely no stories" or "API blip"
+    // (the repo swallows errors and returns []). Either way, don't wipe
+    // what we already painted — the next refresh will recover.
+    if (fresh.isEmpty) {
+      setState(() => _viewedIds = viewedIds);
+      return;
+    }
+
     setState(() {
-      _stories = results[0] as List<Story>;
-      _viewedIds = results[1] as Set<int>;
+      _stories = fresh;
+      _viewedIds = viewedIds;
     });
+    await _writeCachedStories(fresh);
+  }
+
+  Future<List<Story>> _readCachedStories() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_cachePrefsKey);
+      if (raw == null || raw.isEmpty) return const [];
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map>()
+          .map((m) => Story.fromJson(Map<String, dynamic>.from(m)))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> _writeCachedStories(List<Story> stories) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = jsonEncode(stories.map((s) => s.toJson()).toList());
+      await prefs.setString(_cachePrefsKey, encoded);
+    } catch (_) {
+      // Cache writes are best-effort.
+    }
   }
 
   Future<Set<int>> _readViewedIds() async {

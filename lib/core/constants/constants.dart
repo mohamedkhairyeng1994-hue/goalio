@@ -24,9 +24,9 @@ class ApiConstants {
         }
         return 'http://scrapping.test/goalio_backend/public/api';
       case 'production':
-        return 'https://goalio.site/api';
+        return 'https://goalio.smartoo.site/api';
       default:
-        return 'https://goalio.site/api';
+        return 'https://goalio.smartoo.site/api';
     }
   }
 }

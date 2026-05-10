@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +13,6 @@ import '../../core/utils/number_utils.dart';
 import '../../core/utils/name_translator.dart';
 import '../../core/utils/messages.dart';
 import '../../l10n/app_localizations.dart';
-import 'fantasy_hub_tab.dart';
 
 class MatchDetailPage extends StatefulWidget {
   final Map<String, dynamic> match;
@@ -33,18 +33,10 @@ class _MatchDetailPageState extends State<MatchDetailPage>
   bool _homeIsFavorite = false;
   bool _awayIsFavorite = false;
 
-  bool get _isPremierLeague {
-    final leagueId = widget.match['league_id'];
-    return leagueId == 1 || leagueId?.toString() == '1';
-  }
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: _isPremierLeague ? 5 : 4,
-      vsync: this,
-    );
+    _tabController = TabController(length: 4, vsync: this);
     _homeIsFavorite = widget.match['home_is_favorite'] ?? false;
     _awayIsFavorite = widget.match['away_is_favorite'] ?? false;
     _loadDetails(forceRefresh: true);
@@ -221,7 +213,11 @@ class _MatchDetailPageState extends State<MatchDetailPage>
       body: RefreshIndicator(
         color: GoalioColors.greenAccent,
         backgroundColor: Theme.of(context).cardColor,
-        onRefresh: () => _loadDetails(forceRefresh: true),
+        onRefresh: () async {
+          // Kick off the force-refresh in the background; the spinner dismisses
+          // quickly and the UI updates in place when the scrape completes.
+          unawaited(_loadDetails(forceRefresh: true));
+        },
         // NestedScrollView > TabBarView > CustomScrollView = depth 2
         notificationPredicate: (notification) => notification.depth == 2,
         child: NestedScrollView(
@@ -316,24 +312,6 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                                   text: AppLocalizations.of(context)!.timeline,
                                 ),
                                 Tab(text: AppLocalizations.of(context)!.lineup),
-                                if (_isPremierLeague)
-                                  Tab(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.emoji_events_rounded,
-                                          size: 12.w,
-                                        ),
-                                        SizedBox(width: 4.w),
-                                        Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          )!.fantasyHub,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                               ],
                             ),
                           ),
@@ -385,8 +363,6 @@ class _MatchDetailPageState extends State<MatchDetailPage>
                   _buildStatisticsTab(innerContext),
                   _buildEventsTab(innerContext),
                   _buildLineupTab(innerContext),
-                  if (_isPremierLeague)
-                    _buildFantasyHubTab(innerContext),
                 ],
               );
             },
@@ -2695,30 +2671,6 @@ class _MatchDetailPageState extends State<MatchDetailPage>
           ),
         ),
       ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  FANTASY HUB TAB
-  // ─────────────────────────────────────────────────────────────────────────
-
-  Widget _buildFantasyHubTab(BuildContext context) {
-    final home = (_lineup['home'] as Map<String, dynamic>?) ?? {};
-    final away = (_lineup['away'] as Map<String, dynamic>?) ?? {};
-    final homeStarting = (home['starting'] as List<dynamic>?) ?? [];
-    final awayStarting = (away['starting'] as List<dynamic>?) ?? [];
-
-    if (homeStarting.isEmpty && awayStarting.isEmpty) {
-      return _buildNoDataWidget(
-        context: context,
-        icon: Icons.emoji_events_outlined,
-        message: AppLocalizations.of(context)!.matchInfoNotAvailable,
-      );
-    }
-
-    return FantasyHubTab(
-      matchId: (widget.match['id'] as num).toInt(),
-      match: widget.match,
     );
   }
 

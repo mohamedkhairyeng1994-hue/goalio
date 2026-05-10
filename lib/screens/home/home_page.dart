@@ -1122,39 +1122,41 @@ class HomePageState extends ConsumerState<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Column(
-                      children: [
-                        buildTeamLogo(match['home_team_image'], size: 56.w),
-                        SizedBox(height: 12.h),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              (match['home_team'] ??
-                                   AppLocalizations.of(context)!.homeTeam)
-                                  .toString()
-                                  .toArabicName(context),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          buildTeamLogo(match['home_team_image'], size: 56.w),
+                          SizedBox(height: 12.h),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                (match['home_team'] ??
+                                     AppLocalizations.of(context)!.homeTeam)
+                                    .toString()
+                                    .toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (homeRedCards != null && (homeRedCards is! int || homeRedCards > 0)) ...[
-                              SizedBox(height: 4.h),
-                              _buildRedCardBadge(
-                                homeRedCards,
-                                fontSize: 9.sp,
-                                isHome: true,
-                                showNames: true,
-                              ),
+                              if (homeRedCards != null && (homeRedCards is! int || homeRedCards > 0)) ...[
+                                SizedBox(height: 4.h),
+                                _buildRedCardBadge(
+                                  homeRedCards,
+                                  fontSize: 9.sp,
+                                  isHome: true,
+                                  showNames: true,
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                     Column(
                       children: [
@@ -1257,39 +1259,41 @@ class HomePageState extends ConsumerState<HomePage> {
                           ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        buildTeamLogo(match['away_team_image'], size: 56.w),
-                        SizedBox(height: 12.h),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              (match['away_team'] ??
-                                   AppLocalizations.of(context)!.awayTeam)
-                                  .toString()
-                                  .toArabicName(context),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          buildTeamLogo(match['away_team_image'], size: 56.w),
+                          SizedBox(height: 12.h),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                (match['away_team'] ??
+                                     AppLocalizations.of(context)!.awayTeam)
+                                    .toString()
+                                    .toArabicName(context),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (awayRedCards != null && (awayRedCards is! int || awayRedCards > 0)) ...[
-                              SizedBox(height: 4.h),
-                              _buildRedCardBadge(
-                                awayRedCards,
-                                fontSize: 9.sp,
-                                isHome: false,
-                                showNames: true,
-                              ),
+                              if (awayRedCards != null && (awayRedCards is! int || awayRedCards > 0)) ...[
+                                SizedBox(height: 4.h),
+                                _buildRedCardBadge(
+                                  awayRedCards,
+                                  fontSize: 9.sp,
+                                  isHome: false,
+                                  showNames: true,
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

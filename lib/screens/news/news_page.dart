@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
@@ -164,7 +166,10 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Future<void> refreshNews() async {
-    await loadNews(silent: true, forceScrape: true);
+    // Fast path: refresh from DB cache so the spinner dismisses quickly.
+    // Background: scrape and prepend any new articles via append mode.
+    await loadNews(silent: true, forceScrape: false);
+    unawaited(appendLatestNews(silent: true));
   }
 
   List<dynamic> get _layoutItems {
