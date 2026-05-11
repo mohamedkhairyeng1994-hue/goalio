@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../core/utils/time_utils.dart';
 
 import 'dart:async';
@@ -27,6 +28,13 @@ class FixturesPage extends StatefulWidget {
 
 class FixturesPageState extends State<FixturesPage>
     with SingleTickerProviderStateMixin {
+  // Day tabs span [-_daysBefore, +_daysAfter] centered on today, so the
+  // selected tab on first paint is at index _daysBefore.
+  static const int _daysBefore = 6;
+  static const int _daysAfter = 6;
+  static const int _tabCount = _daysBefore + 1 + _daysAfter;
+  static const int _todayIndex = _daysBefore;
+
   late TabController _tabController;
   bool _showLiveOnly = false;
   bool _showFavoritesOnly =
@@ -36,17 +44,20 @@ class FixturesPageState extends State<FixturesPage>
   final ValueNotifier<bool> _todayHasLive = ValueNotifier<bool>(false);
   final TextEditingController _searchController = TextEditingController();
 
-  // Stable keys to access FixtureListState
-  final GlobalKey<_FixtureListState> _yesterdayKey =
-      GlobalKey<_FixtureListState>();
-  final GlobalKey<_FixtureListState> _todayKey = GlobalKey<_FixtureListState>();
-  final GlobalKey<_FixtureListState> _tomorrowKey =
-      GlobalKey<_FixtureListState>();
+  // One key per day tab so resetScroll() can target every list.
+  final List<GlobalKey<_FixtureListState>> _tabKeys = List.generate(
+    _tabCount,
+    (_) => GlobalKey<_FixtureListState>(),
+  );
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(
+      length: _tabCount,
+      vsync: this,
+      initialIndex: _todayIndex,
+    );
     _tabController.addListener(() {
       setState(() {});
     });
@@ -58,17 +69,16 @@ class FixturesPageState extends State<FixturesPage>
 
   void resetState() {
     setState(() {
-      _tabController.animateTo(1);
+      _tabController.animateTo(_todayIndex);
       _searchController.clear();
       _showLiveOnly = false;
       _showFavoritesOnly = false;
       _sortMode = FixtureSortMode.favorites;
     });
 
-    // Reset scroll positions
-    _yesterdayKey.currentState?.resetScroll();
-    _todayKey.currentState?.resetScroll();
-    _tomorrowKey.currentState?.resetScroll();
+    for (final key in _tabKeys) {
+      key.currentState?.resetScroll();
+    }
   }
 
   @override
@@ -100,8 +110,30 @@ class FixturesPageState extends State<FixturesPage>
     );
   }
 
+  // Build the list of dates that back the day tabs. Normalized to midnight so
+  // the tab range doesn't drift mid-session if the user crosses midnight.
+  List<DateTime> _buildTabDates() {
+    final now = DateTime.now();
+    final base = DateTime(now.year, now.month, now.day);
+    return List.generate(
+      _tabCount,
+      (i) => base.add(Duration(days: i - _daysBefore)),
+    );
+  }
+
+  String _tabLabel(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    final offset = date.difference(_buildTabDates()[_todayIndex]).inDays;
+    if (offset == 0) return l10n.today;
+    if (offset == -1) return l10n.yesterday;
+    if (offset == 1) return l10n.tomorrow;
+    // Short, locale-aware label, e.g. "Mon 5" / "الإثنين 5".
+    return DateFormat('EEE d', Intl.defaultLocale).format(date);
+  }
+
   Widget _buildTabBar(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dates = _buildTabDates();
     return Padding(
       padding: const EdgeInsets.only(top: 20.0),
       child: Container(
@@ -116,11 +148,13 @@ class FixturesPageState extends State<FixturesPage>
         ),
         child: TabBar(
           controller: _tabController,
-          isScrollable: false,
-          tabAlignment: TabAlignment.fill,
+          isScrollable: true,
+          tabAlignment: TabAlignment.center,
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
           indicatorPadding: EdgeInsets.all(4.w),
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          labelPadding: EdgeInsets.symmetric(horizontal: 14.w),
           indicator: BoxDecoration(
             gradient: const LinearGradient(
               colors: [GoalioColors.greenAccent, GoalioColors.blueAccent],
@@ -142,9 +176,7 @@ class FixturesPageState extends State<FixturesPage>
             fontSize: 13.sp,
           ),
           tabs: [
-            Tab(text: AppLocalizations.of(context)!.yesterday),
-            Tab(text: AppLocalizations.of(context)!.today),
-            Tab(text: AppLocalizations.of(context)!.tomorrow),
+            for (final d in dates) Tab(text: _tabLabel(context, d)),
           ],
         ),
       ),
@@ -152,45 +184,26 @@ class FixturesPageState extends State<FixturesPage>
   }
 
   Widget _buildTabBarView() {
-    final now = DateTime.now();
-    final today = _formatDate(now);
-    final yesterday = _formatDate(now.subtract(const Duration(days: 1)));
-    final tomorrow = _formatDate(now.add(const Duration(days: 1)));
+    final dates = _buildTabDates();
 
-    // TabBarView enables smooth swiping between tabs and keeps them in sync with the top bar.
     return TabBarView(
       controller: _tabController,
       children: [
-        FixtureList(
-          key: _yesterdayKey,
-          day: yesterday,
-          showLiveOnly: _showLiveOnly,
-          showFavoritesOnly: _showFavoritesOnly,
-          showAllLeagues: true,
-          sortMode: _sortMode,
-          refreshNotifier: _refreshNotifier,
-          searchQuery: _searchController.text,
-        ),
-        FixtureList(
-          key: _todayKey,
-          day: today,
-          showLiveOnly: _showLiveOnly,
-          showFavoritesOnly: _showFavoritesOnly,
-          showAllLeagues: true,
-          sortMode: _sortMode,
-          refreshNotifier: _refreshNotifier,
-          onLiveChanged: (hasLive) => _todayHasLive.value = hasLive,
-          searchQuery: _searchController.text,
-        ),
-        FixtureList(
-          key: _tomorrowKey,
-          day: tomorrow,
-          showFavoritesOnly: _showFavoritesOnly,
-          showAllLeagues: true,
-          sortMode: _sortMode,
-          refreshNotifier: _refreshNotifier,
-          searchQuery: _searchController.text,
-        ),
+        for (int i = 0; i < dates.length; i++)
+          FixtureList(
+            key: _tabKeys[i],
+            day: _formatDate(dates[i]),
+            showLiveOnly: _showLiveOnly,
+            showFavoritesOnly: _showFavoritesOnly,
+            showAllLeagues: true,
+            sortMode: _sortMode,
+            refreshNotifier: _refreshNotifier,
+            // Only the today tab drives the live-indicator dot.
+            onLiveChanged: i == _todayIndex
+                ? (hasLive) => _todayHasLive.value = hasLive
+                : null,
+            searchQuery: _searchController.text,
+          ),
       ],
     );
   }
