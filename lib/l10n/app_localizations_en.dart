@@ -450,11 +450,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get premierLeague => 'ENGLAND - PREMIER LEAGUE';
+  String get premierLeague => 'FEATURED LEAGUE';
 
   @override
-  String get noMatchesOnDate =>
-      'No Premier League matches scheduled\nfor this date.';
+  String get noMatchesOnDate => 'No matches scheduled\nfor this date.';
 
   @override
   String get noMatchesFound => 'No Matches Found';

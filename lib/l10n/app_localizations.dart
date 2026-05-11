@@ -941,13 +941,13 @@ abstract class AppLocalizations {
   /// No description provided for @premierLeague.
   ///
   /// In en, this message translates to:
-  /// **'ENGLAND - PREMIER LEAGUE'**
+  /// **'FEATURED LEAGUE'**
   String get premierLeague;
 
   /// No description provided for @noMatchesOnDate.
   ///
   /// In en, this message translates to:
-  /// **'No Premier League matches scheduled\nfor this date.'**
+  /// **'No matches scheduled\nfor this date.'**
   String get noMatchesOnDate;
 
   /// No description provided for @noMatchesFound.

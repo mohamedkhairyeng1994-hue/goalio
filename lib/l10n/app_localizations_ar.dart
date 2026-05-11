@@ -450,11 +450,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get premierLeague => 'إنجلترا - الدوري الممتاز';
+  String get premierLeague => 'الدوري المميز';
 
   @override
-  String get noMatchesOnDate =>
-      'لا توجد مباريات في الدوري الممتاز\nمجدولة لهذا التاريخ.';
+  String get noMatchesOnDate => 'لا توجد مباريات مجدولة\nلهذا التاريخ.';
 
   @override
   String get noMatchesFound => 'لم يتم العثور على مباريات';
