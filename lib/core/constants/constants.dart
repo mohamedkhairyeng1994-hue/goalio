@@ -13,7 +13,7 @@ class GoalioColors {
 }
 
 class ApiConstants {
-  static String currentEnvironment = 'local';
+  static String currentEnvironment = 'production';
 
   static String get authBaseUrl {
     switch (currentEnvironment) {
